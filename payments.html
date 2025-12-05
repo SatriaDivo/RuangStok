@@ -1,0 +1,805 @@
+  <style>
+    /* === Base Styles === */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f4f6f8;
+      color: #333;
+    }
+    h1, h2 { margin: 0; }
+    .container { padding: 20px; }
+    .flex { display: flex; align-items: center; }
+    .flex-space { justify-content: space-between; }
+
+    /* === Header === */
+    #ptHeader { margin-bottom: 20px; }
+    #ptHeader h1 { font-size: 1.8rem; font-weight: 600; }
+    #ptHeader h2 { font-size: 1rem; font-weight: 400; color: #555; }
+
+    /* === Buttons & Inputs === */
+    button, .btn {
+      background: #008b8b;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      margin: 0 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+    button:hover, .btn:hover { background: #006f6f; }
+    .btn-clear { background: #95a5a6; color: #fff; }
+    .btn-clear:hover { background: #7f8c8d; }
+
+    input, select {
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      font-family: 'Poppins', sans-serif;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #008b8b;
+      box-shadow: 0 0 0 2px rgba(0,139,139,0.1);
+    }
+
+    /* === Table === */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: white;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+    
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    
+    th {
+      background: #2c5f5f;
+      color: white;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    
+    td {
+      border-bottom: 1px solid #e2e2e2;
+    }
+    
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+    
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+    /* === Overlay & Modal === */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 6px;
+      width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .modal-header { margin-bottom: 15px; }
+    .modal-footer { text-align: right; margin-top: 15px; }
+
+    /* === Processing overlay === */
+    #ptProcessing {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      font-size: 1.2rem;
+      color: #008b8b;
+    }
+    
+    /* === Notification Popup === */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10001;
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      max-width: 400px;
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification.success {
+      background: #27ae60;
+      color: white;
+    }
+    
+    .notification.error {
+      background: #e74c3c;
+      color: white;
+    }
+    
+    .notification.warning {
+      background: #f39c12;
+      color: white;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    /* === Confirm Dialog === */
+    .confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10002;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .confirm-dialog {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      min-width: 400px;
+      max-width: 500px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      animation: scaleIn 0.3s ease-out;
+    }
+    .confirm-dialog h3 {
+      margin: 0 0 16px 0;
+      color: #e74c3c;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .confirm-dialog p {
+      margin: 0 0 24px 0;
+      color: #555;
+      line-height: 1.5;
+    }
+    .confirm-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .confirm-buttons button {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+    }
+    .btn-cancel {
+      background: #95a5a6;
+    }
+    .btn-cancel:hover {
+      background: #7f8c8d;
+    }
+    .btn-delete {
+      background: #e74c3c;
+    }
+    .btn-delete:hover {
+      background: #c0392b;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    /* Responsive Design */
+    @media screen and (max-width: 1024px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .flex-space {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+      }
+    }
+    
+    @media screen and (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      button, .btn {
+        width: 100%;
+        margin: 5px 0;
+      }
+      
+      .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      table {
+        min-width: 1000px;
+        font-size: 12px;
+      }
+      
+      th, td {
+        padding: 6px;
+      }
+      
+      .modal {
+        width: 95vw !important;
+        padding: 15px;
+      }
+      
+      input, select {
+        width: 100%;
+      }
+    }
+    
+    @media screen and (max-width: 480px) {
+      h1 {
+        font-size: 1.2rem;
+      }
+      
+      button, .btn {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      
+      table {
+        font-size: 11px;
+      }
+      
+      th, td {
+        padding: 4px;
+      }
+    }
+  </style>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="flex flex-space" id="ptHeader">
+      <div>
+        <h1><i class="fas fa-money-bill-wave"></i> Pembayaran</h1>
+        <h2>Kelola Pembayaran Purchase Order</h2>
+      </div>
+      <button id="ptBtnNew"><i class="fa fa-plus"></i> New Payment</button>
+    </div>
+
+    <!-- Search bar -->
+    <div class="flex flex-space" style="margin-top:15px;">
+      <div></div>
+      <div class="flex">
+        <select id="ptSearchCrit">
+          <option>Semua</option>
+          <option>PO ID</option>
+          <option>Supplier Name</option>
+          <option>No Rek</option>
+          <option>PMT Mode</option>
+        </select>
+        <input type="text" id="ptSearchInput" placeholder="Cari...">
+        <button id="ptBtnSearch"><i class="fa fa-search"></i> Cari</button>
+        <button class="btn-clear" id="ptBtnClear"><i class="fa fa-times"></i> Bersihkan</button>
+      </div>
+    </div>
+
+    <!-- Payments list -->
+    <div class="table-container">
+      <table id="ptList">
+      <thead>
+        <tr>
+          <th>Trx Date</th><th>Trx ID</th><th>Supplier ID</th><th>Supplier Name</th>
+          <th>PO ID</th><th>No Rek</th><th>PMT Mode</th>
+          <th>Jumlah Total</th><th>Yang dibayarkan</th><th>Selisih</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Processing overlay -->
+  <div id="ptProcessing"><i class="fa fa-spinner fa-pulse"></i> Processing...</div>
+
+  <!-- Modal -->
+  <div id="ptModalOverlay" class="modal-overlay">
+    <div class="modal" id="ptModal">
+      <div class="modal-header"><h2 id="ptModalTitle"></h2></div>
+      <div class="modal-body" id="ptModalBody"></div>
+      <div class="modal-footer" id="ptModalFooter"></div>
+    </div>
+  </div>
+
+  <script>
+    // Global state arrays
+    let ptPayments = [], ptSuppliers = [], ptPO = [], ptDims = [];
+
+    // Show/hide processing overlay
+    function ptShowProcessing(){ document.getElementById('ptProcessing').style.display='flex'; }
+    function ptHideProcessing(){ document.getElementById('ptProcessing').style.display='none'; }
+
+    // Show notification popup
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      
+      const icon = type === 'success' ? 'fa-check-circle' : 
+                   type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+      
+      notification.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 18px;"></i>
+        <span>${message}</span>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+
+    // Show confirm dialog
+    function showConfirm(message, onConfirm) {
+      const overlay = document.createElement('div');
+      overlay.className = 'confirm-overlay';
+      
+      overlay.innerHTML = `
+        <div class="confirm-dialog">
+          <h3><i class="fas fa-exclamation-triangle"></i> Konfirmasi</h3>
+          <p>${message}</p>
+          <div class="confirm-buttons">
+            <button class="btn-cancel" onclick="this.closest('.confirm-overlay').remove()">Batal</button>
+            <button class="btn-delete" id="confirmYes">Ya, Hapus</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(overlay);
+      
+      document.getElementById('confirmYes').onclick = function() {
+        overlay.remove();
+        onConfirm();
+      };
+      
+      overlay.onclick = function(e) {
+        if (e.target === overlay) overlay.remove();
+      };
+    }
+
+    // Load and render payments list
+    function ptRefresh() {
+      ptShowProcessing();
+      const user = SessionManager.getUser();
+      const userEmail = user ? user.username : null;
+      google.script.run
+        .withSuccessHandler(ptRenderList)
+        .withFailureHandler(ptHideProcessing)
+        .ptGetAllPayments(userEmail);
+    }
+
+      function ptInitSelect2() {
+    $('#ptSupplierName')
+      .select2({ placeholder:'Select Supplier', dropdownParent:$('#ptModal') })
+      .on('change', ptOnSupplier);
+
+    $('#ptPOID')
+      .select2({ placeholder:'Select PO', dropdownParent:$('#ptModal') })
+      .on('change', ptOnPO);
+
+    // No Rek is now readonly input field, not dropdown
+
+    $('#ptPMTMode')
+      .select2({ placeholder:'Payment Mode', dropdownParent:$('#ptModal') });
+      
+    // Add event listener for Amount Paid to calculate PO Balance
+    $(document).on('input', '#ptAmount', ptOnAmountPaid);
+  }
+
+
+    function ptRenderList(rows) {
+      ptHideProcessing();
+      ptPayments = rows || [];
+      const tbody = document.querySelector('#ptList tbody');
+      tbody.innerHTML = '';
+      
+      (rows||[]).forEach(r => {
+        // Get No Rek from supplier data instead of payment data
+        const supplier = ptSuppliers.find(s => s['Supplier ID'] === r['Supplier ID']);
+        const noRek = supplier ? (supplier['No Rek'] || '') : (r['No Rek'] || '');
+        
+        // Get Total Amount from PO data
+        const order = (ptPO||[]).find(o => o['PO ID'] === r['PO ID']) || {};
+        const totalAmount = order['Total Amount'] || 0;
+        const amountPaid = parseFloat(r['Amount Paid']) || 0;
+        const selisih = totalAmount - amountPaid;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r['Trx Date']}</td>
+          <td>${r['Trx ID']}</td>
+          <td>${r['Supplier ID']}</td>
+          <td>${r['Supplier Name']}</td>
+          <td>${r['PO ID']}</td>
+          <td>${noRek}</td>
+          <td>${r['PMT Mode']}</td>
+          <td>${totalAmount.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td>${amountPaid.toFixed(2)}</td>
+          <td>${selisih.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td>
+            <button class="btn" onclick="ptOpenEdit('${r['Trx ID']}')">Edit</button>
+            <button class="btn-clear" onclick="ptDelete('${r['Trx ID']}')">Delete</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Search & clear
+    function ptSearch() {
+      const crit = document.getElementById('ptSearchCrit').value;
+      const val  = document.getElementById('ptSearchInput').value.toLowerCase();
+      if (crit==='Semua' || !val) return ptRenderList(ptPayments);
+      const filtered = ptPayments.filter(r => (''+r[crit]).toLowerCase().includes(val));
+      if (!filtered.length) {
+        showNotification('Tidak ada data yang cocok', 'warning');
+      }
+      ptRenderList(filtered);
+    }
+    function ptClear() {
+      document.getElementById('ptSearchInput').value='';
+      document.getElementById('ptSearchCrit').value='Semua';
+      ptRenderList(ptPayments);
+    }
+
+    // On load: fetch lookups & bind buttons
+    // document.addEventListener('DOMContentLoaded', () => {
+      // Load suppliers first, then load payments
+      const user = SessionManager.getUser();
+      const userEmail = user ? user.username : null;
+
+      google.script.run.withSuccessHandler(suppliers => {
+        ptSuppliers = suppliers || [];
+        console.log('Suppliers loaded:', ptSuppliers);
+        ptRefresh(); // Load payments after suppliers loaded
+      }).ptGetSuppliers(userEmail);
+      
+      google.script.run.withSuccessHandler(a=>ptPO=a||[]).ptGetPO(userEmail);
+      google.script.run.withSuccessHandler(a=>ptDims=a||[]).ptGetDimensions(userEmail);
+      
+      document.getElementById('ptBtnNew').onclick    = ptOpenNew;
+      document.getElementById('ptBtnSearch').onclick = ptSearch;
+      document.getElementById('ptBtnClear').onclick  = ptClear;
+    // });
+
+    // Modal helpers
+   function ptShowModal(title, body, footer) {
+    $('#ptModalTitle').text(title);
+    $('#ptModalBody').html(body);
+    $('#ptModalFooter').html(footer);
+    $('#ptModalOverlay').css('display','flex');
+    ptInitSelect2();
+  }
+    function ptCloseModal(){
+      document.getElementById('ptModalOverlay').style.display='none';
+    }
+
+    // Form HTML builders
+    function ptFormBody() {
+      return `
+      <div class="flex-space">
+        <div style="flex:1;margin-right:10px;">
+          <label>Trx Date</label><br><input type="date" id="ptTrxDate"><br><br>
+          <label>Trx ID</label><br>
+          <input type="text" id="ptTrxID" readonly style="width:70%">
+          <button class="btn" onclick="ptGenTrxID()">Generate</button><br><br>
+          <label>Supplier Name</label><br><select id="ptSupplierName" style="width:100%"></select><br><br>
+          <label>Supplier ID</label><br><input type="text" id="ptSupplierID" readonly><br><br>
+          <label>State</label><br><input type="text" id="ptState" readonly><br><br>
+          <label>City</label><br><input type="text" id="ptCity" readonly><br><br>
+        </div>
+        <div style="flex:1;margin-left:10px;">
+          <label>PO ID</label><br><select id="ptPOID" style="width:100%"></select><br><br>
+          <label>No Rek</label><br><input type="text" id="ptNoRek" readonly><br><br>
+          <label>PMT Mode</label><br><select id="ptPMTMode" style="width:100%"></select><br><br>
+          <label>Jumlah Total</label><br><input type="text" id="ptTotalAmount" readonly style="background:#f0f0f0; font-weight:bold;"><br><br>
+          <label>Yang dibayarkan</label><br><input type="number" id="ptAmount" step="0.01"><br><br>
+          <label>Selisih</label><br><input type="text" id="ptPOBalance" readonly style="background:#ffe6e6; font-weight:bold;"><br>
+        </div>
+      </div>`;
+    }
+    function ptFormFooter(label, handler) {
+      return `
+        <button class="btn" onclick="${handler}">${label}</button>
+        <button class="btn-clear" onclick="ptCloseModal()">Close</button>`;
+    }
+
+    // Open New
+    function ptOpenNew(){
+      ptShowModal('New Payment', ptFormBody(), ptFormFooter('Save','ptSave()'));
+      ptPopulateForm(true);
+    }
+    // Open Edit
+    function ptOpenEdit(id){
+      const rec = ptPayments.find(r=>r['Trx ID']===id);
+      if(!rec) return showNotification('Data tidak ditemukan', 'error');
+      ptShowModal('Edit Payment', ptFormBody(), ptFormFooter('Update','ptUpdate()'));
+      ptPopulateForm(false, rec);
+    }
+
+    // Populate form (new vs edit)
+    function ptPopulateForm(isNew, rec={}){
+      $('#ptTrxDate').val(isNew?'':rec['Trx Date']);
+      $('#ptTrxID').val(isNew?'':rec['Trx ID']);
+
+      // supplier dropdown
+      const sup = $('#ptSupplierName').empty().append('<option></option>');
+      ptSuppliers.forEach(s=> sup.append(new Option(s['Supplier Name'],s['Supplier Name'])));
+      
+      // PMT Mode - use predefined options if Dimensions data is empty
+      const pm = $('#ptPMTMode').empty().append('<option></option>');
+      const pmtModes = [...new Set(ptDims.map(d=>d['PMT Mode']).filter(m=>m))];
+      
+      // If no data from Dimensions, use default payment modes
+      if (pmtModes.length === 0) {
+        ['Cash', 'Transfer Bank', 'Cek/Giro', 'Kartu Kredit'].forEach(m => pm.append(new Option(m, m)));
+      } else {
+        pmtModes.forEach(m => pm.append(new Option(m, m)));
+      }
+      
+      if(!isNew) {
+        // For edit mode, populate all fields with existing data
+        // Temporarily remove event handlers to prevent auto-fill
+        $('#ptSupplierName').off('change');
+        $('#ptPOID').off('change');
+        
+        // Set supplier and related fields
+        setSelect('#ptSupplierName', rec['Supplier Name']);
+        $('#ptSupplierID').val(rec['Supplier ID']||'');
+        $('#ptState').val(rec['State']||'');
+        $('#ptCity').val(rec['City']||'');
+        $('#ptNoRek').val(rec['No Rek']||'');
+        
+        // Populate PO ID dropdown with supplier's POs
+        const orders = (ptPO||[]).filter(o => o['Supplier Name'] === rec['Supplier Name']);
+        const $po = $('#ptPOID').empty().append('<option></option>');
+        orders.forEach(o => $po.append(new Option(o['PO ID'], o['PO ID'])));
+        setSelect('#ptPOID', rec['PO ID']);
+        
+        // Set payment fields from record
+        const order = (ptPO||[]).find(o=>o['PO ID']===rec['PO ID']) || {};
+        const totalAmount = order['Total Amount']||0;
+        $('#ptTotalAmount').val(totalAmount.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+        $('#ptAmount').val(rec['Amount Paid']||0);
+        
+        setSelect('#ptPMTMode', rec['PMT Mode']);
+        
+        // Calculate PO Balance
+        ptCalculatePOBalance();
+        
+        // Re-attach event handlers
+        $('#ptSupplierName').on('change', ptOnSupplier);
+        $('#ptPOID').on('change', ptOnPO);
+      } else {
+        // For new mode, clear all fields
+        $('#ptSupplierID,#ptState,#ptCity,#ptPOID,#ptNoRek,#ptTotalAmount,#ptPOBalance,#ptAmount').val('');
+      }
+    }
+
+    // helper to set select2 value
+    function setSelect(sel, val){
+      const $s = $(sel).append(new Option(val,val,true,true));
+      $s.trigger('change');
+    }
+
+    // Generate unique Trx ID
+    function ptGenTrxID(){
+      ptShowProcessing();
+      const user = SessionManager.getUser();
+      const userEmail = user ? user.username : null;
+      google.script.run.withSuccessHandler(id=>{
+        $('#ptTrxID').val(id);
+        ptHideProcessing();
+      }).ptGenerateTrxID(userEmail);
+    }
+
+    // Supplier changed
+ function ptOnSupplier() {
+    const name = this.value;
+    const sup  = ptSuppliers.find(s=>s['Supplier Name']===name) || {};
+
+    $('#ptSupplierID').val(sup['Supplier ID']||'');
+    $('#ptState').val(sup['State']||'');
+    $('#ptCity').val(sup['City']||'');
+    $('#ptNoRek').val(sup['No Rek']||'');
+
+    // Filter by Supplier Name (not ID)
+    const orders = (ptPO||[]).filter(o => o['Supplier Name'] === name);
+
+    // Populate PO ID dropdown
+    const $po = $('#ptPOID').empty().append('<option></option>');
+    orders.forEach(o => $po.append(new Option(o['PO ID'], o['PO ID'])));
+
+    $('#ptSupplierName').select2('close');
+    // trigger PO change if at least one order
+    if (orders.length) $po.trigger('change');
+  }
+
+  // Handler when PO ID changes
+  function ptOnPO() {
+    const id    = this.value;
+    const order = (ptPO||[]).find(o=>o['PO ID']===id) || {};
+
+    const totalAmount = order['Total Amount']||0;
+    const poBalance = order['PO Balance']||0;
+    
+    $('#ptTotalAmount').val(totalAmount.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    $('#ptAmount').val(poBalance);
+    
+    // Calculate PO Balance = Jumlah Total - Amount Paid
+    ptCalculatePOBalance();
+    
+    $('#ptPOID').select2('close');
+  }
+  
+  // Calculate PO Balance automatically
+  function ptCalculatePOBalance() {
+    const totalAmountStr = $('#ptTotalAmount').val().replace(/[^0-9,-]/g, '').replace(',', '.');
+    const totalAmount = parseFloat(totalAmountStr) || 0;
+    const amountPaid = parseFloat($('#ptAmount').val()) || 0;
+    const poBalance = totalAmount - amountPaid;
+    
+    $('#ptPOBalance').val(poBalance.toLocaleString('id-ID', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+  }
+  
+  // Handler when Amount Paid changes
+  function ptOnAmountPaid() {
+    ptCalculatePOBalance();
+  }
+
+    // Save new payment
+    function ptSave(){
+      const rec = {
+        'Trx Date': $('#ptTrxDate').val(),
+        'Trx ID':   $('#ptTrxID').val(),
+        'Supplier ID':$('#ptSupplierID').val(),
+        'Supplier Name':$('#ptSupplierName').val(),
+        'State':    $('#ptState').val(),
+        'City':     $('#ptCity').val(),
+        'PO ID':    $('#ptPOID').val(),
+        'No Rek': $('#ptNoRek').val(),
+        'PMT Mode': $('#ptPMTMode').val(),
+        'Amount Paid': parseFloat($('#ptAmount').val())
+      };
+      if (!rec['Trx Date']||!rec['Trx ID']||!rec['Supplier Name']||
+          !rec['PO ID']||isNaN(rec['Amount Paid'])) {
+        return showNotification('Harap isi semua field yang diperlukan', 'warning');
+      }
+      // Validate Amount Paid should not exceed Jumlah Total
+      const totalAmountStr = $('#ptTotalAmount').val().replace(/[^0-9,-]/g, '').replace(',', '.');
+      const totalAmount = parseFloat(totalAmountStr) || 0;
+      if (rec['Amount Paid'] > totalAmount) {
+        return showNotification('Jumlah pembayaran melebihi Jumlah Total', 'warning');
+      }
+      ptShowProcessing();
+      const user = SessionManager.getUser();
+      const userEmail = user ? user.username : null;
+      google.script.run.withSuccessHandler(()=>{
+        showNotification('✓ Pembayaran Berhasil Disimpan', 'success');
+        ptCloseModal(); ptRefresh(); ptHideProcessing();
+      }).withFailureHandler((err)=>{
+        showNotification('Error: ' + err.message, 'error');
+        ptHideProcessing();
+      }).ptSaveNewPayment(rec, userEmail);
+    }
+
+    // Update existing
+    function ptUpdate(){
+      const rec = {
+        'Trx Date': $('#ptTrxDate').val(),
+        'Trx ID':   $('#ptTrxID').val(),
+        'Supplier ID':$('#ptSupplierID').val(),
+        'Supplier Name':$('#ptSupplierName').val(),
+        'State':    $('#ptState').val(),
+        'City':     $('#ptCity').val(),
+        'PO ID':    $('#ptPOID').val(),
+        'No Rek': $('#ptNoRek').val(),
+        'PMT Mode': $('#ptPMTMode').val(),
+        'Amount Paid': parseFloat($('#ptAmount').val())
+      };
+      ptShowProcessing();
+      const user = SessionManager.getUser();
+      const userEmail = user ? user.username : null;
+      google.script.run.withSuccessHandler(()=>{
+        showNotification('✓ Pembayaran Berhasil Diupdate', 'success');
+        ptCloseModal(); ptRefresh(); ptHideProcessing();
+      }).withFailureHandler((err)=>{
+        showNotification('Error: ' + err.message, 'error');
+        ptHideProcessing();
+      }).ptUpdatePayment(rec, userEmail);
+    }
+
+    // Delete
+    function ptDelete(id){
+      showConfirm('Yakin ingin menghapus pembayaran ini?', function() {
+        ptShowProcessing();
+        const user = SessionManager.getUser();
+        const userEmail = user ? user.username : null;
+        google.script.run.withSuccessHandler(()=>{
+          showNotification('✓ Pembayaran Berhasil Dihapus', 'success');
+          ptRefresh(); ptHideProcessing();
+        }).withFailureHandler((err)=>{
+          showNotification('Error: ' + err.message, 'error');
+          ptHideProcessing();
+        }).ptDeletePayment(id, userEmail);
+      });
+    }
+  </script>

@@ -1,0 +1,666 @@
+﻿<!-- Settings Page Fragment -->
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .settings-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f8f9fa;
+    min-height: 100vh;
+  }
+  
+  .page-header {
+    background: linear-gradient(135deg, #4a90e2 0%, #50c878 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+  
+  .page-header h1 {
+    font-size: 2rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  
+  .page-header p {
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+  
+  .settings-grid {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+  
+  .settings-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-left: 4px solid #3498db;
+  }
+  
+  .card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #ecf0f1;
+  }
+  
+  .card-header h3 {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .card-header i {
+    margin-right: 10px;
+    font-size: 1.3rem;
+    color: #3498db;
+  }
+  
+  .setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f2f6;
+  }
+  
+  .setting-item:last-child {
+    border-bottom: none;
+  }
+  
+  .setting-info {
+    flex: 1;
+  }
+  
+  .setting-info h4 {
+    color: #2c3e50;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  
+  .setting-info p {
+    color: #7f8c8d;
+    font-size: 0.8rem;
+    line-height: 1.3;
+    margin: 0;
+  }
+  
+  .setting-control {
+    margin-left: 15px;
+  }
+  
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .btn-primary {
+    background: #3498db;
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  }
+  
+  .btn-success {
+    background: #27ae60;
+    color: white;
+  }
+  
+  .btn-success:hover {
+    background: #229954;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+  }
+  
+  .btn-warning {
+    background: #f39c12;
+    color: white;
+  }
+  
+  .btn-warning:hover {
+    background: #e67e22;
+    transform: translateY(-2px);
+  }
+  
+  .btn-danger {
+    background: #e74c3c;
+    color: white;
+  }
+  
+  .btn-danger:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+  }
+  
+  .input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .form-input {
+    padding: 7px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    width: 140px;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #3498db;
+  }
+  
+  .connection-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .status-connected {
+    background: #d4edda;
+    color: #155724;
+  }
+  
+  .status-disconnected {
+    background: #f8d7da;
+    color: #721c24;
+  }
+  
+  .status-testing {
+    background: #fff3cd;
+    color: #856404;
+  }
+  
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+    z-index: 10000;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  
+  .toast.show {
+    transform: translateX(0);
+  }
+  
+  .toast.success {
+    background: #27ae60;
+  }
+  
+  .toast.error {
+    background: #e74c3c;
+  }
+  
+  .toast.warning {
+    background: #f39c12;
+  }
+  
+  .system-info {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+  
+  .system-info h3 {
+    color: #2c3e50;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .system-info h3 i {
+    margin-right: 10px;
+    color: #34495e;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  
+  .info-item {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #3498db;
+  }
+  
+  .info-item h4 {
+    color: #2c3e50;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  
+  .info-item p {
+    color: #7f8c8d;
+    font-size: 0.8rem;
+    margin: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .settings-container {
+      padding: 12px;
+    }
+    
+    .page-header {
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    
+    .page-header h1 {
+      font-size: 1.5rem;
+    }
+    
+    .page-header p {
+      font-size: 0.85rem;
+    }
+    
+    .settings-card {
+      padding: 15px;
+    }
+    
+    .setting-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .setting-control {
+      margin-left: 0;
+      width: 100%;
+    }
+    
+    .form-input {
+      width: 100%;
+    }
+    
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="settings-container">
+  <div class="page-header">
+    <h1><i class="fas fa-cogs"></i> Pengaturan Sistem</h1>
+    <p>Kelola konfigurasi aplikasi Ruang Stok</p>
+  </div>
+  
+  <div class="settings-grid">
+    <!-- Database & Connection -->
+    <div class="settings-card">
+      <div class="card-header">
+        <h3><i class="fas fa-database"></i> Koneksi Database</h3>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Status Koneksi</h4>
+          <p>Status koneksi dengan Google Sheets</p>
+        </div>
+        <div class="setting-control">
+          <div class="connection-status status-connected" id="connectionStatus">
+            <i class="fas fa-check-circle"></i>
+            Terhubung
+          </div>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Test Koneksi</h4>
+          <p>Periksa dan validasi koneksi database</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="testConnection()">
+            <i class="fas fa-plug"></i> Test Koneksi
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Business Information -->
+    <div class="settings-card">
+      <div class="card-header">
+        <h3><i class="fas fa-building"></i> Informasi Bisnis</h3>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Nama Perusahaan</h4>
+          <p>Nama untuk laporan dan dokumen</p>
+        </div>
+        <div class="setting-control">
+          <div class="input-group">
+            <input type="text" class="form-input" value="Ruang Stok" id="companyName" style="width: 180px;">
+            <button class="btn btn-primary" onclick="updateCompanyName()">
+              <i class="fas fa-save"></i> Simpan
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Level Stok Minimum</h4>
+          <p>Batas minimum untuk alert stok rendah</p>
+        </div>
+        <div class="setting-control">
+          <div class="input-group">
+            <input type="number" class="form-input" value="10" min="0" id="minStockLevel">
+            <button class="btn btn-primary" onclick="updateMinStock()">
+              <i class="fas fa-save"></i> Simpan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Backup & Data -->
+    <div class="settings-card">
+      <div class="card-header">
+        <h3><i class="fas fa-shield-alt"></i> Backup & Data</h3>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Backup Data</h4>
+          <p>Download backup semua data</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-success" onclick="createBackup()">
+            <i class="fas fa-download"></i> Backup Sekarang
+          </button>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Clear Cache</h4>
+          <p>Hapus cache untuk refresh data</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-warning" onclick="clearCache()">
+            <i class="fas fa-broom"></i> Clear Cache
+          </button>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Reset Pengaturan</h4>
+          <p>Kembalikan ke pengaturan default</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-danger" onclick="resetSettings()">
+            <i class="fas fa-undo"></i> Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- System Information -->
+  <div class="system-info">
+    <h3><i class="fas fa-info-circle"></i> Informasi Sistem</h3>
+    <div class="info-grid">
+      <div class="info-item">
+        <h4>Versi Aplikasi</h4>
+        <p>Ruang Stok v2.1.0</p>
+      </div>
+      <div class="info-item">
+        <h4>Platform</h4>
+        <p>Google Apps Script</p>
+      </div>
+      <div class="info-item">
+        <h4>Database</h4>
+        <p>Google Sheets</p>
+      </div>
+      <div class="info-item">
+        <h4>Browser</h4>
+        <p id="browserInfo">Detecting...</p>
+      </div>
+      <div class="info-item">
+        <h4>Storage Used</h4>
+        <p id="storageUsed">Calculating...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// document.addEventListener('DOMContentLoaded', function() {
+  loadSettings();
+  updateSystemInfo();
+// });
+
+// Settings object
+const settings = {
+  companyName: 'Ruang Stok',
+  minStockLevel: 10
+};
+
+function loadSettings() {
+  const saved = localStorage.getItem('ruangStokSettings');
+  if (saved) {
+    Object.assign(settings, JSON.parse(saved));
+    updateUI();
+  }
+}
+
+function saveSettings() {
+  localStorage.setItem('ruangStokSettings', JSON.stringify(settings));
+  showToast('Pengaturan berhasil disimpan', 'success');
+}
+
+function updateUI() {
+  document.getElementById('companyName').value = settings.companyName;
+  document.getElementById('minStockLevel').value = settings.minStockLevel;
+}
+
+// Update functions
+function updateCompanyName() {
+  const name = document.getElementById('companyName').value.trim();
+  if (name) {
+    settings.companyName = name;
+    saveSettings();
+  } else {
+    showToast('Nama perusahaan tidak boleh kosong', 'error');
+  }
+}
+
+function updateMinStock() {
+  const level = parseInt(document.getElementById('minStockLevel').value);
+  if (level >= 0) {
+    settings.minStockLevel = level;
+    saveSettings();
+  } else {
+    showToast('Level stok minimum tidak valid', 'error');
+  }
+}
+
+// Action functions
+function testConnection() {
+  const statusEl = document.getElementById('connectionStatus');
+  statusEl.className = 'connection-status status-testing';
+  statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+  
+  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.status === 'connected') {
+        statusEl.className = 'connection-status status-connected';
+        statusEl.innerHTML = '<i class="fas fa-check-circle"></i> Terhubung';
+        showToast('Koneksi berhasil! ' + result.spreadsheetName, 'success');
+      } else {
+        statusEl.className = 'connection-status status-disconnected';
+        statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Terputus';
+        showToast(result ? result.message : 'Koneksi gagal', 'error');
+      }
+    })
+    .withFailureHandler(function(error) {
+      statusEl.className = 'connection-status status-disconnected';
+      statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error';
+      showToast('Error: ' + error.message, 'error');
+    })
+    .settingsTestConnection(user ? user.email : null);
+}
+
+function createBackup() {
+  showToast('Membuat backup database...', 'warning');
+  
+  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  
+  // Call Google Apps Script backend to generate Excel export URL
+  google.script.run
+    .withSuccessHandler(function(url) {
+      if (url) {
+        // Trigger download
+        const timestamp = new Date().toISOString().slice(0, 10);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'RuangStok_Backup_' + timestamp + '.xlsx';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showToast('Backup Excel sedang diunduh...', 'success');
+      } else {
+        showToast('Gagal membuat backup', 'error');
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error('Backup error:', error);
+      showToast('Error: ' + error.message, 'error');
+    })
+    .settingsCreateExcelBackupAlternative(user ? user.email : null);
+}
+
+function clearCache() {
+  if (confirm('Hapus semua cache? Halaman akan dimuat ulang.')) {
+    localStorage.removeItem('ruangStokCache');
+    sessionStorage.clear();
+    showToast('Cache berhasil dihapus', 'success');
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  }
+}
+
+function resetSettings() {
+  if (confirm('Reset semua pengaturan ke default?')) {
+    localStorage.removeItem('ruangStokSettings');
+    showToast('Pengaturan berhasil direset', 'success');
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  }
+}
+
+// System info
+function updateSystemInfo() {
+  const browserInfo = navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/);
+  document.getElementById('browserInfo').textContent = browserInfo ? browserInfo[0] : 'Unknown';
+  
+  let storageUsed = 0;
+  for (let key in localStorage) {
+    if (localStorage.hasOwnProperty(key)) {
+      storageUsed += localStorage[key].length;
+    }
+  }
+  document.getElementById('storageUsed').textContent = `${(storageUsed / 1024).toFixed(2)} KB`;
+
+  // Fetch Database Info
+  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  if (user && user.email) {
+    google.script.run
+      .withSuccessHandler(function(info) {
+        if (info) {
+          // Update UI with database info if elements exist or create them
+          // For now, we just log it or maybe update the "Database" field
+          const dbElement = document.querySelector('.info-item:nth-child(3) p');
+          if (dbElement) {
+            dbElement.textContent = `Google Sheets (${info.totalSheets} Sheets)`;
+            dbElement.title = `Last Modified: ${info.lastModified}`;
+          }
+        }
+      })
+      .withFailureHandler(function(error) {
+        console.error('Failed to get DB info', error);
+      })
+      .settingsGetDatabaseInfo(user.email);
+  }
+}
+
+// Toast notification
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  
+  document.body.appendChild(toast);
+  
+  setTimeout(() => toast.classList.add('show'), 100);
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => document.body.removeChild(toast), 300);
+  }, 3000);
+}
+</script>
+
+<!-- End Settings Page Fragment -->

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Ruang Stok</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+      width: 100%;
+      max-width: 400px;
+      animation: slideUp 0.5s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 30px;
+      text-align: center;
+      color: white;
+    }
+
+    .login-header i {
+      font-size: 50px;
+      margin-bottom: 15px;
+    }
+
+    .login-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      object-fit: contain;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+
+    .login-header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .login-header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .login-form {
+      padding: 40px 30px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      color: #2c3e50;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper > i:first-child {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #667eea;
+      font-size: 16px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 45px 12px 45px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: all 0.3s;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-login:active {
+      transform: translateY(0);
+    }
+
+    .btn-login:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .alert {
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .alert.show {
+      display: block;
+    }
+
+    .alert-error {
+      background: #fee;
+      color: #c33;
+      border: 1px solid #fcc;
+    }
+
+    .alert-success {
+      background: #efe;
+      color: #3c3;
+      border: 1px solid #cfc;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      color: #667eea;
+      margin-top: 15px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .loading i {
+      font-size: 24px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .footer {
+      padding: 20px 30px;
+      background: #f8f9fa;
+      text-align: center;
+      color: #7f8c8d;
+      font-size: 13px;
+    }
+    
+    .footer p {
+      margin-top: 5px;
+      font-size: 12px;
+      color: #95a5a6;
+    }
+
+    .remember-forgot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 13px;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .remember-me input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .forgot-password {
+      color: #667eea;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    /* Modal Reset Password */
+    .modal-backdrop { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center; z-index:10000; }
+    .modal { background:#fff; border-radius:12px; padding:30px; width:400px; max-width:90%; box-shadow:0 15px 35px rgba(0,0,0,.2); animation: modalIn 0.3s ease; }
+    @keyframes modalIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
+    .modal-header { text-align: center; margin-bottom: 25px; }
+    .modal-header .header-icon { font-size: 50px; color: #667eea; margin-bottom: 15px; }
+    .modal-header h3 { margin: 0; color: #2c3e50; font-size: 20px; }
+    .modal-header p { margin: 8px 0 0; color: #7f8c8d; font-size: 13px; }
+    .modal .form-group { margin-bottom: 20px; }
+    .modal .form-group label { display: block; margin-bottom: 8px; color: #2c3e50; font-weight: 500; font-size: 14px; }
+    .modal .form-group label i { margin-right: 8px; color: #667eea; }
+    .modal .input-wrapper input { width: 100%; padding: 12px 12px 12px 42px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; transition: all 0.3s; box-sizing: border-box; }
+    .modal .input-wrapper input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.15); outline: none; }
+    .modal-footer { display: flex; gap: 12px; margin-top: 25px; }
+    .modal-footer button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-secondary { background: #ecf0f1; color: #2c3e50; }
+    .btn-secondary:hover { background: #dce0e5; }
+    .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.3); }
+    .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    .info-box { background: #e8f4fc; border: 1px solid #b8daff; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 13px; color: #004085; }
+    .info-box i { margin-right: 8px; }
+    .modal-loading { display: none; text-align: center; padding: 20px; }
+    .modal-loading.show { display: block; }
+    .modal-loading i { font-size: 30px; color: #667eea; animation: spin 1s linear infinite; }
+    .modal-loading p { margin-top: 10px; color: #7f8c8d; }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.3s;
+    }
+
+    .password-toggle:hover {
+      color: #667eea;
+    }
+
+    .password-toggle i {
+      position: static;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-header">
+      <img src="https://lh3.googleusercontent.com/d/14DvFqEdzov_KpXX6gPOp0V6_j9RBSQX7" alt="Ruang Stok Logo" class="login-logo" draggable="false">
+      <h1>Ruang Stok</h1>
+      <p>Sistem Manajemen Inventory</p>
+    </div>
+
+    <div class="login-form">
+      <div id="alertBox" class="alert"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrapper">
+            <i class="fas fa-user"></i>
+            <input type="text" id="username" name="username" placeholder="Masukkan username" required autocomplete="username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" name="password" placeholder="Masukkan password" required autocomplete="current-password">
+            <button type="button" class="password-toggle" onclick="togglePassword()" title="Lihat password">
+              <i class="fas fa-eye" id="toggleIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="remember-forgot">
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe">
+            <span>Ingat saya</span>
+          </label>
+          <a class="forgot-password" onclick="openResetPasswordModal()">Lupa Password?</a>
+        </div>
+
+        <button type="submit" class="btn-login" id="btnLogin">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+      </form>
+
+      <div class="loading" id="loading">
+        <i class="fas fa-spinner"></i>
+        <p>Memverifikasi...</p>
+      </div>
+      
+      <!-- Add a manual link that appears if redirect fails -->
+      <div id="redirect-fallback" style="display:none; text-align:center; margin-top:20px; font-size:14px;">
+        <p>Jika tidak dialihkan otomatis, <a href="#" id="manual-link" style="color:#667eea; font-weight:600;">klik di sini</a></p>
+      </div>
+    </div>
+
+    <div class="footer">
+      © 2025 Ruang Stok. All rights reserved.
+      <p>Belum punya akun? Hubungi Administrator.</p>
+    </div>
+  </div>
+
+  <script>
+    // Get the base script URL from the server-side template
+    var baseScriptUrl = "<?= getScriptUrl() ?>";
+
+    function handleLogin(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+      
+      if (!username || !password) {
+        showAlert('Harap isi username dan password', 'error');
+        return;
+      }
+
+      showLoading(true);
+      hideAlert();
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoading(false);
+          
+          if (result.success) {
+            // Show success message
+            showAlert('Login berhasil! Mengalihkan...', 'success');
+            
+            // Save session
+            if (rememberMe) {
+              localStorage.setItem('ruangstok_user', JSON.stringify({
+                username: result.user.username,
+                role: result.user.role,
+                name: result.user.name
+              }));
+            } else {
+              sessionStorage.setItem('ruangstok_user', JSON.stringify({
+                username: result.user.username,
+                role: result.user.role,
+                name: result.user.name
+              }));
+            }
+            
+            // Redirect to dashboard - force full page reload
+            var deploymentUrl = 'https://script.google.com/macros/s/AKfycby7LQUauSM2003uP85QkxX4vi8YoYJDcQj6CQa1_aha/dev';
+            var finalUrl = deploymentUrl + '?page=dashboard&t=' + new Date().getTime();
+            
+            console.log('Redirecting to dashboard:', finalUrl);
+            
+            // Try multiple methods to ensure redirect works
+            setTimeout(function() {
+              try {
+                window.top.location.replace(finalUrl);
+              } catch(e) {
+                try {
+                  window.top.location.href = finalUrl;
+                } catch(e2) {
+                  window.location.href = finalUrl;
+                }
+              }
+            }, 500);
+          } else {
+            showAlert(result.message || 'Username atau password salah', 'error');
+          }
+        })
+        .withFailureHandler(function(error) {
+          showLoading(false);
+          showAlert('Terjadi kesalahan: ' + error.message, 'error');
+        })
+        .authenticateUser(username, password);
+    }
+
+    function showLoading(show) {
+      const loading = document.getElementById('loading');
+      const btnLogin = document.getElementById('btnLogin');
+      
+      if (show) {
+        loading.classList.add('show');
+        btnLogin.disabled = true;
+      } else {
+        loading.classList.remove('show');
+        btnLogin.disabled = false;
+      }
+    }
+
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = 'alert alert-' + type + ' show';
+    }
+
+    function hideAlert() {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.classList.remove('show');
+    }
+
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const toggleIcon = document.getElementById('toggleIcon');
+      
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+      } else {
+        passwordInput.type = 'password';
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+      }
+    }
+
+    // Clear session ONLY on logout, not on normal login page
+    window.onload = function() {
+      if (window.location.href.indexOf('page=logout') !== -1) {
+        localStorage.removeItem('ruangstok_user');
+        sessionStorage.removeItem('ruangstok_user');
+        console.log('Session cleared on logout');
+        
+        // After clearing, redirect to clean login page
+        var cleanUrl = baseScriptUrl + '?page=login';
+        window.top.location.replace(cleanUrl);
+      }
+    };
+
+    // Reset Password Modal Functions
+    function openResetPasswordModal() {
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+      backdrop.id = 'resetPasswordModal';
+      backdrop.innerHTML = `
+        <div class="modal">
+          <div class="modal-header">
+            <div class="header-icon">
+              <i class="fas fa-key"></i>
+            </div>
+            <h3>Reset Password Admin</h3>
+            <p>Masukkan email admin untuk menerima password baru</p>
+          </div>
+          <div id="resetFormContent">
+            <div class="info-box">
+              <i class="fas fa-info-circle"></i>
+              Fitur ini hanya untuk akun Admin. Password baru akan dikirim ke email Anda.
+            </div>
+            <div class="form-group">
+              <label><i class="fas fa-envelope"></i>Email Admin</label>
+              <div class="input-wrapper">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="resetEmail" placeholder="Masukkan email admin" required>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn-secondary" onclick="closeResetModal()"><i class="fas fa-times"></i> Batal</button>
+              <button type="button" class="btn-primary" id="btnReset" onclick="sendResetPassword()"><i class="fas fa-paper-plane"></i> Kirim</button>
+            </div>
+          </div>
+          <div class="modal-loading" id="resetLoading">
+            <i class="fas fa-spinner"></i>
+            <p>Mengirim password ke email...</p>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(backdrop);
+      document.getElementById('resetEmail').focus();
+    }
+
+    function closeResetModal() {
+      const modal = document.getElementById('resetPasswordModal');
+      if (modal) modal.remove();
+    }
+
+    function sendResetPassword() {
+      const email = document.getElementById('resetEmail').value.trim();
+      
+      if (!email) {
+        showAlert('Harap masukkan email', 'error');
+        return;
+      }
+
+      // Show loading
+      document.getElementById('resetFormContent').style.display = 'none';
+      document.getElementById('resetLoading').classList.add('show');
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          closeResetModal();
+          if (result.success) {
+            showAlert('Password baru telah dikirim ke email Anda!', 'success');
+          } else {
+            showAlert(result.message || 'Gagal reset password', 'error');
+          }
+        })
+        .withFailureHandler(function(error) {
+          closeResetModal();
+          showAlert('Terjadi kesalahan: ' + error.message, 'error');
+        })
+        .adminResetPasswordByEmail(email);
+    }
+  </script>
+</body>
+</html>

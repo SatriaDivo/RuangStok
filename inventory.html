@@ -1,0 +1,1645 @@
+<style>
+  /* Responsive Styles for Inventory */
+  @media screen and (max-width: 768px) {
+    .inventory-header {
+      flex-direction: column !important;
+      gap: 15px !important;
+      align-items: flex-start !important;
+    }
+    
+    .inventory-header h1 {
+      font-size: 20px !important;
+    }
+    
+    .inventory-actions {
+      width: 100%;
+      flex-direction: column !important;
+    }
+    
+    .inventory-actions button {
+      width: 100%;
+      justify-content: center !important;
+    }
+    
+    .table-container {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .table-container table {
+      min-width: 800px;
+    }
+    
+    .modal-content {
+      width: 95% !important;
+      max-width: 95% !important;
+      margin: 10px !important;
+    }
+    
+    .confirm-modal-content {
+      width: 95% !important;
+      max-width: 95% !important;
+    }
+    
+    .form-grid-2col {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    .inventory-header h1 {
+      font-size: 18px !important;
+    }
+    
+    .inventory-actions button {
+      padding: 10px 15px !important;
+      font-size: 13px !important;
+    }
+    
+    .table-container table {
+      font-size: 12px !important;
+    }
+    
+    .modal-content {
+      padding: 15px !important;
+    }
+  }
+</style>
+
+<div class="inventory-container">
+  <div class="inventory-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <h1 style="font-family: 'Montserrat', sans-serif; color: #2c3e50; margin: 0;">
+      <i class="fas fa-boxes"></i> Manajemen Persediaan
+    </h1>
+    
+    <div class="inventory-actions" style="display: flex; gap: 10px;">
+      <button id="lowStockBtn" onclick="toggleLowStockDashboard()" style="background: #e74c3c; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 14px; transition: all 0.3s;">
+        <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+        <span id="lowStockBtnText">Stok Rendah</span>
+      </button>
+      <button id="addProductBtn" style="background: #1abc9c; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 14px; transition: all 0.3s;">
+        <i class="fas fa-plus" style="margin-right: 8px;"></i>
+        Tambah Barang
+      </button>
+    </div>
+  </div>
+
+  <!-- Dashboard Peringatan Stok Rendah -->
+  <div id="lowStockDashboard" class="low-stock-dashboard" style="display: none; background: #fff5f5; border: 2px solid #e74c3c; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <h3 style="margin: 0; color: #e74c3c; font-family: 'Poppins', sans-serif;">
+        <i class="fas fa-exclamation-triangle"></i> Peringatan Stok Rendah
+      </h3>
+      <button onclick="toggleLowStockDashboard()" style="background: none; border: none; font-size: 20px; color: #e74c3c; cursor: pointer; padding: 5px;">×</button>
+    </div>
+    <div id="lowStockContent">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+  
+  <!-- Confirmation Modal for Delete -->
+  <div id="confirmDeleteModal" class="modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="confirm-modal-content">
+      <div class="confirm-header" style="padding: 25px 30px 20px; border-bottom: 2px solid #e74c3c; background: linear-gradient(135deg, #ff6b6b, #e74c3c);">
+        <h3 style="margin: 0; color: white; display: flex; align-items: center; font-family: 'Poppins', sans-serif; font-size: 18px;">
+          <i class="fas fa-exclamation-triangle" style="margin-right: 12px; font-size: 20px;"></i> 
+          Konfirmasi Penghapusan
+        </h3>
+      </div>
+      <div class="confirm-body" style="padding: 25px 30px;">
+        <p style="margin: 0 0 20px 0; color: #2c3e50; font-size: 15px; line-height: 1.5;">
+          Apakah Anda yakin ingin menghapus barang berikut?
+        </p>
+        
+        <div id="deleteItemDetails" class="item-details" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #e74c3c; margin-bottom: 20px;">
+          <!-- Item details will be populated here -->
+        </div>
+        
+        <div id="deleteWarnings" style="margin-bottom: 20px;">
+          <!-- Warnings will be populated here -->
+        </div>
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+          <div style="color: #856404; font-size: 14px; line-height: 1.5;">
+            <i class="fas fa-info-circle" style="margin-right: 8px;"></i> 
+            Data akan dihapus dari sistem lokal dan Google Sheets (jika terhubung). Tindakan ini tidak dapat dibatalkan.
+          </div>
+        </div>
+      </div>
+      <div class="confirm-footer" style="padding: 20px 30px; background: #f8f9fa; border-top: 1px solid #dee2e6; display: flex; justify-content: flex-end; gap: 12px;">
+        <button id="cancelDeleteBtn" class="btn-cancel" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; transition: all 0.3s;">
+          <i class="fas fa-times" style="margin-right: 8px;"></i> Batal
+        </button>
+        <button id="confirmDeleteBtn" class="btn-delete" style="background: #e74c3c; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; transition: all 0.3s;">
+          <i class="fas fa-trash" style="margin-right: 8px;"></i> Hapus
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear Form Confirmation Modal -->
+  <div id="confirmClearModal" class="modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="confirm-modal-content">
+      <div class="confirm-header" style="padding: 25px 30px 20px; border-bottom: 2px solid #f39c12; background: linear-gradient(135deg, #f39c12, #e67e22);">
+        <h3 style="margin: 0; color: white; display: flex; align-items: center; font-family: 'Poppins', sans-serif; font-size: 18px;">
+          <i class="fas fa-exclamation-circle" style="margin-right: 12px; font-size: 20px;"></i> 
+          Konfirmasi Hapus Data Form
+        </h3>
+      </div>
+      <div class="confirm-body" style="padding: 25px 30px;">
+        <p style="margin: 0 0 20px 0; color: #2c3e50; font-size: 15px; line-height: 1.5;">
+          Apakah Anda yakin ingin menghapus semua data yang sudah diisi di form ini?
+        </p>
+        
+        <div id="clearFormDetails" class="item-details" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #f39c12; margin-bottom: 20px;">
+          <!-- Form data details will be populated here -->
+        </div>
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+          <div style="color: #856404; font-size: 14px; line-height: 1.5;">
+            <i class="fas fa-info-circle" style="margin-right: 8px;"></i> 
+            Semua data yang telah diisi akan hilang dan form akan kembali kosong. Tindakan ini tidak dapat dibatalkan.
+          </div>
+        </div>
+      </div>
+      <div class="confirm-footer" style="padding: 20px 30px; background: #f8f9fa; border-top: 1px solid #dee2e6; display: flex; justify-content: flex-end; gap: 12px;">
+        <button id="cancelClearBtn" class="btn-cancel" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; transition: all 0.3s;">
+          <i class="fas fa-times" style="margin-right: 8px;"></i> Batal
+        </button>
+        <button id="confirmClearBtn" class="btn-clear" style="background: #f39c12; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; transition: all 0.3s;">
+          <i class="fas fa-trash-alt" style="margin-right: 8px;"></i> Hapus Form
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory Table -->
+  <div style="background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
+    <div style="padding: 20px; border-bottom: 1px solid #eee;">
+      <h3 style="margin: 0; color: #2c3e50; font-family: 'Poppins', sans-serif;">
+        <i class="fas fa-list"></i> Daftar Barang
+      </h3>
+    </div>
+    
+    <div class="table-container" style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background: #f8f9fa;">
+            <th style="padding: 15px; text-align: left; color: #2c3e50; font-weight: 600; border-bottom: 1px solid #dee2e6;">Kode Barang</th>
+            <th style="padding: 15px; text-align: left; color: #2c3e50; font-weight: 600; border-bottom: 1px solid #dee2e6;">Nama Barang</th>
+            <th style="padding: 15px; text-align: left; color: #2c3e50; font-weight: 600; border-bottom: 1px solid #dee2e6;">Kategori Barang</th>
+            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 1px solid #dee2e6;">Total Stok</th>
+            <th style="padding: 15px; text-align: right; color: #2c3e50; font-weight: 600; border-bottom: 1px solid #dee2e6;">Harga Satuan</th>
+            <th style="padding: 15px; text-align: right; color: #2c3e50; font-weight: 600; border-bottom: 1px solid #dee2e6;">Total Harga</th>
+            <th style="padding: 15px; text-align: center; color: #2c3e50; font-weight: 600; border-bottom: 1px solid #dee2e6;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTableBody">
+          <tr>
+            <td colspan="7" style="padding: 60px; text-align: center; color: #7f8c8d;">
+              <div>
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 15px;"></i>
+                <p style="margin: 0; font-size: 16px;">Memuat data persediaan...</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+
+</div>
+
+<!-- Add Product Modal -->
+<div id="addProductModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 style="margin: 0; color: #2c3e50;">Tambah Barang</h3>
+      <button id="closeModal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">×</button>
+    </div>
+    
+    <form id="addProductForm">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kode Barang *</label>
+          <input type="text" id="productCode" name="productCode" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;" placeholder="Masukkan kode barang">
+          <div class="error-message" id="codeError">Kode barang diperlukan</div>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nama Barang *</label>
+          <input type="text" id="productName" name="productName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+          <div class="error-message" id="nameError">Nama barang diperlukan</div>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kategori Barang *</label>
+        <input type="text" id="category" name="category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        <div class="error-message" id="categoryError">Kategori barang diperlukan</div>
+      </div>
+      
+      <div class="form-grid-2col" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">
+            Total Stok *
+          </label>
+          <input type="number" id="quantity" name="quantity" required min="0" 
+                 style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;" 
+                 placeholder="Masukkan total stok" 
+                 oninput="calculateTotal()">
+          <div class="error-message" id="quantityError">Jumlah stok diperlukan</div>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Harga Satuan (Rp) *</label>
+          <input type="number" id="unitPrice" name="unitPrice" required min="0" step="0.01" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;" oninput="calculateTotal()">
+          <div class="error-message" id="priceError">Harga harus lebih dari 0</div>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Total Harga</label>
+        <input type="text" id="totalPrice" readonly style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; background-color: #f8f9fa; color: #2c3e50; font-weight: 600;">
+      </div>
+      
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+        <button type="button" id="deleteBtn" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Delete</button>
+        <button type="button" id="cancelBtn" style="background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Close</button>
+        <button type="submit" style="background: #1abc9c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .inventory-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  
+  .inventory-container tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .inventory-container input:focus,
+  .inventory-container select:focus {
+    outline: none;
+    border-color: #1abc9c;
+    box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+  }
+  
+  .low-stock {
+    background-color: #fef2f2 !important;
+    border-left: 4px solid #dc2626 !important;
+  }
+  
+  .low-stock:hover {
+    background-color: #ffeaea !important;
+  }
+
+    .stock-warning {
+      font-size: 10px;
+      color: #e53e3e;
+      margin-top: 3px;
+      font-weight: bold;
+    }
+
+    .low-stock-dashboard {
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #lowStockBtn {
+      position: relative;
+    }
+
+    /* Delete Modal Styles */
+    #confirmDeleteModal .btn-cancel:hover {
+      background: #5a6268 !important;
+      transform: translateY(-1px);
+    }
+
+    #confirmDeleteModal .btn-delete:hover {
+      background: #dc3545 !important;
+      transform: translateY(-1px);
+    }
+
+    /* Modal Overlay Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* Clear form modal should appear above edit modal */
+    #confirmClearModal {
+      z-index: 15000;
+    }
+
+    #confirmClearModal .modal-overlay {
+      z-index: 15001;
+    }
+
+    #confirmClearModal .confirm-modal-content {
+      z-index: 15002;
+    }
+
+    /* Delete modal z-index */
+    #confirmDeleteModal {
+      z-index: 12000;
+    }
+
+    #confirmDeleteModal .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      animation: fadeIn 0.2s ease;
+      z-index: 12001;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    #confirmDeleteModal .confirm-modal-content {
+      position: relative;
+      z-index: 12002;
+      background: white;
+      border-radius: 12px;
+      padding: 0;
+      max-width: 500px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: scale(0.85) translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* Prevent modal from scrolling with page */
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    /* Clear Form Modal Styles */
+    #confirmClearModal .btn-cancel:hover {
+      background: #5a6268 !important;
+      transform: translateY(-1px);
+    }
+
+    #confirmClearModal .btn-clear:hover {
+      background: #e67e22 !important;
+      transform: translateY(-1px);
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 600px) {
+      #confirmDeleteModal .confirm-modal-content,
+      #confirmClearModal .confirm-modal-content {
+        max-width: 95%;
+        margin: 10px;
+      }
+      
+      .modal {
+        padding: 10px;
+      }
+    }
+
+    #lowStockBtn:hover {
+      background: #c0392b !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+    }
+
+    /* Confirmation Modal Styles */
+    .confirm-modal-content {
+      background: white;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      z-index: 10001;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .confirm-header {
+      padding: 20px 25px;
+      background: linear-gradient(135deg, #fff5f5 0%, #ffeaea 100%);
+      border-radius: 12px 12px 0 0;
+      border-bottom: 1px solid #f1c0c0;
+    }
+
+    .confirm-header h3 {
+      margin: 0;
+      color: #c0392b;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .confirm-body {
+      padding: 25px;
+    }
+
+    .item-details {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #e74c3c;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding: 5px 0;
+      border-bottom: 1px solid #ecf0f1;
+    }
+
+    .detail-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+    }
+
+    .detail-label {
+      font-weight: 600;
+      color: #2c3e50;
+      min-width: 100px;
+    }
+
+    .detail-value {
+      color: #34495e;
+      font-weight: 500;
+      text-align: right;
+    }
+
+    .confirm-footer {
+      padding: 20px 25px;
+      background: #f8f9fa;
+      border-radius: 0 0 12px 12px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      border-top: 1px solid #ecf0f1;
+    }
+
+    .btn-cancel {
+      background: #95a5a6;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-cancel:hover {
+      background: #7f8c8d;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
+    }
+
+    .btn-delete {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-delete:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    .btn-delete:active {
+      transform: translateY(0);
+    }
+
+    .btn-delete:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-delete:disabled:hover {
+      background: #bdc3c7;
+      transform: none;
+      box-shadow: none;
+    }  .stock-warning {
+    color: #dc2626;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .form-error {
+    border-color: #e74c3c !important;
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2) !important;
+  }
+  
+  .error-message {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+  }
+</style>
+
+<script>
+console.log('🚀 Inventory Script Starting...');
+try {
+// Global variables
+let inventoryData = [];
+let editingIndex = -1;
+
+// ==============================================
+// PENGATURAN APLIKASI
+// ==============================================
+
+// Konfigurasi aplikasi Ruang Stock
+const inventoryConfig = {
+  // Pengaturan sinkronisasi
+  SYNC_SETTINGS: {
+    autoSyncOnLoad: false,        // Auto-sync saat halaman dimuat
+    showDetailedLogs: true,       // Tampilkan log detail di console
+    preserveLocalPrices: true     // Pertahankan harga dari data lokal
+  },
+  
+  // Pengaturan peringatan stok rendah
+  LOW_STOCK_SETTINGS: {
+    defaultReorderLevel: 10,      // Level reorder default
+    showLowStockOnStartup: true,  // Tampilkan dashboard saat startup
+    lowStockThreshold: 5          // Threshold stok sangat rendah
+  },
+  
+  // Pengaturan inventory
+  INVENTORY_SETTINGS: {
+    allowManualStockEntry: true   // Izinkan input stok manual (untuk perusahaan yang baru menerapkan sistem)
+  }
+};
+
+// Log status konfigurasi
+console.log('🔧 Ruang Stock Configuration:', inventoryConfig);
+
+// Format currency to Indonesian Rupiah
+function formatRupiah(amount) {
+  return 'Rp' + new Intl.NumberFormat('id-ID').format(amount);
+}
+
+// Parse Rupiah back to number
+function parseRupiah(rupiahString) {
+  return parseFloat(rupiahString.replace(/[^0-9]/g, '')) || 0;
+}
+
+// Calculate total price
+function calculateTotal() {
+  const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+  const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+  const total = quantity * unitPrice;
+  document.getElementById('totalPrice').value = formatRupiah(total);
+}
+
+// Generate random product code
+function generateProductCode() {
+  return 'P' + Math.floor(10000 + Math.random() * 90000);
+}
+
+// Show toast notification
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 5px;
+    color: white;
+    font-weight: 500;
+    z-index: 10001;
+    animation: slideIn 0.3s ease;
+    max-width: 300px;
+  `;
+  
+  switch(type) {
+    case 'success':
+      toast.style.backgroundColor = '#27ae60';
+      break;
+    case 'error':
+      toast.style.backgroundColor = '#e74c3c';
+      break;
+    case 'warning':
+      toast.style.backgroundColor = '#f39c12';
+      break;
+    default:
+      toast.style.backgroundColor = '#3498db';
+  }
+  
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// Check for low stock and show warnings
+function checkLowStock(item) {
+  if (item.quantity < 10) {
+    showToast(`⚠️ Stok untuk ${item.name} hampir habis! (${item.quantity} tersisa)`, 'warning');
+    updateLowStockDashboard();
+    return true;
+  }
+  return false;
+}
+
+// Update dashboard peringatan stok rendah
+function updateLowStockDashboard() {
+  const lowStockItems = inventoryData.filter(item => item.quantity < 10);
+  const dashboard = document.getElementById('lowStockDashboard');
+  const content = document.getElementById('lowStockContent');
+  const lowStockBtn = document.getElementById('lowStockBtn');
+  const lowStockBtnText = document.getElementById('lowStockBtnText');
+  
+  // Update button text and visibility
+  if (lowStockItems.length === 0) {
+    dashboard.style.display = 'none';
+    lowStockBtn.style.display = 'none';
+    return;
+  } else {
+    lowStockBtn.style.display = 'flex';
+    lowStockBtnText.textContent = `Stok Rendah (${lowStockItems.length})`;
+  }
+  
+  dashboard.style.display = 'block';
+  
+  const stats = getInventoryStats();
+  
+  let html = `
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px;">
+      <div style="background: white; padding: 10px; border-radius: 6px; text-align: center; border-left: 4px solid #3498db;">
+        <div style="font-size: 20px; font-weight: bold; color: #3498db;">${stats.totalItems}</div>
+        <div style="font-size: 12px; color: #7f8c8d;">Total Barang</div>
+      </div>
+      <div style="background: white; padding: 10px; border-radius: 6px; text-align: center; border-left: 4px solid #e67e22;">
+        <div style="font-size: 20px; font-weight: bold; color: #e67e22;">${stats.lowStockCount}</div>
+        <div style="font-size: 12px; color: #7f8c8d;">Stok Rendah</div>
+      </div>
+      <div style="background: white; padding: 10px; border-radius: 6px; text-align: center; border-left: 4px solid #c0392b;">
+        <div style="font-size: 20px; font-weight: bold; color: #c0392b;">${stats.outOfStockCount}</div>
+        <div style="font-size: 12px; color: #7f8c8d;">Stok Habis</div>
+      </div>
+      <div style="background: white; padding: 10px; border-radius: 6px; text-align: center; border-left: 4px solid #27ae60;">
+        <div style="font-size: 20px; font-weight: bold; color: #27ae60;">${formatRupiah(stats.totalValue)}</div>
+        <div style="font-size: 12px; color: #7f8c8d;">Total Nilai</div>
+      </div>
+    </div>
+    <div style="margin-bottom: 10px; font-weight: bold; color: #c0392b;">
+      Ditemukan ${lowStockItems.length} barang dengan stok rendah (< 10):
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px;">
+  `;
+  
+  lowStockItems.forEach(item => {
+    const urgency = item.quantity === 0 ? 'habis' : item.quantity <= 3 ? 'kritis' : 'rendah';
+    const urgencyColor = item.quantity === 0 ? '#c0392b' : item.quantity <= 3 ? '#e67e22' : '#f39c12';
+    
+    html += `
+      <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid ${urgencyColor};">
+        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 5px;">${item.name}</div>
+        <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 5px;">Kode: ${item.id} | Kategori: ${item.category}</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: ${urgencyColor}; font-weight: bold;">
+            Stok: ${item.quantity} 
+            <span style="font-size: 11px;">(${urgency.toUpperCase()})</span>
+          </span>
+          <button onclick="editItem(${inventoryData.indexOf(item)})" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+            <i class="fas fa-edit"></i> Update
+          </button>
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+// Toggle dashboard visibility
+function toggleLowStockDashboard() {
+  const dashboard = document.getElementById('lowStockDashboard');
+  if (dashboard.style.display === 'none') {
+    dashboard.style.display = 'block';
+    updateLowStockDashboard(); // Refresh dashboard content when showing
+  } else {
+    dashboard.style.display = 'none';
+  }
+}
+
+// Get inventory statistics
+function getInventoryStats() {
+  const totalItems = inventoryData.length;
+  const totalStock = inventoryData.reduce((sum, item) => sum + item.quantity, 0);
+  const totalValue = inventoryData.reduce((sum, item) => sum + item.totalPrice, 0);
+  const lowStockCount = inventoryData.filter(item => item.quantity < 10).length;
+  const outOfStockCount = inventoryData.filter(item => item.quantity === 0).length;
+  
+  return {
+    totalItems,
+    totalStock,
+    totalValue,
+    lowStockCount,
+    outOfStockCount
+  };
+}
+
+// Sync with Google Sheets (bidirectional)
+function syncWithGoogleSheets() {
+  if (typeof google === 'undefined' || !google.script) {
+    showToast('Google Sheets tidak tersedia. Pastikan aplikasi terhubung dengan Google Apps Script.', 'error');
+    return;
+  }
+
+  // Get user from localStorage or sessionStorage
+  const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+  if (!userStr) {
+    showToast('Sesi tidak valid. Silakan login kembali.', 'error');
+    return;
+  }
+  
+  const user = JSON.parse(userStr);
+  const syncBtn = document.getElementById('syncBtn');
+  const originalText = syncBtn ? syncBtn.innerHTML : '';
+  if (syncBtn) {
+    syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>Syncing...';
+    syncBtn.disabled = true;
+  }
+  
+  showToast('Memulai sinkronisasi dengan Google Sheets...', 'info');
+  
+  // Get data from Google Sheets using itemGetInventoryItems
+  google.script.run
+    .withSuccessHandler(function(items) {
+      console.log('Received items from Google Sheets:', items);
+      
+      if (items && items.length > 0) {
+        inventoryData = items;
+        renderInventoryTable();
+        updateLowStockDashboard();
+        showToast(`📊 Data dimuat dari Google Sheets: ${items.length} item`, 'success');
+      } else {
+        inventoryData = [];
+        renderInventoryTable();
+        showToast('Tidak ada data di Google Sheets', 'info');
+      }
+      
+      if (syncBtn) {
+        syncBtn.innerHTML = originalText;
+        syncBtn.disabled = false;
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error('Error syncing with Google Sheets:', error);
+      showToast(`❌ Gagal sinkronisasi: ${error.message}`, 'error');
+      
+      if (syncBtn) {
+        syncBtn.innerHTML = originalText;
+        syncBtn.disabled = false;
+      }
+    })
+    .itemGetInventoryItems(user.username);
+}
+
+// Validation functions
+function validateForm() {
+  let isValid = true;
+  
+  // Clear previous errors
+  document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.form-error').forEach(el => el.classList.remove('form-error'));
+  
+  const productCode = document.getElementById('productCode');
+  const productName = document.getElementById('productName');
+  const category = document.getElementById('category');
+  const quantity = document.getElementById('quantity');
+  const unitPrice = document.getElementById('unitPrice');
+  
+  // Validate product code
+  if (!productCode.value.trim()) {
+    showFieldError('productCode', 'codeError', 'Kode barang diperlukan');
+    isValid = false;
+  } else if (productCode.value.trim().length < 3) {
+    showFieldError('productCode', 'codeError', 'Kode barang minimal 3 karakter');
+    isValid = false;
+  } else if (editingIndex < 0 && inventoryData.find(item => item.id === productCode.value.trim())) {
+    showFieldError('productCode', 'codeError', 'Kode barang sudah digunakan');
+    isValid = false;
+  }
+  
+  // Validate product name
+  if (!productName.value.trim()) {
+    showFieldError('productName', 'nameError', 'Nama barang diperlukan');
+    isValid = false;
+  }
+  
+  // Validate category
+  if (!category.value.trim()) {
+    showFieldError('category', 'categoryError', 'Kategori barang diperlukan');
+    isValid = false;
+  }
+  
+  // Validate quantity
+  const qty = parseInt(quantity.value);
+  if (isNaN(qty) || qty < 0) {
+    showFieldError('quantity', 'quantityError', 'Jumlah stok tidak valid');
+    isValid = false;
+  }
+  
+  // Validate price
+  const price = parseFloat(unitPrice.value);
+  if (!price || price <= 0) {
+    showFieldError('unitPrice', 'priceError', 'Harga harus lebih dari 0');
+    isValid = false;
+  }
+  
+  return isValid;
+}
+
+function showFieldError(fieldId, errorId, message) {
+  const field = document.getElementById(fieldId);
+  const error = document.getElementById(errorId);
+  
+  field.classList.add('form-error');
+  error.textContent = message;
+  error.style.display = 'block';
+}
+
+// CRUD Operations
+function addOrUpdateItem() {
+  if (!validateForm()) {
+    showToast('Mohon isi semua field dengan benar', 'error');
+    return;
+  }
+
+  // Get user from localStorage or sessionStorage
+  const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+  if (!userStr) {
+    showToast('Sesi tidak valid. Silakan login kembali.', 'error');
+    return;
+  }
+  const user = JSON.parse(userStr);
+  
+  const productData = {
+    id: document.getElementById('productCode').value,
+    name: document.getElementById('productName').value.trim(),
+    category: document.getElementById('category').value.trim(),
+    quantity: parseInt(document.getElementById('quantity').value),
+    unitPrice: parseFloat(document.getElementById('unitPrice').value),
+    totalPrice: parseInt(document.getElementById('quantity').value) * parseFloat(document.getElementById('unitPrice').value)
+  };
+  
+  if (editingIndex >= 0) {
+    // Update item in Google Sheets
+    if (typeof google !== 'undefined' && google.script) {
+      const gssData = {
+        id: productData.id,
+        type: productData.category,
+        category: productData.category,
+        subcategory: '',
+        name: productData.name,
+        quantity: productData.quantity,
+        unitPrice: productData.unitPrice,
+        totalPrice: productData.totalPrice,
+        reorderLevel: inventoryConfig.LOW_STOCK_SETTINGS.defaultReorderLevel
+      };
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result && result.success) {
+            showToast('Barang berhasil diperbarui!', 'success');
+            // Refresh data from sheets
+            syncWithGoogleSheets();
+          } else {
+            showToast('Gagal memperbarui barang: ' + (result.message || 'Unknown error'), 'error');
+          }
+        })
+        .withFailureHandler(function(error) {
+          showToast('Gagal memperbarui barang: ' + error.message, 'error');
+        })
+        .itemUpdateInventoryItem(gssData, user.username);
+    } else {
+      showToast('Google Sheets tidak tersedia - mode offline', 'warning');
+    }
+  } else {
+    // Add new item to Google Sheets
+    if (typeof google !== 'undefined' && google.script) {
+      const gssData = {
+        id: productData.id,
+        type: productData.category,
+        category: productData.category,
+        subcategory: '',
+        name: productData.name,
+        quantity: productData.quantity,
+        unitPrice: productData.unitPrice,
+        totalPrice: productData.totalPrice,
+        reorderLevel: inventoryConfig.LOW_STOCK_SETTINGS.defaultReorderLevel
+      };
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result && result.success) {
+            showToast('Barang berhasil ditambahkan!', 'success');
+            // Refresh data from sheets
+            syncWithGoogleSheets();
+          } else {
+            showToast('Gagal menambahkan barang: ' + (result.message || 'Unknown error'), 'error');
+          }
+        })
+        .withFailureHandler(function(error) {
+          showToast('Gagal menambahkan barang: ' + error.message, 'error');
+        })
+        .itemAddNewInventoryItem(gssData, user.username);
+    } else {
+      showToast('Google Sheets tidak tersedia - mode offline', 'warning');
+    }
+  }
+  
+  closeForm();
+}
+
+function editItem(index) {
+  const item = inventoryData[index];
+  if (!item) return;
+  
+  editingIndex = index;
+  
+  // Populate form
+  document.getElementById('productCode').value = item.id;
+  document.getElementById('productName').value = item.name;
+  document.getElementById('category').value = item.category;
+  document.getElementById('quantity').value = item.quantity;
+  document.getElementById('unitPrice').value = item.unitPrice;
+  
+  calculateTotal();
+  
+  // Change modal title and button text
+  document.querySelector('#addProductModal h3').textContent = 'Edit Barang';
+  document.querySelector('#addProductModal button[type="submit"]').textContent = 'Update';
+  
+  document.getElementById('addProductModal').style.display = 'block';
+}
+
+function deleteItem(index) {
+  const item = inventoryData[index];
+  if (!item) {
+    showToast('Barang tidak ditemukan', 'error');
+    return;
+  }
+  
+  // Store the index for later use
+  window.deleteItemIndex = index;
+  
+  // Get additional context about this deletion
+  const warnings = getItemDeletionWarnings(item);
+  
+  // Populate modal with item details
+  const itemDetails = document.getElementById('deleteItemDetails');
+  itemDetails.innerHTML = `
+    <div style="display: grid; gap: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+        <span style="font-weight: 500; color: #6c757d;">Kode Barang:</span>
+        <span style="font-weight: 600; color: #2c3e50; font-family: 'Roboto Mono', monospace;">${item.id}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+        <span style="font-weight: 500; color: #6c757d;">Nama Barang:</span>
+        <span style="font-weight: 600; color: #2c3e50;">${item.name}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+        <span style="font-weight: 500; color: #6c757d;">Kategori:</span>
+        <span style="font-weight: 600; color: #2c3e50; padding: 4px 8px; background: #e9ecef; border-radius: 4px; font-size: 13px;">${item.category}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+        <span style="font-weight: 500; color: #6c757d;">Stok:</span>
+        <span style="font-weight: 600; color: ${item.quantity < 10 ? '#e74c3c' : '#27ae60'}; padding: 4px 8px; background: ${item.quantity < 10 ? '#ffebee' : '#e8f5e8'}; border-radius: 4px;">
+          ${item.quantity} unit
+        </span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+        <span style="font-weight: 500; color: #6c757d;">Harga Satuan:</span>
+        <span style="font-weight: 600; color: #2c3e50; font-family: 'Roboto Mono', monospace;">${formatRupiah(item.unitPrice)}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-weight: 500; color: #6c757d;">Total Nilai:</span>
+        <span style="font-weight: 700; color: #e67e22; font-size: 16px; padding: 6px 10px; background: #fff3e0; border-radius: 6px; font-family: 'Roboto Mono', monospace;">
+          ${formatRupiah(item.totalPrice)}
+        </span>
+      </div>
+    </div>
+  `;
+  
+  // Populate warnings
+  const warningsContainer = document.getElementById('deleteWarnings');
+  if (warnings.length > 0) {
+    warningsContainer.innerHTML = `
+      <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #f39c12;">
+        <div style="font-weight: 600; color: #856404; margin-bottom: 10px; display: flex; align-items: center;">
+          <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i> Perhatian:
+        </div>
+        <div style="color: #856404; font-size: 14px; line-height: 1.6;">
+          ${warnings.map(warning => `<div style="margin-bottom: 6px;">• ${warning}</div>`).join('')}
+        </div>
+      </div>
+    `;
+  } else {
+    warningsContainer.innerHTML = '';
+  }
+  
+  // Prevent body scroll and show modal
+  document.body.style.overflow = 'hidden';
+  document.getElementById('confirmDeleteModal').style.display = 'flex';
+}
+
+// Handle actual deletion after confirmation
+function confirmDeleteItem() {
+  const index = window.deleteItemIndex;
+  const item = inventoryData[index];
+  
+  if (!item) {
+    showToast('Terjadi kesalahan saat menghapus barang', 'error');
+    closeDeleteModal();
+    return;
+  }
+
+  // Get user from localStorage or sessionStorage
+  const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+  if (!userStr) {
+    showToast('Sesi tidak valid. Silakan login kembali.', 'error');
+    closeDeleteModal();
+    return;
+  }
+  const user = JSON.parse(userStr);
+  
+  // Show loading state
+  const confirmBtn = document.getElementById('confirmDeleteBtn');
+  const originalBtnText = confirmBtn.innerHTML;
+  confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+  confirmBtn.disabled = true;
+  
+  const deletedItem = inventoryData[index];
+  
+  // Delete from Google Sheets
+  if (typeof google !== 'undefined' && google.script) {
+    showToast(`Menghapus "${deletedItem.name}" dari Google Sheets...`, 'info');
+    
+    google.script.run
+      .withSuccessHandler(function(result) {
+        // Reset button state
+        confirmBtn.innerHTML = originalBtnText;
+        confirmBtn.disabled = false;
+        closeDeleteModal();
+        
+        if (result && result.success) {
+          showToast(`Barang "${deletedItem.name}" berhasil dihapus`, 'success');
+          // Refresh data from sheets
+          syncWithGoogleSheets();
+        } else {
+          showToast(`Gagal menghapus barang: ${result.message}`, 'error');
+        }
+      })
+      .withFailureHandler(function(error) {
+        // Reset button state
+        confirmBtn.innerHTML = originalBtnText;
+        confirmBtn.disabled = false;
+        closeDeleteModal();
+        
+        showToast(`Gagal menghapus barang: ${error.message}`, 'error');
+      })
+      .itemDeleteInventoryItem(deletedItem.id, user.username);
+  } else {
+    // Reset button state and close modal
+    confirmBtn.innerHTML = originalBtnText;
+    confirmBtn.disabled = false;
+    closeDeleteModal();
+    
+    showToast('Google Sheets tidak tersedia - mode offline', 'warning');
+  }
+}
+
+// Close delete confirmation modal
+function closeDeleteModal() {
+  // Restore body scroll and hide modal
+  document.body.style.overflow = '';
+  document.getElementById('confirmDeleteModal').style.display = 'none';
+  window.deleteItemIndex = null;
+  
+  // Reset button state in case modal is closed during loading
+  const confirmBtn = document.getElementById('confirmDeleteBtn');
+  confirmBtn.innerHTML = '<i class="fas fa-trash"></i> Hapus';
+  confirmBtn.disabled = false;
+}
+
+// Get additional context about item deletion
+function getItemDeletionWarnings(item) {
+  const sameCategory = inventoryData.filter(i => i.category === item.category);
+  const warnings = [];
+  
+  // Check if this is the only item in the category
+  if (sameCategory.length === 1) {
+    warnings.push(`🏷️ Ini adalah satu-satunya item dalam kategori "${item.category}"`);
+  }
+  
+  // Check for high value items
+  if (item.totalPrice >= 1000000) {
+    warnings.push(`💰 Item ini memiliki nilai tinggi (${formatRupiah(item.totalPrice)})`);
+  }
+  
+  // Check for low stock items (might want to keep track)
+  if (item.quantity > 0 && item.quantity <= 5) {
+    warnings.push(`📦 Item ini memiliki stok sangat rendah (${item.quantity} unit)`);
+  } else if (item.quantity > 5 && item.quantity <= 15) {
+    warnings.push(`⚠️ Item ini memiliki stok terbatas (${item.quantity} unit)`);
+  }
+  
+  // Check for items with high unit price
+  if (item.unitPrice >= 5000000) {
+    warnings.push(`� Item ini memiliki harga satuan sangat tinggi (${formatRupiah(item.unitPrice)})`);
+  }
+  
+  return warnings;
+}
+
+function clearForm() {
+  // Get current form data
+  const form = document.getElementById('addProductForm');
+  const formData = new FormData(form);
+  
+  // Check if form has any data
+  let hasData = false;
+  const formDetails = [];
+  
+  const productCode = document.getElementById('productCode').value.trim();
+  const productName = formData.get('productName')?.trim();
+  const category = formData.get('category')?.trim();
+  const quantity = formData.get('quantity')?.trim();
+  const unitPrice = formData.get('unitPrice')?.trim();
+  
+  if (productCode) {
+    hasData = true;
+    formDetails.push({ label: 'Kode Barang', value: productCode });
+  }
+  if (productName) {
+    hasData = true;
+    formDetails.push({ label: 'Nama Barang', value: productName });
+  }
+  if (category) {
+    hasData = true;
+    formDetails.push({ label: 'Kategori', value: category });
+  }
+  if (quantity) {
+    hasData = true;
+    formDetails.push({ label: 'Jumlah', value: quantity + ' unit' });
+  }
+  if (unitPrice) {
+    hasData = true;
+    formDetails.push({ label: 'Harga Satuan', value: formatRupiah(parseFloat(unitPrice) || 0) });
+  }
+  
+  if (!hasData) {
+    showToast('Form sudah kosong', 'info');
+    return;
+  }
+  
+  // Check if we're in edit mode
+  const isEditMode = editingIndex !== -1;
+  
+  // Populate modal with form details
+  const clearFormDetails = document.getElementById('clearFormDetails');
+  clearFormDetails.innerHTML = `
+    <div style="margin-bottom: 15px;">
+      <div style="font-weight: 600; color: #2c3e50; margin-bottom: 12px; display: flex; align-items: center;">
+        <i class="fas fa-${isEditMode ? 'trash' : 'clipboard-list'}" style="margin-right: 8px; color: #f39c12;"></i>
+        ${isEditMode ? 'Barang yang akan dihapus:' : 'Data yang akan dihapus:'}
+      </div>
+      <div style="display: grid; gap: 10px;">
+        ${formDetails.map(detail => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+            <span style="font-weight: 500; color: #6c757d;">${detail.label}:</span>
+            <span style="font-weight: 600; color: #2c3e50; text-align: right;">${detail.value}</span>
+          </div>
+        `).join('')}
+      </div>
+      ${isEditMode ? `
+        <div style="background: #ffe6e6; padding: 12px; border-radius: 6px; margin-top: 15px; border-left: 4px solid #e74c3c;">
+          <div style="color: #721c24; font-size: 14px; font-weight: 500;">
+            <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+            Perhatian: Ini akan menghapus barang dari inventory secara permanen!
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+  
+  // Update modal title and message based on mode
+  const modalTitle = document.querySelector('#confirmClearModal h3');
+  const modalMessage = document.querySelector('#confirmClearModal .confirm-body p');
+  const modalButton = document.getElementById('confirmClearBtn');
+  
+  if (isEditMode) {
+    modalTitle.innerHTML = '<i class="fas fa-trash" style="margin-right: 12px; font-size: 20px;"></i> Konfirmasi Hapus Barang';
+    modalMessage.textContent = 'Apakah Anda yakin ingin menghapus barang ini dari inventory?';
+    modalButton.innerHTML = '<i class="fas fa-trash" style="margin-right: 8px;"></i> Hapus Barang';
+  } else {
+    modalTitle.innerHTML = '<i class="fas fa-exclamation-circle" style="margin-right: 12px; font-size: 20px;"></i> Konfirmasi Hapus Data Form';
+    modalMessage.textContent = 'Apakah Anda yakin ingin menghapus semua data yang sudah diisi di form ini?';
+    modalButton.innerHTML = '<i class="fas fa-trash-alt" style="margin-right: 8px;"></i> Hapus Form';
+  }
+  
+  // Show modal
+  document.body.style.overflow = 'hidden';
+  document.getElementById('confirmClearModal').style.display = 'flex';
+}
+
+function confirmClearForm() {
+  // Show loading state
+  const confirmBtn = document.getElementById('confirmClearBtn');
+  const originalBtnText = confirmBtn.innerHTML;
+  confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+  confirmBtn.disabled = true;
+  
+  // Check if we're in edit mode
+  const isEditMode = editingIndex !== -1;
+  
+  if (isEditMode) {
+    // If in edit mode, we're actually deleting the item from database
+    const item = inventoryData[editingIndex];
+    
+    if (item) {
+      // Get user from localStorage or sessionStorage
+      const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+      if (!userStr) {
+        showToast('Sesi tidak valid. Silakan login kembali.', 'error');
+        confirmBtn.innerHTML = originalBtnText;
+        confirmBtn.disabled = false;
+        closeClearModal();
+        return;
+      }
+      const user = JSON.parse(userStr);
+
+      // Delete from Google Sheets
+      if (typeof google !== 'undefined' && google.script) {
+        google.script.run
+          .withSuccessHandler(function(result) {
+            confirmBtn.innerHTML = originalBtnText;
+            confirmBtn.disabled = false;
+            closeClearModal();
+            closeForm(); // Close the edit modal
+            
+            if (result && result.success) {
+              showToast(`Barang "${item.name}" berhasil dihapus`, 'success');
+              // Refresh data from sheets
+              syncWithGoogleSheets();
+            } else {
+              showToast(`Gagal menghapus barang: ${result.message}`, 'error');
+            }
+          })
+          .withFailureHandler(function(error) {
+            confirmBtn.innerHTML = originalBtnText;
+            confirmBtn.disabled = false;
+            closeClearModal();
+            closeForm(); // Close the edit modal
+            
+            showToast(`Gagal menghapus barang: ${error.message}`, 'error');
+          })
+          .itemDeleteInventoryItem(item.id, user.username);
+      } else {
+        // No Google Sheets available, just close modals
+        setTimeout(() => {
+          confirmBtn.innerHTML = originalBtnText;
+          confirmBtn.disabled = false;
+          closeClearModal();
+          closeForm(); // Close the edit modal
+          
+          showToast('Google Sheets tidak tersedia - mode offline', 'warning');
+        }, 500);
+      }
+    }
+  } else {
+    // If in add mode, just clear the form
+    setTimeout(() => {
+      // Clear the form
+      document.getElementById('addProductForm').reset();
+      document.getElementById('productCode').value = '';
+      document.getElementById('totalPrice').value = formatRupiah(0);
+      
+      // Clear errors
+      document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.form-error').forEach(el => el.classList.remove('form-error'));
+      
+      // Reset button state and close modal
+      confirmBtn.innerHTML = originalBtnText;
+      confirmBtn.disabled = false;
+      closeClearModal();
+      
+      showToast('Form telah dikosongkan', 'success');
+    }, 500);
+  }
+}
+
+function closeClearModal() {
+  // Restore body scroll and hide modal
+  document.body.style.overflow = '';
+  document.getElementById('confirmClearModal').style.display = 'none';
+  
+  // Reset button state in case modal is closed during loading
+  const confirmBtn = document.getElementById('confirmClearBtn');
+  confirmBtn.innerHTML = '<i class="fas fa-trash-alt"></i> Hapus Form';
+  confirmBtn.disabled = false;
+}
+
+function closeForm() {
+  document.getElementById('addProductModal').style.display = 'none';
+  document.getElementById('addProductForm').reset();
+  editingIndex = -1;
+  
+  // Reset modal title and button
+  document.querySelector('#addProductModal h3').textContent = 'Tambah Barang';
+  document.querySelector('#addProductModal button[type="submit"]').textContent = 'Simpan';
+  
+  // Clear errors
+  document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.form-error').forEach(el => el.classList.remove('form-error'));
+}
+
+// Render inventory table
+function renderInventoryTable() {
+  const tableBody = document.getElementById('inventoryTableBody');
+  
+  if (inventoryData.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" style="padding: 60px; text-align: center; color: #7f8c8d;">
+          <div>
+            <i class="fas fa-box-open" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+            <p style="margin: 0; font-size: 16px;">Belum ada produk dalam persediaan</p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">Klik "Tambah Barang" untuk memulai</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  let tableHTML = '';
+  inventoryData.forEach((item, index) => {
+    const totalStock = (item.totalStock !== undefined) ? item.totalStock : item.quantity;
+    const isLowStock = totalStock < 10;
+    const rowClass = isLowStock ? 'low-stock' : '';
+    
+    tableHTML += `
+      <tr class="${rowClass}">
+        <td style="padding: 15px; border-bottom: 1px solid #f1f2f6; font-family: monospace; color: #2c3e50;">${item.id}</td>
+        <td style="padding: 15px; border-bottom: 1px solid #f1f2f6;">
+          <div style="font-weight: 500; color: #2c3e50;">${item.name}</div>
+        </td>
+        <td style="padding: 15px; border-bottom: 1px solid #f1f2f6; color: #2c3e50;">${item.category}</td>
+        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #f1f2f6; color: #2c3e50; font-weight: 600;">
+          ${totalStock}
+          ${isLowStock ? '<div class="stock-warning">⚠️ Stok Rendah</div>' : ''}
+        </td>
+        <td style="padding: 15px; text-align: right; border-bottom: 1px solid #f1f2f6; color: #27ae60; font-weight: 600;">${formatRupiah(item.unitPrice)}</td>
+        <td style="padding: 15px; text-align: right; border-bottom: 1px solid #f1f2f6; color: #e67e22; font-weight: 600;">${formatRupiah(item.totalPrice)}</td>
+        <td style="padding: 15px; text-align: center; border-bottom: 1px solid #f1f2f6;">
+          <button onclick="editItem(${index})" style="background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px;">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button onclick="deleteItem(${index})" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+  
+  tableBody.innerHTML = tableHTML;
+  
+  // Update low stock dashboard after rendering table
+  updateLowStockDashboard();
+}
+
+// document.addEventListener('DOMContentLoaded', function() {
+  // Always load from Google Sheets for realtime data
+  if (typeof google !== 'undefined' && google.script) {
+    console.log('🔄 Loading data from Google Sheets...');
+    syncWithGoogleSheets();
+  } else {
+    console.log('⚠️ Google Apps Script not available - cannot load data');
+    showToast('Google Sheets tidak tersedia', 'warning');
+    renderInventoryTable();
+  }
+  
+  // Show low stock dashboard if enabled
+  if (inventoryConfig.LOW_STOCK_SETTINGS.showLowStockOnStartup) {
+    setTimeout(() => {
+      updateLowStockDashboard();
+      const lowStockItems = inventoryData.filter(item => 
+        item.quantity <= (item.reorderLevel || inventoryConfig.LOW_STOCK_SETTINGS.defaultReorderLevel)
+      );
+      if (lowStockItems.length > 0) {
+        document.getElementById('lowStockDashboard').style.display = 'block';
+      }
+    }, 500);
+  }
+  
+  // Hide/show Google Sheets buttons based on availability
+  const syncBtn = document.getElementById('syncBtn');
+  const setupBtn = document.getElementById('setupBtn');
+  const testBtn = document.getElementById('testBtn');
+  
+  if (typeof google === 'undefined' || !google.script) {
+    if (syncBtn) syncBtn.style.display = 'none';
+    if (setupBtn) setupBtn.style.display = 'none';
+    if (testBtn) testBtn.style.display = 'none';
+    console.log('ℹ️ Google Apps Script not available - offline mode only');
+  } else {
+    console.log('✅ Google Apps Script available');
+  }
+  
+  // Check for low stock items when page loads
+  setTimeout(() => {
+    updateLowStockDashboard();
+    const lowStockItems = inventoryData.filter(item => item.quantity < 10);
+    if (lowStockItems.length > 0) {
+      showToast(`⚠️ Ada ${lowStockItems.length} barang dengan stok rendah!`, 'warning');
+    }
+  }, 1000);
+  
+  const addProductBtn = document.getElementById('addProductBtn');
+  const modal = document.getElementById('addProductModal');
+  const closeModal = document.getElementById('closeModal');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const form = document.getElementById('addProductForm');
+
+  // Open modal
+  addProductBtn.addEventListener('click', function() {
+    document.getElementById('productCode').value = '';
+    document.getElementById('quantity').value = '';  // Empty, user will input manually
+    document.getElementById('totalPrice').value = formatRupiah(0);
+    modal.style.display = 'block';
+  });
+
+  // Close modal
+  closeModal.addEventListener('click', closeForm);
+  cancelBtn.addEventListener('click', closeForm);
+
+  // Delete button (clear form)
+  deleteBtn.addEventListener('click', clearForm);
+
+  // Close modal when clicking outside
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeForm();
+    }
+  });
+
+  // Handle form submission
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    addOrUpdateItem();
+  });
+
+  // Auto-calculate total when quantity or price changes
+  const quantityInput = document.getElementById('quantity');
+  const unitPriceInput = document.getElementById('unitPrice');
+  
+  if (quantityInput) {
+    quantityInput.addEventListener('input', calculateTotal);
+  }
+  if (unitPriceInput) {
+    unitPriceInput.addEventListener('input', calculateTotal);
+  }
+
+  // Delete confirmation modal event listeners
+  const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+  const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+  cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+  confirmDeleteBtn.addEventListener('click', confirmDeleteItem);
+
+  // Close modal when clicking outside
+  confirmDeleteModal.addEventListener('click', function(e) {
+    if (e.target === confirmDeleteModal || e.target.classList.contains('modal-overlay')) {
+      closeDeleteModal();
+    }
+  });
+
+  // Clear form confirmation modal event listeners
+  const confirmClearModal = document.getElementById('confirmClearModal');
+  const cancelClearBtn = document.getElementById('cancelClearBtn');
+  const confirmClearBtn = document.getElementById('confirmClearBtn');
+
+  cancelClearBtn.addEventListener('click', closeClearModal);
+  confirmClearBtn.addEventListener('click', confirmClearForm);
+
+  // Close modal when clicking outside
+  confirmClearModal.addEventListener('click', function(e) {
+    if (e.target === confirmClearModal || e.target.classList.contains('modal-overlay')) {
+      closeClearModal();
+    }
+  });
+
+  // Close modals with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (confirmDeleteModal.style.display === 'block') {
+        closeDeleteModal();
+      } else if (confirmClearModal.style.display === 'block') {
+        closeClearModal();
+      }
+    }
+  });
+// });
+
+// Function deleteItem sudah didefinisikan di atas dengan implementasi lengkap
+} catch (err) {
+  console.error('🔥 CRITICAL ERROR in Inventory Script:', err);
+  document.body.innerHTML += '<div style="color:red; padding:20px; font-size:20px;">JS ERROR: ' + err.message + '</div>';
+}
+</script>

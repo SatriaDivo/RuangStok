@@ -1,0 +1,717 @@
+  <style>
+    /* === Base Styles === */
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f4f6f8;
+      color: #333;
+    }
+    h1, h2 { margin: 0; }
+    .container { padding: 20px; }
+    .flex { display: flex; align-items: center; }
+    .flex-space { justify-content: space-between; }
+
+    /* === Header === */
+    #rcHeader { margin-bottom: 20px; }
+    #rcHeader h1 { font-size: 1.8rem; font-weight: 600; }
+    #rcHeader h2 { font-size: 1rem; font-weight: 400; color: #555; }
+
+    /* === Buttons & Inputs === */
+    button, .btn {
+      background: #008b8b;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      margin: 0 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+    button:hover, .btn:hover { background: #006f6f; }
+    .btn-clear { background: #95a5a6; color: #fff; }
+    .btn-clear:hover { background: #7f8c8d; }
+
+    input, select {
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      font-family: 'Poppins', sans-serif;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #008b8b;
+      box-shadow: 0 0 0 2px rgba(0,139,139,0.1);
+    }
+
+    /* === Table === */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: white;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1200px;
+    }
+    
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    
+    th {
+      background: #2c5f5f;
+      color: white;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    
+    td {
+      border-bottom: 1px solid #e2e2e2;
+    }
+    
+    tbody tr:hover {
+      background: #f8f9fa;
+    }
+    
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Overlay & Modal */
+    .modal-overlay {
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.4); display:none;
+      align-items:center; justify-content:center; z-index:9999;
+    }
+    .modal {
+      background:#fff; border-radius:6px;
+      width:90vw; max-height:90vh; overflow:auto;
+      padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.2);
+    }
+    .modal-header { margin-bottom:15px; }
+    .modal-footer { text-align:right; margin-top:15px; }
+
+    /* Processing overlay */
+    #rcProcessing {
+      position:fixed; top:0; left:0; right:0; bottom:0;
+      background:rgba(255,255,255,0.7); display:none;
+      align-items:center; justify-content:center; z-index:10000;
+      font-size:1.2rem; color:#008b8b;
+    }
+    
+    /* Notification Popup */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10001;
+      font-family: 'Roboto', sans-serif;
+      font-size: 14px;
+      max-width: 400px;
+      animation: slideIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .notification.success {
+      background: #27ae60;
+      color: white;
+    }
+    
+    .notification.error {
+      background: #e74c3c;
+      color: white;
+    }
+    
+    .notification.warning {
+      background: #f39c12;
+      color: white;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    /* Confirm Dialog */
+    .confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10002;
+      animation: fadeIn 0.2s ease-out;
+    }
+    .confirm-dialog {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      min-width: 400px;
+      max-width: 500px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      animation: scaleIn 0.3s ease-out;
+    }
+    .confirm-dialog h3 {
+      margin: 0 0 16px 0;
+      color: #e74c3c;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .confirm-dialog p {
+      margin: 0 0 24px 0;
+      color: #555;
+      line-height: 1.5;
+    }
+    .confirm-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .confirm-buttons button {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+    }
+    .btn-cancel {
+      background: #95a5a6;
+    }
+    .btn-cancel:hover {
+      background: #7f8c8d;
+    }
+    .btn-delete {
+      background: #e74c3c;
+    }
+    .btn-delete:hover {
+      background: #c0392b;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    /* Responsive Design */
+    @media screen and (max-width: 1024px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .flex-space {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+      }
+    }
+    
+    @media screen and (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      button, .btn {
+        width: 100%;
+        margin: 5px 0;
+      }
+      
+      .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      table {
+        min-width: 1000px;
+        font-size: 12px;
+      }
+      
+      th, td {
+        padding: 6px;
+      }
+      
+      .modal {
+        width: 95vw !important;
+        padding: 15px;
+      }
+      
+      input, select {
+        width: 100%;
+      }
+    }
+    
+    @media screen and (max-width: 480px) {
+      h1 {
+        font-size: 1.2rem;
+      }
+      
+      button, .btn {
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      
+      table {
+        font-size: 11px;
+      }
+      
+      th, td {
+        padding: 4px;
+      }
+    }
+  </style>
+
+  <div class="container">
+    <!-- Title -->
+    <div id="rcHeader" class="flex-space">
+      <div>
+        <h1>Cash and Bank Module</h1>
+        <h2>Create Receipts and Payments</h2>
+      </div>
+      <button id="rcBtnNew"><i class="fa fa-plus"></i> New Receipt</button>
+    </div>
+
+    <!-- Nav & Search -->
+    <div class="flex-space" style="margin-bottom: 15px;">
+      <div></div>
+      <div class="flex" style="gap: 8px;">
+        <select id="rcSearchCrit" style="min-width: 150px;">
+          <option value="All">Semua</option>
+          <option value="Customer Name">Nama Customer</option>
+          <option value="PMT Mode">Metode Bayar</option>
+          <option value="Keterangan">Keterangan</option>
+        </select>
+        <input type="text" id="rcSearchInput" placeholder="Cari..." style="min-width: 200px;">
+        <button id="rcBtnSearch"><i class="fa fa-search"></i> Cari</button>
+        <button class="btn-clear" id="rcBtnClear"><i class="fa fa-times"></i> Bersihkan</button>
+      </div>
+    </div>
+
+    <!-- Receipt List Table -->
+    <div class="table-container">
+    <table id="rcList">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>No. Transaksi</th>
+          <th>Nama Customer</th>
+          <th>Jumlah</th>
+          <th>Metode Bayar</th>
+          <th>Keterangan</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    </div>
+  </div>
+
+  <!-- Processing Overlay -->
+  <div id="rcProcessing"><i class="fa fa-spinner fa-pulse"></i> Memproses...</div>
+
+  <!-- Modal Overlay -->
+  <div id="rcModalOverlay" class="modal-overlay">
+    <div class="modal" id="rcModal">
+      <div class="modal-header"><h2 id="rcModalTitle"></h2></div>
+      <div class="modal-body" id="rcModalBody"></div>
+      <div class="modal-footer" id="rcModalFooter"></div>
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let rcReceipts = [];
+    let rcCustomers = [];
+    let rcSalesOrders = [];
+    let rcDimensions = [];
+
+    // Get user from session
+    const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+    const user = userStr ? JSON.parse(userStr) : null;
+
+    // Initialization
+    // document.addEventListener('DOMContentLoaded', () => {
+      rcRefreshList();
+      
+      if (user) {
+        google.script.run.withSuccessHandler(data => {
+          rcCustomers = data;
+          console.log('Customers loaded:', rcCustomers.length);
+        }).rcGetCustomers(user.username);
+      }
+      
+      document.getElementById('rcBtnNew').onclick    = openNewReceipt;
+      document.getElementById('rcBtnSearch').onclick = doSearch;
+      document.getElementById('rcBtnClear').onclick  = clearSearch;
+    // });
+
+    // Refresh receipt list
+    function rcRefreshList() {
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(renderList)
+        .withFailureHandler(hideProcessing)
+        .rcGetAllReceipts(user.username);
+    }
+
+    function renderList(rows) {
+      hideProcessing();
+      rcReceipts = rows;
+      const tbody = document.querySelector('#rcList tbody');
+      tbody.innerHTML = '';
+      rows.forEach(r => {
+        const amount = parseFloat(r['Amount Received']) || 0;
+        const notes = r['Keterangan'] || '-';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${new Date(r['Trx Date']).toLocaleDateString('id-ID')}</td>
+          <td>${r['Trx ID']}</td>
+          <td>${r['Customer Name']}</td>
+          <td style="text-align: right;">Rp ${amount.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+          <td>${r['PMT Mode'] || '-'}</td>
+          <td>${notes}</td>
+          <td>
+            <button class="btn" onclick="openEditReceipt('${r['Trx ID']}')" style="padding: 4px 8px; font-size: 0.85rem;"><i class="fa fa-edit"></i></button>
+            <button class="btn-clear" onclick="deleteReceipt('${r['Trx ID']}')" style="padding: 4px 8px; font-size: 0.85rem;"><i class="fa fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Search / Clear
+    function doSearch() {
+      const crit = document.getElementById('rcSearchCrit').value;
+      const val  = document.getElementById('rcSearchInput').value.toLowerCase();
+      if (crit==='All' || !val) return renderList(rcReceipts);
+      const filtered = rcReceipts.filter(r => 
+        (''+r[crit]).toLowerCase().includes(val)
+      );
+      if (!filtered.length) {
+        showNotification('Tidak ada data yang cocok', 'warning');
+      }
+      renderList(filtered);
+    }
+    function clearSearch() {
+      document.getElementById('rcSearchInput').value='';
+      document.getElementById('rcSearchCrit').value='All';
+      renderList(rcReceipts);
+    }
+
+    // Show / hide processing
+    function showProcessing() { document.getElementById('rcProcessing').style.display='flex'; }
+    function hideProcessing() { document.getElementById('rcProcessing').style.display='none'; }
+    
+    // Show notification popup
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      
+      const icon = type === 'success' ? 'fa-check-circle' : 
+                   type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+      
+      notification.innerHTML = `
+        <i class="fas ${icon}" style="font-size: 18px;"></i>
+        <span>${message}</span>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+
+    // Show confirm dialog
+    function showConfirm(message, onConfirm) {
+      const overlay = document.createElement('div');
+      overlay.className = 'confirm-overlay';
+      
+      overlay.innerHTML = `
+        <div class="confirm-dialog">
+          <h3><i class="fas fa-exclamation-triangle"></i> Konfirmasi</h3>
+          <p>${message}</p>
+          <div class="confirm-buttons">
+            <button class="btn-cancel" onclick="this.closest('.confirm-overlay').remove()">Batal</button>
+            <button class="btn-delete" id="confirmYes">Ya, Hapus</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(overlay);
+      
+      document.getElementById('confirmYes').onclick = function() {
+        overlay.remove();
+        onConfirm();
+      };
+      
+      overlay.onclick = function(e) {
+        if (e.target === overlay) overlay.remove();
+      };
+    }
+
+    // Open New Receipt form
+    function openNewReceipt() {
+      showModal('New Receipt', rcFormBody(), rcFormFooter('Save','rcSaveReceipt()'));
+      initFormElements(true);
+    }
+
+    // HTML for form body
+    function rcFormBody() {
+      return `
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div>
+          <label style="font-weight: 500; margin-bottom: 5px; display: block;">Tanggal Transaksi *</label>
+          <input type="date" id="rcTrxDate" style="width: 100%;" required><br><br>
+
+          <label style="font-weight: 500; margin-bottom: 5px; display: block;">No. Transaksi *</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="rcTrxID" readonly style="flex: 1;" required>
+            <button class="btn" onclick="rcGenTrxID()">Generate</button>
+          </div><br>
+
+          <label style="font-weight: 500; margin-bottom: 5px; display: block;">Nama Customer *</label>
+          <select id="rcCustomerName" style="width: 100%;" required></select><br><br>
+        </div>
+        <div>
+          <label style="font-weight: 500; margin-bottom: 5px; display: block;">Jumlah Diterima *</label>
+          <input type="number" id="rcAmount" step="1000" placeholder="0" style="width: 100%;" required><br><br>
+
+          <label style="font-weight: 500; margin-bottom: 5px; display: block;">Metode Pembayaran *</label>
+          <select id="rcPMTMode" style="width: 100%;" required>
+            <option value="">-- Pilih Metode --</option>
+            <option value="Cash">Cash</option>
+            <option value="Transfer BCA">Transfer BCA</option>
+            <option value="Transfer Mandiri">Transfer Mandiri</option>
+            <option value="GoPay">GoPay</option>
+            <option value="OVO">OVO</option>
+            <option value="QRIS">QRIS</option>
+            <option value="Lainnya">Lainnya</option>
+          </select><br><br>
+
+          <label style="font-weight: 500; margin-bottom: 5px; display: block;">Keterangan (Opsional)</label>
+          <textarea id="rcKeterangan" rows="3" placeholder="Catatan: misal SO ID, bayar sebagian, lunas, dll..." style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;"></textarea>
+        </div>
+      </div>`;
+    }
+
+    // Generic form footer
+    function rcFormFooter(btnText, onClick) {
+      return `
+        <button class="btn" onclick="${onClick}"><i class="fa fa-save"></i> ${btnText}</button>
+        <button class="btn-clear" onclick="closeModal()"><i class="fa fa-times"></i> Tutup</button>
+      `;
+    }
+
+    // Show modal
+    function showModal(title, body, footer) {
+      document.getElementById('rcModalTitle').innerText = title;
+      document.getElementById('rcModalBody').innerHTML  = body;
+      document.getElementById('rcModalFooter').innerHTML= footer;
+      document.getElementById('rcModalOverlay').style.display = 'flex';
+      initSelect2();  // global init
+    }
+    function closeModal() {
+      document.getElementById('rcModalOverlay').style.display='none';
+    }
+
+    // Initialize all select2 in form
+    function initSelect2() {
+      $('#rcCustomerName').select2({ placeholder:'Pilih Customer', dropdownParent:$('#rcModal') });
+      $('#rcPMTMode').select2({ placeholder:'Pilih Metode Bayar', dropdownParent:$('#rcModal') });
+    }
+
+    // Initialize form elements (for both New & Edit)
+    function initFormElements(isNew) {
+      console.log('Initializing form, customers available:', rcCustomers.length);
+      
+      // Populate Customer dropdown
+      const custSel = document.getElementById('rcCustomerName');
+      custSel.innerHTML = '<option value="">-- Pilih Customer --</option>';
+      
+      const validCustomers = rcCustomers.filter(c => c['Customer Name']);
+      console.log('Valid customers:', validCustomers.length);
+      
+      validCustomers.forEach(c=>{
+        const opt = new Option(c['Customer Name'], c['Customer Name']);
+        custSel.add(opt);
+      });
+
+      if (!isNew) return;
+
+      // Clear form
+      ['rcTrxDate','rcTrxID','rcAmount','rcKeterangan'].forEach(id=>{
+         const el = document.getElementById(id);
+         if (el) el.value = '';
+       });
+    }
+
+    // Generate unique Trx ID
+    function rcGenTrxID() {
+      showProcessing();
+      google.script.run.withSuccessHandler(id=>{
+        document.getElementById('rcTrxID').value = id;
+        hideProcessing();
+      }).rcGenerateTrxID(user.username);
+    }
+
+    // Save new receipt
+    function rcSaveReceipt() {
+      const trxDate = document.getElementById('rcTrxDate').value;
+      const trxID   = document.getElementById('rcTrxID').value;
+      const custNm  = $('#rcCustomerName').val();
+      const mode    = $('#rcPMTMode').val();
+      const amt     = parseFloat(document.getElementById('rcAmount').value);
+      const notes   = document.getElementById('rcKeterangan').value;
+
+      // Validation
+      if (!trxDate||!trxID||!custNm||!mode||isNaN(amt)||amt<=0) {
+        showNotification('Harap isi semua field yang diperlukan (Tanggal, No. Transaksi, Customer, Metode Bayar, Jumlah)', 'warning');
+        return;
+      }
+
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(()=>{
+          showNotification('✓ Penerimaan Berhasil Disimpan', 'success');
+          closeModal();
+          rcRefreshList();
+          hideProcessing();
+        })
+        .withFailureHandler((err)=>{
+          showNotification('Error: ' + err.message, 'error');
+          hideProcessing();
+        })
+        .rcSaveNewReceipt({
+          'Trx Date': trxDate,
+          'Trx ID': trxID,
+          'Customer Name': custNm,
+          'Amount Received': amt,
+          'PMT Mode': mode,
+          'Keterangan': notes
+        }, user.username);
+    }
+
+    // Edit existing receipt
+    function openEditReceipt(trxID) {
+      // Find the record
+      const rec = rcReceipts.find(r=>r['Trx ID']===trxID);
+      if (!rec) return;
+
+      showModal('Edit Receipt', rcFormBody(), rcFormFooter('Update','rcUpdateReceipt()'));
+      initFormElements(false);
+
+      // Prefill
+      document.getElementById('rcTrxDate').value = rec['Trx Date'];
+      document.getElementById('rcTrxID').value = rec['Trx ID'];
+      $('#rcCustomerName').append(new Option(rec['Customer Name'], rec['Customer Name'], true, true))
+        .trigger('change');
+      $('#rcPMTMode').append(new Option(rec['PMT Mode'], rec['PMT Mode'], true, true))
+        .trigger('change');
+      document.getElementById('rcAmount').value = parseFloat(rec['Amount Received']) || 0;
+      document.getElementById('rcKeterangan').value = rec['Keterangan'] || '';
+    }
+
+    // Update receipt
+    function rcUpdateReceipt() {
+      const trxDate = document.getElementById('rcTrxDate').value;
+      const trxID = document.getElementById('rcTrxID').value;
+      const custNm = $('#rcCustomerName').val();
+      const mode = $('#rcPMTMode').val();
+      const amt = parseFloat(document.getElementById('rcAmount').value);
+      const notes = document.getElementById('rcKeterangan').value;
+
+      // Validation
+      if (!trxDate || !trxID || !custNm || !mode || isNaN(amt) || amt <= 0) {
+        showNotification('Harap isi semua field yang diperlukan', 'warning');
+        return;
+      }
+
+      const payload = {
+        'Trx Date': trxDate,
+        'Trx ID': trxID,
+        'Customer Name': custNm,
+        'Amount Received': amt,
+        'PMT Mode': mode,
+        'Keterangan': notes
+      };
+
+      showProcessing();
+      google.script.run
+        .withSuccessHandler(()=>{
+          showNotification('✓ Penerimaan Berhasil Diupdate', 'success');
+          closeModal();
+          rcRefreshList();
+          hideProcessing();
+        })
+        .withFailureHandler((err)=>{
+          showNotification('Error: ' + err.message, 'error');
+          hideProcessing();
+        })
+        .rcUpdateReceipt(payload, user.username);
+    }
+
+    // Delete receipt
+    function deleteReceipt(trxID) {
+      showConfirm('Yakin ingin menghapus penerimaan ini?', function() {
+        showProcessing();
+        google.script.run
+          .withSuccessHandler(()=>{
+            showNotification('✓ Penerimaan Berhasil Dihapus', 'success');
+            rcRefreshList();
+            hideProcessing();
+          })
+          .withFailureHandler((err)=>{
+            showNotification('Error: ' + err.message, 'error');
+            hideProcessing();
+          })
+          .rcDeleteReceipt(trxID, user.username);
+      });
+    }
+  </script>

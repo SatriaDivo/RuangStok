@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ruang Stok</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Poppins:wght@400;500;600&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Select2 CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- jQuery (required for Select2) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <!-- Select2 JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+  
+  <style>
+    :root {
+      --sidebar-bg: #2c3e50;
+      --topbar-bg: #ffffff;
+      --primary: #1abc9c;
+      --primary-light: #d1f2eb;
+      --secondary: #3498db;
+      --text-dark: #34495e;
+      --text-light: #ecf0f1;
+      --border-color: #e0e0e0;
+      --card-bg: #ffffff;
+      --hover-bg: #16a085;
+      --active-nav-color: #008080; /* New color for active navigation */
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f7fa;
+      color: var(--text-dark);
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar-bg);
+      color: var(--text-light);
+      transition: all 0.3s ease;
+      height: 100vh;
+      position: fixed;
+      overflow-y: auto;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+    
+    .app-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 1.4rem;
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      display: flex;
+      align-items: center;
+    }
+    
+    .app-title i {
+      margin-right: 12px;
+      color: var(--primary);
+    }
+    
+    .app-logo {
+      width: 32px;
+      height: 32px;
+      margin-right: 12px;
+      border-radius: 4px;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+    
+    .nav {
+      padding: 15px 0;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+    
+    .nav-item:hover {
+      background: #008080;
+      border-left: 4px solid var(--primary);
+      color: white;
+    }
+
+    /* Active navigation item styling */
+    .nav-item.active {
+      background: #008080;
+      border-left: 4px solid var(--active-nav-color); /* Highlight color */
+      color: white;
+    }
+    
+    .nav-item i {
+      width: 24px;
+      margin-right: 12px;
+      text-align: center;
+    }
+    
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Top Bar Styles */
+    .top-bar {
+      background: var(--topbar-bg);
+      padding: 10px 15px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    
+    .top-bar-links a {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f8f9fa;
+      text-align: center;
+      line-height: 36px;
+      margin-left: 12px;
+      color: var(--text-dark);
+      transition: all 0.3s;
+    }
+    
+    .top-bar-links a:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    /* Content Area */
+    .content {
+      padding: 30px;
+      flex: 1;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 80px;
+      }
+      
+      .app-title span {
+        display: none;
+      }
+      
+      .app-logo {
+        width: 28px;
+        height: 28px;
+        margin-right: 0;
+      }
+      
+      .nav-item span {
+        display: none;
+      }
+      
+      .nav-item i {
+        margin-right: 0;
+        font-size: 1.2rem;
+      }
+      
+      .nav-item {
+        justify-content: center;
+      }
+      
+      .main-content {
+        margin-left: 80px;
+      }
+    }
+    
+    /* Hide mobile menu button on desktop */
+    .mobile-menu-btn {
+      display: none;
+    }
+    
+    .sidebar-overlay {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        left: -250px;
+        width: 250px;
+        z-index: 1000;
+        transition: left 0.3s ease;
+      }
+      
+      .sidebar.mobile-open {
+        left: 0;
+      }
+      
+      .sidebar .nav-item span {
+        display: inline;
+      }
+      
+      .sidebar .nav-item {
+        justify-content: flex-start;
+      }
+      
+      .sidebar .nav-item i {
+        margin-right: 15px;
+      }
+      
+      .sidebar .app-title span {
+        display: inline;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .mobile-menu-btn {
+        display: block;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 999;
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transition: background 0.3s ease;
+      }
+      
+      .mobile-menu-btn:hover {
+        background: #006666;
+      }
+      
+      .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+        cursor: pointer;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 15px;
+      }
+      
+      .mobile-menu-btn {
+        padding: 10px 12px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+  <script>
+    // Global Session Management
+    const SessionManager = {
+      getUser: function() {
+        const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+        return userStr ? JSON.parse(userStr) : null;
+      },
+      
+      clearSession: function() {
+        localStorage.removeItem('ruangstok_user');
+        sessionStorage.removeItem('ruangstok_user');
+      },
+      
+      validateSession: function() {
+        const user = this.getUser();
+        if (!user || !user.username) {
+          console.log('No local session found. Redirecting to login.');
+          this.redirectToLogin();
+          return;
+        }
+        
+        // Verify with server
+        google.script.run
+          .withSuccessHandler((result) => {
+            if (!result || !result.active) {
+              console.log('Server session expired. Redirecting to login.');
+              this.clearSession();
+              this.redirectToLogin();
+            } else {
+              console.log('Session valid for:', user.username);
+              
+              // Update local storage with latest data from server (e.g. role change)
+              const updatedUser = {
+                username: result.email,
+                role: result.role,
+                name: result.name
+              };
+              
+              // Update storage (preserve login type)
+              if (localStorage.getItem('ruangstok_user')) {
+                localStorage.setItem('ruangstok_user', JSON.stringify(updatedUser));
+              } else {
+                sessionStorage.setItem('ruangstok_user', JSON.stringify(updatedUser));
+              }
+              
+              // Update UI with user info
+              this.updateUserUI(updatedUser);
+            }
+          })
+          .withFailureHandler((err) => {
+            console.error('Session check failed:', err);
+          })
+          .apiCheckServerSession(user.username);
+      },
+      
+      redirectToLogin: function() {
+        // Avoid redirect loop
+        if (window.location.href.indexOf('page=login') === -1 && window.location.href.indexOf('page=logout') === -1) {
+           var currentUrl = window.location.href.split('?')[0];
+           window.top.location.href = currentUrl + "?page=login";
+        }
+      },
+      
+      updateUserUI: function(user) {
+        // Update user name and role in top bar using ID
+        const userDisplay = document.getElementById('user-display');
+        if (userDisplay) {
+           userDisplay.innerHTML = `
+            <i class="fas fa-user-circle" style="margin-right: 5px; color: #667eea; font-size: 1.2rem;"></i>
+            ${user.name} 
+            <span style="font-size: 12px; color: #7f8c8d; margin-left: 5px;">(${user.role})</span>
+           `;
+           console.log('Updated user display to:', user.name, user.role);
+        } else {
+           console.error('User display element not found!');
+        }
+        
+        // Show/Hide Admin menu items based on role
+        const adminItems = document.querySelectorAll('.admin-only');
+        console.log('Found admin items:', adminItems.length, 'User role:', user.role);
+        
+        if (user.role === 'Admin') {
+            adminItems.forEach(el => {
+              el.style.display = 'flex';
+              console.log('Showing admin menu:', el.textContent.trim());
+            });
+        } else {
+            adminItems.forEach(el => {
+              el.style.display = 'none';
+              console.log('Hiding admin menu:', el.textContent.trim());
+            });
+        }
+      }
+    };
+
+    // Run validation on load
+    document.addEventListener('DOMContentLoaded', () => {
+      SessionManager.validateSession();
+    });
+  </script>
+</head>
+<body>
+  <!-- Mobile Menu Button -->
+  <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" style="display: none;">
+    <i class="fas fa-bars"></i>
+  </button>
+  
+  <!-- Sidebar Overlay (for mobile) -->
+  <div class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+  
+  <!-- Sidebar Navigation -->
+  <div class="sidebar">
+    <h1 class="app-title"><img src="https://lh3.googleusercontent.com/d/14DvFqEdzov_KpXX6gPOp0V6_j9RBSQX7" alt="Ruang Stok Logo" class="app-logo" draggable="false"> <span>Ruang Stok</span></h1>
+    
+    <nav class="nav">
+      <a href="?page=dashboard" class="nav-item <?= currentPage == 'dashboard' ? 'active' : '' ?>">
+        <i class="fas fa-tachometer-alt"></i> <span>Dashboard</span>
+      </a>
+
+      <a href="?page=inventory" class="nav-item <?= currentPage == 'inventory' ? 'active' : '' ?>">
+        <i class="fas fa-boxes"></i> <span>Inventaris</span>
+      </a>
+
+      <a href="?page=suppliers" class="nav-item <?= currentPage == 'suppliers' ? 'active' : '' ?>">
+        <i class="fas fa-truck-loading"></i> <span>Pemasok</span>
+      </a>
+
+      <a href="?page=customers" class="nav-item <?= currentPage == 'customers' ? 'active' : '' ?>">
+        <i class="fas fa-user-friends"></i> <span>Pelanggan</span>
+      </a>
+
+      <a href="?page=purchases" class="nav-item <?= currentPage == 'purchases' ? 'active' : '' ?>">
+        <i class="fas fa-file-invoice-dollar"></i> <span>Pembelian</span>
+      </a>
+
+      <a href="?page=sales" class="nav-item <?= currentPage == 'sales' ? 'active' : '' ?>">
+        <i class="fas fa-chart-line"></i> <span>Penjualan</span>
+      </a>
+
+      <a href="?page=receipts" class="nav-item <?= currentPage == 'receipts' ? 'active' : '' ?>">
+        <i class="fas fa-receipt"></i> <span>Penerimaan</span>
+      </a>
+
+      <a href="?page=payments" class="nav-item <?= currentPage == 'payments' ? 'active' : '' ?>">
+        <i class="fas fa-credit-card"></i> <span>Pembayaran</span>
+      </a>
+
+      <!-- Admin-only menu items - rendered by client-side JS -->
+      <a href="?page=reports" class="nav-item admin-only <?= currentPage == 'reports' ? 'active' : '' ?>" style="display:none;">
+        <i class="fas fa-chart-pie"></i> <span>Laporan</span>
+      </a>
+
+      <a href="?page=users" class="nav-item admin-only <?= currentPage == 'users' ? 'active' : '' ?>" style="display:none;">
+        <i class="fas fa-user-cog"></i> <span>Pengguna</span>
+      </a>
+
+      <a href="?page=settings" class="nav-item admin-only <?= currentPage == 'settings' ? 'active' : '' ?>" style="display:none;">
+        <i class="fas fa-cogs"></i> <span>Pengaturan</span>
+      </a>
+
+      <a href="#" onclick="handleLogout(); return false;" class="nav-item">
+        <i class="fas fa-sign-out-alt"></i> <span>Keluar</span>
+      </a>
+
+    </nav>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-links" style="display: flex; align-items: center;">
+        
+        <!-- Settings Icon -->
+        <a href="?page=settings" title="Pengaturan" style="width: 36px; height: 36px; line-height: 36px; margin-left: 10px; background: transparent;">
+          <i class="fas fa-cog" style="font-size: 1.2rem; color: #2c3e50;"></i>
+        </a>
+
+        <!-- User Profile Link -->
+        <a href="?page=users" title="Profil Pengguna" style="width: auto; height: auto; background: transparent; line-height: normal; margin-left: 15px; text-decoration: none; display: flex; align-items: center;">
+          <span id="user-display" style="color: #2c3e50; font-weight: 500; display: flex; align-items: center;">
+            <i class="fas fa-user-circle" style="margin-right: 5px; color: #667eea; font-size: 1.2rem;"></i>
+            User
+            <span style="font-size: 12px; color: #7f8c8d; margin-left: 5px;">(Staff)</span>
+          </span>
+        </a>
+
+        <!-- Logout Button -->
+        <a href="#" onclick="handleLogout(); return false;" title="Logout" style="width: 36px; height: 36px; line-height: 36px; background: #e74c3c; color: white; margin-left: 15px;">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Dynamic Content Injection -->
+    <div class="content">
+      <?!= include(contentTemplate) ?>
+    </div>
+  </div>
+  
+  <script>
+    // Get base URL from server
+    var baseScriptUrl = "<?= getScriptUrl() ?>";
+
+    // Mobile Sidebar Toggle Function
+    function toggleMobileSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.querySelector('.sidebar-overlay');
+      
+      if (sidebar && overlay) {
+        sidebar.classList.toggle('mobile-open');
+        
+        // Show/hide overlay
+        if (sidebar.classList.contains('mobile-open')) {
+          overlay.style.display = 'block';
+        } else {
+          overlay.style.display = 'none';
+        }
+      }
+    }
+    
+    // Handle logout
+    function handleLogout() {
+      Swal.fire({
+        title: 'Konfirmasi Logout',
+        text: "Apakah Anda yakin ingin keluar?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Keluar!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Get user email before clearing
+          const user = SessionManager.getUser();
+          const userEmail = user ? user.username : null;
+          
+          // Clear local storage immediately
+          sessionStorage.removeItem('ruangstok_user');
+          localStorage.removeItem('ruangstok_user');
+          
+          // Call server logout if we have email
+          if (userEmail) {
+            google.script.run
+              .withSuccessHandler(function() {
+                console.log('Server logout successful');
+              })
+              .withFailureHandler(function(err) {
+                console.error('Server logout failed:', err);
+              })
+              .processLogout(userEmail);
+          }
+          
+          // Construct target URL
+          var targetUrl = baseScriptUrl;
+          
+          // Try to detect dev mode from referrer
+          if (document.referrer && document.referrer.indexOf('/dev') !== -1) {
+            targetUrl = targetUrl.replace('/exec', '/dev');
+          }
+          
+          var loginUrl = targetUrl + "?page=login&t=" + new Date().getTime();
+
+          // Immediate redirect to login
+          Swal.fire({
+            title: 'Sedang Keluar...',
+            text: 'Mohon tunggu sebentar',
+            allowOutsideClick: false,
+            didOpen: () => {
+              Swal.showLoading();
+              
+              // Direct redirect to login page
+              setTimeout(function() {
+                window.top.location.replace(loginUrl);
+              }, 500);
+            }
+          });
+        }
+      });
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Hide overlay by default
+      const overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+      
+      // Handle all navigation links
+      const deploymentUrl = 'https://script.google.com/macros/s/AKfycby7LQUauSM2003uP85QkxX4vi8YoYJDcQj6CQa1_aha/dev';
+      const navLinks = document.querySelectorAll('.nav-item[href^="?page="], a[href^="?page="]');
+      
+      navLinks.forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          const href = this.getAttribute('href');
+          const page = href.replace('?page=', '');
+          const targetUrl = deploymentUrl + '?page=' + page + '&t=' + new Date().getTime();
+          
+          console.log('Navigating to:', targetUrl);
+          
+          // Use multiple fallback methods like login
+          try {
+            window.top.location.replace(targetUrl);
+          } catch(err) {
+            try {
+              window.top.location.href = targetUrl;
+            } catch(err2) {
+              window.location.href = targetUrl;
+            }
+          }
+        });
+      });
+    });
+    
+    // Logo fallback handling
+    document.addEventListener('DOMContentLoaded', function() {
+      const logo = document.querySelector('.app-logo');
+      if (logo) {
+        logo.addEventListener('error', function() {
+          // Fallback to icon if logo fails to load
+          this.style.display = 'none';
+          const fallbackIcon = document.createElement('i');
+          fallbackIcon.className = 'fas fa-warehouse';
+          fallbackIcon.style.marginRight = '12px';
+          fallbackIcon.style.color = 'var(--primary)';
+          this.parentNode.insertBefore(fallbackIcon, this);
+        });
+      }
+    });
+  </script>
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <!-- jQuery (required for Select2) - Moved to Head -->
+  <!-- Select2 JS - Moved to Head -->
+</body>
+</html>

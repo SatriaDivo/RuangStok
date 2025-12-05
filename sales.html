@@ -1,0 +1,1254 @@
+  <style>
+    /* === Base Styles === */
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f4f6f8;
+      color: #333;
+    }
+    h1, h2 { margin: 0; }
+    .container { padding: 20px; }
+    .flex { display: flex; align-items: center; }
+    .flex-space { justify-content: space-between; }
+
+    /* === Header === */
+    #soHeader { margin-bottom: 20px; }
+    #soHeader h1 { font-size: 1.8rem; font-weight: 600; }
+    #soHeader h2 { font-size: 1rem; font-weight: 400; color: #555; }
+
+    /* === Buttons & Inputs === */
+    button, .btn {
+      background: #008b8b;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      margin: 0 5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      font-size: 0.9rem;
+    }
+    button:hover { background: #006f6f; }
+    .btn-clear { background: #ccc; color: #333; }
+    input, select {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 0.9rem;
+    }
+
+    /* === Tables === */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 15px;
+      border: 1px solid #e2e2e2;
+      border-radius: 4px;
+      background: #fff;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      padding: 10px 12px;
+      border: 1px solid #e2e2e2;
+      font-size: 0.85rem;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th { 
+      background: #2c5f5f; 
+      color: white;
+      position: sticky; 
+      top: 0; 
+      z-index: 2; 
+      font-weight: 600;
+    }
+    tbody tr:nth-child(even) { background: #f9f9f9; }
+    tbody tr:hover { background: #e8f7f7; }
+
+    /* === Modal Overlay === */
+    .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+    .modal {
+    background: #fff;
+    border-radius: 6px;
+    width: 90vw;        /* take 90% of viewport width */
+    max-width: none;    /* remove any smaller cap */
+    max-height: 90vh;
+    overflow: auto;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+    .modal-header { margin-bottom: 15px; }
+    .modal-footer { text-align: right; margin-top: 15px; }
+
+    /* === Inline Row Controls === */
+    .add-row, .remove-row { color: #008b8b; cursor: pointer; font-weight: 600; }
+    .remove-row { color: #d9534f; }
+    
+    /* === Processing Overlay === */
+    #soProcessingOverlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.7);
+      display: none; align-items: center; justify-content: center;
+      z-index: 10000;
+      font-size: 1.2rem; color: #008b8b;
+    }
+  /* Ensure select2 menus float above your modal-overlay (z-index:9999) */
+    .select2-container--open .select2-dropdown {
+    z-index: 10000 !important;
+  }
+
+    /* Auto-fit columns and prevent wrapping in both tables */
+    #soNewLines,
+    #soDetailsTable {
+      table-layout: auto;    /* content defines width */
+      white-space: nowrap;    /* keep each cell on one line */
+    }
+    
+    /* SO Details Table Specific Styling */
+    #soDetailsTable {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    #soDetailsTable th {
+      background: #2c5f5f;
+      color: white;
+      padding: 12px 10px;
+      text-align: left;
+      font-weight: 500;
+    }
+    
+    #soDetailsTable td {
+      padding: 10px;
+      border-bottom: 1px solid #e2e2e2;
+    }
+    
+    #soDetailsTable tbody tr:hover {
+      background: #f8f9fa;
+    }
+    
+    #soDetailsTable .fa-trash {
+      color: #e74c3c;
+      cursor: pointer;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+    
+    #soDetailsTable .fa-trash:hover {
+      color: #c0392b;
+    }
+    
+    /* Actions column should be narrow */
+    #soDetailsTable th:last-child,
+    #soDetailsTable td:last-child {
+      width: 60px;
+      text-align: center;
+    }
+    
+    /* Form Grid Layout */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .form-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-group label {
+      font-weight: 500;
+      margin-bottom: 5px;
+      color: #2c3e50;
+      font-size: 0.9rem;
+    }
+    
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #008b8b;
+      box-shadow: 0 0 0 2px rgba(0,139,139,0.1);
+    }
+    
+    .form-group input[readonly] {
+      background-color: #f5f5f5;
+      cursor: not-allowed;
+    }
+    
+    .input-with-button {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .input-with-button input {
+      flex: 1;
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 20px 0 15px 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #008b8b;
+    }
+    
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 15px;
+      border: 1px solid #e2e2e2;
+      border-radius: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .compact-table {
+      min-width: 1000px;
+    }
+    
+    .compact-table th,
+    .compact-table td {
+      padding: 8px 6px;
+      font-size: 0.85rem;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+  /* Responsive Design */
+  @media screen and (max-width: 1024px) {
+    .container {
+      padding: 15px;
+    }
+    
+    .flex-space {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 15px;
+    }
+    
+    .flex-space > div {
+      width: 100%;
+    }
+  }
+  
+  @media screen and (max-width: 768px) {
+    .container {
+      padding: 10px;
+    }
+    
+    #soHeader h1 {
+      font-size: 1.5rem;
+    }
+    
+    button, .btn {
+      width: 100%;
+      margin: 5px 0;
+      justify-content: center;
+    }
+    
+    .btn-group {
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .form-grid,
+    .form-grid-2,
+    .form-grid-3 {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    #soNewLines,
+    #soDetailsTable {
+      min-width: 1200px;
+      font-size: 12px;
+    }
+    
+    th, td {
+      padding: 6px;
+      font-size: 12px;
+    }
+    
+    .modal {
+      width: 95vw !important;
+      padding: 15px;
+      max-height: 95vh;
+    }
+    
+    input, select {
+      width: 100%;
+      font-size: 14px;
+    }
+    
+    .action-buttons {
+      flex-direction: column;
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    #soHeader h1 {
+      font-size: 1.2rem;
+    }
+    
+    #soHeader h2 {
+      font-size: 0.85rem;
+    }
+    
+    button, .btn {
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+    
+    #soNewLines,
+    #soDetailsTable {
+      font-size: 11px;
+    }
+    
+    th, td {
+      padding: 4px;
+    }
+    
+    .modal {
+      padding: 10px;
+    }
+  }
+
+</style>
+
+<div class="container">
+    <!-- Header -->
+    <div id="soHeader" class="flex-space">
+      <div>
+        <h1>Pesanan Penjualan</h1>
+        <h2>Tambah dan kelola Pesanan Penjualan Anda</h2>
+      </div>
+      <button id="soBtnNewSO"><i class="fa fa-plus"></i> Pesanan Baru</button>
+    </div>
+
+    <!-- Navigation & Search -->
+    <div class="flex-space">
+      <div></div>
+      <div class="flex">
+        <select id="soSearchCriteria">
+          <option>Semua</option>
+          <option>ID Pesanan</option>
+          <option>Nama Pelanggan</option>
+          <option>Status Penerimaan</option>
+          <option>Status Pengiriman</option>
+        </select>
+        <input type="text" id="soSearchInput" placeholder="Cari...">
+        <button id="soBtnSearch">Cari</button>
+        <button class="btn-clear" id="soBtnClear">Bersihkan</button>
+      </div>
+    </div>
+
+    <!-- SO List Table -->
+    <div class="table-container" style="overflow-x: auto;">
+      <table id="solist" style="min-width: 800px;">
+        <thead>
+          <tr>
+            <th>Tanggal Pesanan</th>
+            <th>ID Pesanan</th>
+            <th>ID Pelanggan</th>
+            <th>Jumlah Barang</th>
+            <th>Harga Perbarang</th>
+            <th>Total</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Processing Overlay -->
+  <div id="soProcessingOverlay"><i class="fa fa-spinner fa-pulse"></i> Memproses...</div>
+
+  <!-- New SO / View Details Modal -->
+  <div id="soModalOverlay" class="modal-overlay">
+    <div class="modal" id="soModal">
+      <div class="modal-header">
+        <h2 id="soModalTitle">Modal Title</h2>
+      </div>
+      <div class="modal-body" id="soModalBody">
+        <!-- Content injected by JS -->
+      </div>
+      <div class="modal-footer" id="soModalFooter">
+        <!-- Buttons injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  
+  <script>
+    /* === Utility & State === */
+    let soAllData = [];      // Array of { … } from RANGESO
+    let soSearchData = [];   // Filtered view
+    let soCustomers = [];
+    let soInventory = [];
+    let soInventoryLoaded = false; // Flag to track if inventory is loaded
+    const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    
+    /* === Initialization === */
+    // document.addEventListener('DOMContentLoaded', () => {
+      soRefreshSOList();
+      
+      // Check if user is logged in
+      if (!user) {
+        console.error('❌ User not logged in');
+        showNotification('Sesi tidak valid. Silakan login kembali.', 'error');
+        updateInventoryStatus(true);
+      } else {
+        // Load inventory with proper error handling
+        google.script.run
+          .withSuccessHandler(data => {
+            console.log('✅ Inventory loaded:', data.length, 'items');
+            soInventory = data;
+            soInventoryLoaded = true;
+            updateInventoryStatus();
+          })
+          .withFailureHandler(err => {
+            console.error('❌ Failed to load inventory:', err);
+            showNotification('Gagal memuat data inventory: ' + err.message, 'error');
+            updateInventoryStatus(true);
+          })
+          .soGetInventoryItems(user.username);
+      }
+      
+      // Button bindings
+      document.getElementById('soBtnNewSO').onclick = openNewSOForm;
+      document.getElementById('soBtnSearch').onclick = applySearch;
+      document.getElementById('soBtnClear').onclick = clearSearch;
+    // });
+    
+    /* === Update Inventory Status === */
+    function updateInventoryStatus(error = false) {
+      const statusEl = document.getElementById('inventoryStatus');
+      const btnEl = document.getElementById('btnAddSOLine');
+      
+      if (!statusEl) return; // Modal not open yet
+      
+      if (error) {
+        statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Gagal memuat inventory';
+        statusEl.style.color = '#e74c3c';
+        if (btnEl) btnEl.disabled = true;
+      } else if (soInventoryLoaded) {
+        statusEl.innerHTML = `<i class="fas fa-check-circle"></i> ${soInventory.length} item tersedia`;
+        statusEl.style.color = '#27ae60';
+        if (btnEl) btnEl.disabled = false;
+      } else {
+        statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memuat inventory...';
+        statusEl.style.color = '#95a5a6';
+        if (btnEl) btnEl.disabled = true;
+      }
+    }
+    
+    /* === Debug Inventory === */
+    function debugInventory() {
+      console.log('=== INVENTORY DEBUG ===');
+      console.log('Loaded:', soInventoryLoaded);
+      console.log('Count:', soInventory.length);
+      console.log('Full Data:', soInventory);
+      if (soInventory.length > 0) {
+        console.log('First Item:', soInventory[0]);
+        console.log('Keys:', Object.keys(soInventory[0]));
+      }
+      alert(`Inventory Debug:\n\nLoaded: ${soInventoryLoaded}\nCount: ${soInventory.length}\n\nCheck console for details (F12)`);
+    }
+
+    /* === Rendering SO List === */
+    function soRefreshSOList() {
+  document.getElementById('soProcessingOverlay').style.display = 'flex';
+  google.script.run
+    .withSuccessHandler(renderSOList)
+    .withFailureHandler(err => {
+      console.error('soGetAllSO failed:', err);
+      document.getElementById('soProcessingOverlay').style.display = 'none';
+    })
+    .soGetAllSO(user.username);
+}
+
+
+function renderSOList(rows) {
+  const tbody = document.querySelector('#solist tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    // Parse values from SalesDetails
+    const qty = parseFloat(r['QTY Sold']) || 0;
+    const unitPrice = parseFloat(r['Unit Price']) || 0;
+    const total = parseFloat(r['Total Sales Price']) || 0;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${new Date(r['SO Date']).toLocaleDateString()}</td>
+      <td>${r['SO ID']}</td>
+      <td>${r['Customer ID'] || '-'}</td>
+      <td style="text-align: right;">${Math.round(qty)}</td>
+      <td style="text-align: right;">${unitPrice.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+      <td style="text-align: right;">${total.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</td>
+      <td><button class="btn" onclick="openSODetails('${r['SO ID']}')">Lihat</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('soProcessingOverlay').style.display = 'none';
+}
+
+    /* === Search / Clear === */
+    function applySearch() {
+      const crit = document.getElementById('soSearchCriteria').value;
+      const val  = document.getElementById('soSearchInput').value.toLowerCase();
+      if (crit === 'All' || !val) {
+        renderSOList(soAllData);
+        return;
+      }
+      const filtered = soAllData.filter(r => (''+r[crit]).toLowerCase().includes(val));
+      if (!filtered.length) {
+        alert('Data yang cocok tidak ditemukan');
+      }
+      renderSOList(filtered);
+    }
+    function clearSearch() {
+      document.getElementById('soSearchInput').value = '';
+      document.getElementById('soSearchCriteria').value = 'All';
+      renderSOList(soAllData);
+    }
+
+    /* === New SO Form === */
+    function openNewSOForm() {
+      // 1) Render the modal skeleton
+      showModal('Create New SO', newSOFormBody(), newSOFormFooter());
+      
+      // 2) Update inventory status indicator
+      updateInventoryStatus();
+
+      // 3) Now that <select id="soNewCustomer"> is in the DOM,
+      //    fetch customers and populate
+      google.script.run
+        .withSuccessHandler(populateCustomerDropdown)
+        .withFailureHandler(err => {
+          console.error('soGetCustomers failed:', err);
+          alert('Tidak dapat memuat daftar pelanggan. Pastikan named range RANGECUSTOMERS tersedia.');
+        })
+        .soGetCustomers(user.username);
+    }
+
+
+    function newSOFormBody() {
+      return `
+        <div>
+          <h3 class="section-title"><i class="fas fa-file-alt"></i> Informasi Master</h3>
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label>ID Pesanan <span style="color:red">*</span></label>
+              <div class="input-with-button">
+                <input type="text" id="soNewSOID" readonly placeholder="Klik Generate">
+                <button class="btn" onclick="genSOID()" title="Generate ID"><i class="fas fa-sync-alt"></i></button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nama Pelanggan</label>
+              <select id="soNewCustomer" style="width:100%">
+                <option value="">-- Pilih Pelanggan --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>ID Pelanggan</label>
+              <input type="text" id="soNewCustID" readonly placeholder="(Opsional)">
+            </div>
+          </div>
+          
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label>Provinsi</label>
+              <input type="text" id="soNewState" readonly placeholder="(Opsional)">
+            </div>
+            <div class="form-group">
+              <label>Kota</label>
+              <input type="text" id="soNewCity" readonly placeholder="(Opsional)">
+            </div>
+            <div class="form-group">
+              <label>Tanggal Pesanan <span style="color:red">*</span></label>
+              <input type="date" id="soNewDate" value="${new Date().toISOString().split('T')[0]}">
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="section-title"><i class="fas fa-shopping-cart"></i> Item Baris</h3>
+          <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn" id="btnAddSOLine" onclick="addSOLine()">
+              <i class="fas fa-plus"></i> Tambah Item
+            </button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="btn" onclick="debugInventory()" style="background:#95a5a6; padding:4px 8px; font-size:11px" title="Debug Inventory">
+                <i class="fas fa-bug"></i>
+              </button>
+              <span id="inventoryStatus" style="font-size: 12px; color: #95a5a6;">
+                <i class="fas fa-spinner fa-spin"></i> Memuat inventory...
+              </span>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table id="soNewLines" class="compact-table">
+              <thead>
+                <tr>
+                  <th>Kode Barang</th>
+                  <th>Jumlah</th>
+                  <th>Harga Satuan</th>
+                  <th>Total</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function newSOFormFooter() {
+      return `
+        <div class="action-buttons">
+          <button class="btn" onclick="saveNewSO()" style="background:#27ae60">
+            <i class="fas fa-save"></i> Simpan Pesanan
+          </button>
+          <button class="btn-clear" onclick="closeModalWithConfirm()">
+            <i class="fas fa-times"></i> Batal
+          </button>
+        </div>
+      `;
+    }
+
+
+
+
+
+function populateCustomerDropdown(customers) {
+  console.log('populateCustomerDropdown got:', customers);
+
+  const sel = document.getElementById('soNewCustomer');
+  if (!sel) {
+    console.error('#soNewCustomer not found');
+    return;
+  }
+
+  // clear & add placeholder
+  sel.innerHTML = '<option></option>';
+
+  // only non-empty names
+  customers
+    .filter(c => c['Customer Name'])
+    .forEach(cust => {
+      const opt = document.createElement('option');
+      opt.value = cust['Customer Name'];
+      opt.textContent = cust['Customer Name'];
+      sel.appendChild(opt);
+    });
+
+  // initialize Select2 and wire up ID/State/City
+  $('#soNewCustomer').select2({
+    placeholder: 'Pilih Pelanggan',
+    width: '100%'
+  }).on('change', function() {
+    const name = this.value;
+    const cust = customers.find(x => x['Customer Name'] === name);
+    if (cust) {
+      document.getElementById('soNewCustID').value = cust['Customer ID'];
+      document.getElementById('soNewState').value   = cust['State'];
+      document.getElementById('soNewCity').value    = cust['City'];
+    }
+  });
+}
+
+    /* === Modal Helpers === */
+    function showModal(title, bodyHTML, footerHTML) {
+      document.getElementById('soModalTitle').innerText   = title;
+      document.getElementById('soModalBody').innerHTML    = bodyHTML;
+      document.getElementById('soModalFooter').innerHTML  = footerHTML;
+      document.getElementById('soModalOverlay').style.display = 'flex';
+      
+      // Auto-focus first input field after modal opens
+      setTimeout(() => {
+        const firstInput = document.querySelector('#soModalBody input:not([readonly]):not([type="date"])');
+        if (firstInput) firstInput.focus();
+      }, 100);
+    }
+    
+    function closeModal() {
+      document.getElementById('soModalOverlay').style.display = 'none';
+      // Clear modal content
+      document.getElementById('soModalBody').innerHTML = '';
+      document.getElementById('soModalFooter').innerHTML = '';
+    }
+    
+    function closeModalWithConfirm() {
+      // Confirm if there's unsaved data
+      const hasContent = document.querySelector('#soNewLines tbody tr');
+      if (hasContent) {
+        if (!confirm('Ada data yang belum disimpan. Yakin ingin menutup?')) {
+          return;
+        }
+      }
+      closeModal();
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('soModalOverlay').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModalWithConfirm();
+      }
+    });
+
+    /* === Generate IDs === */
+    function genSOID() {
+      document.getElementById('soProcessingOverlay').style.display='flex';
+      google.script.run.withSuccessHandler(id=>{
+        document.getElementById('soNewSOID').value = id;
+        document.getElementById('soProcessingOverlay').style.display='none';
+      }).soGenerateSOID(user.username);
+    }
+
+    function genDetailID(rowIdx) {
+      return new Promise(resolve=>{
+        google.script.run.withSuccessHandler(id=>{
+          resolve(id);
+        }).soGenerateSalesDetailID(user.username);
+      });
+    }
+
+    /* === Add / Remove Line Items === */
+    async function addSOLine() {
+      // Check if inventory data is loaded
+      if (!soInventoryLoaded) {
+        showNotification('Mohon tunggu, data inventory sedang dimuat...', 'warning');
+        return;
+      }
+      
+      if (!soInventory || soInventory.length === 0) {
+        showNotification('Data inventory kosong. Pastikan ada item di inventory.', 'error');
+        return;
+      }
+      
+      const tbody = document.querySelector('#soNewLines tbody');
+      const rowIdx = tbody.children.length;
+      const detailID = await genDetailID();
+
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-idx', rowIdx);
+      tr.setAttribute('data-detail-id', detailID);
+      tr.innerHTML = `
+        <td><select class="soItemName" style="width:200px"></select></td>
+        <td><input type="number" class="soQty" min="1" value="1" style="width:80px"></td>
+        <td><input type="text" class="soUnitPrice" value="0" style="width:100px"></td>
+        <td class="soTotalSales">0.00</td>
+        <td><button class="btn" onclick="removeSOLine(this)" style="background:#e74c3c; padding:4px 8px" title="Hapus"><i class="fas fa-trash"></i></button></td>
+      `;
+      tbody.appendChild(tr);
+
+      // init item dropdown
+      const sel = tr.querySelector('.soItemName');
+      
+      // Debug: Check inventory data structure
+      console.log('📦 Total inventory items:', soInventory.length);
+      if (soInventory.length > 0) {
+        console.log('📦 Sample item:', soInventory[0]);
+        console.log('📦 Item keys:', Object.keys(soInventory[0]));
+      }
+      
+      // Build options - Show "Kode - Nama" for clarity
+      sel.innerHTML = '<option value="">-- Pilih Item --</option>';
+      soInventory.forEach((item, idx) => {
+        const itemCode = item['Kode Barang'];
+        const itemName = item['Nama Barang'];
+        const stock = item['Jumlah Barang'] || 0;
+        
+        // Debug first item to see actual column names
+        if (idx === 0) {
+          console.log('🔍 First item full data:', item);
+          console.log('🔍 Stock from Jumlah Barang:', stock);
+        }
+        
+        if (itemCode && itemCode.toString().trim() !== '') {
+          const opt = document.createElement('option');
+          opt.value = itemCode;
+          opt.text = `${itemCode} - ${itemName} (Stok: ${stock})`;
+          opt.dataset.stock = stock;
+          sel.appendChild(opt);
+          if (idx < 5) console.log(`📦 Added option ${idx + 1}:`, itemCode, itemName);
+        } else {
+          console.warn(`⚠️ Item ${idx} has no valid code:`, item);
+        }
+      });
+      
+      console.log('📦 Total options in select:', sel.options.length);
+      
+      // Initialize Select2 AFTER options are added
+      $(sel).select2({ 
+        placeholder: 'Pilih Item', 
+        width: '100%',
+        dropdownParent: $('#soModalBody') // Attach to modal body for proper z-index
+      }).on('change', function(){
+        const itemCode = this.value;
+        console.log('📦 Selected item code:', itemCode);
+        const item = soInventory.find(i=>i['Kode Barang']===itemCode);
+        if (item) {
+          console.log('📦 Item data:', item);
+          const stock = parseFloat(item['Jumlah Barang']) || 0;
+          console.log('📦 Stock value:', stock);
+          
+          // Check stock availability
+          if (stock <= 0) {
+            showNotification(`Stok ${itemCode} habis!`, 'error');
+          }
+          
+          // Store item data in tr dataset
+          tr.dataset.itemId = item['Kode Barang'] || '';
+          tr.dataset.itemName = item['Nama Barang'] || '';
+          tr.dataset.itemCat = item['Kategori Barang'] || '';
+          tr.dataset.stock = stock;
+          
+          // Set unit price from inventory (Harga Satuan)
+          const unitPrice = parseFloat(item['Harga Satuan']) || 0;
+          tr.querySelector('.soUnitPrice').value = unitPrice.toLocaleString('id-ID');
+          
+          // Set max quantity to current stock
+          const qtyInput = tr.querySelector('.soQty');
+          qtyInput.max = stock;
+          
+          recalcLine(tr);
+        }
+      });
+
+      // recalc on qty and price changes
+      ['.soQty','.soUnitPrice'].forEach(cls=>{
+        tr.querySelector(cls).addEventListener('input',()=>recalcLine(tr));
+      });
+    }
+
+    function removeSOLine(el){
+      el.closest('tr').remove();
+    }
+
+    /* === Recalc One Line === */
+    function recalcLine(tr) {
+      const qty = parseFloat(tr.querySelector('.soQty').value) || 0;
+      const upRaw = tr.querySelector('.soUnitPrice').value.replace(/\./g, '').replace(/,/g, '.');
+      const up = parseFloat(upRaw) || 0;
+      
+      const total = qty * up;
+      tr.querySelector('.soTotalSales').innerText = total.toLocaleString('id-ID', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+    }
+
+    /* === Save New SO === */
+    function saveNewSO() {
+      const date   = document.getElementById('soNewDate').value;
+      const soID   = document.getElementById('soNewSOID').value;
+      const custID = document.getElementById('soNewCustID').value || '';
+      const custNm = $('#soNewCustomer').val();
+      const state  = document.getElementById('soNewState').value || '';
+      const city   = document.getElementById('soNewCity').value || '';
+      
+      // Validation - hanya ID Pesanan dan tanggal yang wajib
+      if (!date || !soID) {
+        showNotification('Harap isi ID Pesanan dan Tanggal Pesanan', 'warning');
+        return;
+      }
+      
+      const lines = [];
+      const rows = document.querySelectorAll('#soNewLines tbody tr');
+      
+      if (rows.length === 0) { 
+        showNotification('Tambahkan setidaknya satu item', 'warning');
+        return; 
+      }
+      
+      // Validate each line and check stock
+      let hasError = false;
+      rows.forEach((tr, idx)=>{
+        const itemCode = tr.querySelector('.soItemName').value;
+        const itemName = tr.dataset.itemName || '';
+        const qty = parseInt(tr.querySelector('.soQty').value);
+        const stock = parseFloat(tr.dataset.stock) || 0;
+        
+        if (!itemCode || qty <= 0) {
+          showNotification(`Baris ${idx+1}: Pilih item dan masukkan jumlah yang valid`, 'error');
+          hasError = true;
+          return;
+        }
+        
+        // Check if quantity exceeds stock
+        if (qty > stock) {
+          showNotification(`Baris ${idx+1}: Jumlah (${qty}) melebihi stok tersedia (${stock})`, 'error');
+          hasError = true;
+          return;
+        }
+        
+        const row = {
+          'SO Date': date, 
+          'SO ID': soID, 
+          'Detail ID': tr.dataset.detailId,
+          'Customer ID': custID, 
+          'Customer Name': custNm,
+          'State': state, 
+          'City': city, 
+          'Invoice Num': '',  // Tidak lagi digunakan
+          'Item ID': itemCode,
+          'Item Category': tr.dataset.itemCat || '',
+          'Item Name': itemName,
+          'QTY Sold': qty,
+          'Unit Price': parseFloat(tr.querySelector('.soUnitPrice').value.replace(/\./g, '').replace(/,/g, '.')) || 0,
+          'Total Sales Price': parseFloat(tr.querySelector('.soTotalSales').innerText.replace(/\./g, '').replace(/,/g, '.')) || 0
+        };
+        lines.push(row);
+      });
+      
+      if (hasError) return;
+
+      document.getElementById('soProcessingOverlay').style.display = 'flex';
+      google.script.run
+        .withSuccessHandler(()=>{
+          showNotification('Pesanan Penjualan Berhasil Dibuat & Stok Dikurangi', 'success');
+          closeModal();
+          soRefreshSOList();
+          document.getElementById('soProcessingOverlay').style.display = 'none';
+        })
+        .withFailureHandler((err)=>{
+          showNotification('Error: ' + err.message, 'error');
+          document.getElementById('soProcessingOverlay').style.display = 'none';
+        })
+        .soSaveNewSO({ 
+          master: { date, soID, custID, custNm, state, city, inv: '' }, 
+          details: lines 
+        }, user.username);
+    }
+    
+    /* === Notification Helper === */
+    function showNotification(message, type = 'info') {
+      const colors = {
+        success: '#27ae60',
+        error: '#e74c3c',
+        warning: '#f39c12',
+        info: '#3498db'
+      };
+      
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${colors[type] || colors.info};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10001;
+        font-family: 'Roboto', sans-serif;
+        font-size: 14px;
+        max-width: 400px;
+        animation: slideIn 0.3s ease;
+      `;
+      
+      notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+        ${message}
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+    
+    // Add animation keyframes
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(400px); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    /* === View / Edit SO Details === */
+    function openSODetails(soID) {
+      document.getElementById('soProcessingOverlay').style.display='flex';
+      google.script.run.withSuccessHandler(rows=>{
+        showModal(`SO Details: ${soID}`, sodetailsBody(rows), sodetailsFooter());
+        initDetailEvents();
+        document.getElementById('soProcessingOverlay').style.display='none';
+      }).soGetSODetails(soID, user.username);
+    }
+
+    function sodetailsBody(rows) {
+      // Display only essential columns for editing
+      const displayCols = ['Item Name','QTY Sold','Unit Price','Total Sales Price'];
+      
+      // Store all columns for data integrity
+      const allCols = [
+        'SO Date','SO ID','Detail ID','Customer ID','Customer Name',
+        'State','City','Invoice Num','Item ID','Item Category',
+        'Item Name','QTY Sold','Unit Price','Total Sales Price'
+      ];
+
+      // Build the header row with only display columns
+      let html = `<div style="overflow-x: auto;"><table id="soDetailsTable"><thead><tr>`;
+      displayCols.forEach(c => html += `<th>${c}</th>`);
+      html += `<th>Actions</th></tr></thead><tbody>`;
+
+      // Build each data row
+      rows.forEach(r => {
+        html += `<tr data-detailid="${r['Detail ID']}">`;
+        
+        // Store all data in hidden fields for update
+        allCols.forEach(c => {
+          const className = `col-${c.replace(/\s/g,'')}`;
+          if (displayCols.includes(c)) {
+            html += `<td class="${className}">${r[c] || ''}</td>`;
+          } else {
+            html += `<td class="${className}" style="display:none;">${r[c] || ''}</td>`;
+          }
+        });
+        
+        html += `<td><i class="fa fa-trash" onclick="deleteDetail(this)" style="cursor:pointer; color:#e74c3c;"></i></td></tr>`;
+      });
+
+      html += `</tbody></table></div>`;
+      return html;
+    }
+
+   function sodetailsFooter() {
+  return `
+    <button class="btn" id="soBtnEdit" onclick="enterEditMode()">Edit</button>
+    <button class="btn" id="soBtnUpdate" style="display:none" onclick="updateDetails()">Update</button>
+    <button class="btn-clear" id="soBtnCancel" onclick="onDetailsCancel()">Cancel</button>
+  `;
+}
+
+    /* === SODetails: Edit, Update, Cancel, Delete === */
+    let soEditOriginal = [];
+    function initDetailEvents() {
+      // store original
+      soEditOriginal = Array.from(document.querySelectorAll('#soDetailsTable tbody tr'))
+        .map(tr=>[tr.dataset.detailid, ...Array.from(tr.children).slice(0,-1).map(td=>td.innerText)]);
+    }
+
+    function enterEditMode() {
+  // Swap footer buttons
+  document.getElementById('soBtnEdit').style.display   = 'none';
+  const btnUpdate = document.getElementById('soBtnUpdate');
+  btnUpdate.style.display = 'inline-block';
+  btnUpdate.disabled      = false;
+
+  // For every detail row:
+  document.querySelectorAll('#soDetailsTable tbody tr').forEach(tr => {
+    // --- ITEM NAME dropdown ---
+    const tdName    = tr.querySelector('.col-ItemName');
+    const current   = tdName.innerText;
+    tdName.innerHTML = `<select class="edit-ItemName" style="width:200px"></select>`;
+
+    // Populate options from global soInventory
+    const $sel = $(tdName).find('select');
+    soInventory.forEach(item => {
+      const itemName = item['Nama Barang'];
+      const opt = new Option(itemName, itemName, false, false);
+      $sel.append(opt);
+    });
+    $sel.val(current).trigger('change');
+
+    // Initialize Select2 inside the modal
+    $sel.select2({
+      placeholder: 'Item Name',
+      width: '200px',
+      dropdownParent: $('#soModalBody')
+    }).on('change', function() {
+      const name = this.value;
+      const item = soInventory.find(i => i['Nama Barang'] === name);
+      if (item) {
+        tr.querySelector('.col-ItemID').innerText       = item['Kode Barang'] || '';
+        tr.querySelector('.col-ItemCategory').innerText = item['Kategori Barang'] || '';
+      }
+      recalcDetailLine(tr);
+    });
+
+    // --- Numeric fields into inputs ---
+    const mappings = [
+      { cls: 'QTYSold',     type: 'number', step: '1'    },
+      { cls: 'UnitPrice',   type: 'number', step: '0.01' }
+    ];
+    mappings.forEach(m => {
+      const td = tr.querySelector(`.col-${m.cls}`);
+      const val = td.innerText;
+      td.innerHTML = `<input type="${m.type}"
+                             class="edit-${m.cls}"
+                             step="${m.step}"
+                             value="${val}">`;
+    });
+
+    // Attach live recalc on input changes
+    ['.edit-QTYSold','.edit-UnitPrice']
+      .forEach(sel => {
+        tr.querySelector(sel)
+          .addEventListener('input', () => recalcDetailLine(tr));
+      });
+  });
+}
+
+    function cancelEdit() {
+      // restore from soEditOriginal
+      soEditOriginal.forEach(orig=>{
+        const [did,...cells] = orig;
+        const tr = document.querySelector(`#soDetailsTable tr[data-detailid="${did}"]`);
+        Array.from(tr.children).slice(0,-1).forEach((td,i)=>{
+          td.innerText = cells[i];
+        });
+      });
+      document.getElementById('soBtnUpdate').disabled = true;
+      document.getElementById('soBtnCancel').disabled = true;
+    }
+
+  function updateDetails() {
+  const table   = document.getElementById('soDetailsTable');
+  const ths     = Array.from(table.querySelectorAll('thead th'));
+  const headers = ths.slice(0, -1).map(th => th.innerText.trim());
+  const rowsToUpdate = [];
+
+  table.querySelectorAll('tbody tr').forEach(tr => {
+    const rowObj = {};
+    headers.forEach((h, idx) => {
+      const cell = tr.children[idx];
+      let val;
+
+      // 1) If there's an <input> or <select> inside, grab its .value
+      const inputOrSelect = cell.querySelector('input, select');
+      if (inputOrSelect) {
+        val = inputOrSelect.value;
+      } else {
+        // 2) Otherwise use the displayed text
+        val = cell.innerText.trim();
+      }
+
+      // 3) Strip commas for numeric columns
+      if (['QTY Sold','Unit Price','Total Sales Price'].includes(h)) {
+        val = val.replace(/,/g,'');
+      }
+
+      rowObj[h] = val;
+    });
+    rowsToUpdate.push(rowObj);
+  });
+
+  // Send just the edited-SO’s detail rows to the server
+  document.getElementById('soProcessingOverlay').style.display = 'flex';
+  google.script.run
+    .withSuccessHandler(() => {
+      alert('SO Details Updated');
+      closeModal();
+      soRefreshSOList();
+      document.getElementById('soProcessingOverlay').style.display = 'none';
+    })
+    .withFailureHandler(err => {
+      console.error(err);
+      alert('Update failed: ' + err.message);
+      document.getElementById('soProcessingOverlay').style.display = 'none';
+    })
+    .soUpdateSODetails(rowsToUpdate, user.username);
+}
+
+function deleteDetail(el) {
+  if(!confirm('Are you sure you want to delete this item?')) return;
+  const tr = el.closest('tr');
+  const detailID = tr.dataset.detailid;
+  
+  document.getElementById('soProcessingOverlay').style.display = 'flex';
+  google.script.run
+    .withSuccessHandler(() => {
+      alert('Item deleted');
+      tr.remove();
+      soRefreshSOList(); // Refresh main list to update totals
+      document.getElementById('soProcessingOverlay').style.display = 'none';
+    })
+    .withFailureHandler(err => {
+      console.error(err);
+      alert('Delete failed: ' + err.message);
+      document.getElementById('soProcessingOverlay').style.display = 'none';
+    })
+    .soDeleteDetail(detailID, user.username);
+}
+
+        /**
+     * If we're in edit-mode (Update is visible), cancel edits.
+     * Otherwise close the popup entirely.
+     */
+    function onDetailsCancel() {
+  const btnUpdate = document.getElementById('soBtnUpdate');
+
+  // If in edit-mode, revert edits
+  if (btnUpdate.style.display === 'inline-block') {
+    cancelEdit();
+    document.getElementById('soBtnEdit').style.display   = 'inline-block';
+    btnUpdate.style.display                              = 'none';
+  } else {
+    // Otherwise close the modal
+    closeModal();
+  }
+}
+    /**
+ * Recalculate one detail row’s totals on-the-fly
+ */
+function recalcDetailLine(tr) {
+  const qty   = parseFloat(tr.querySelector('.edit-QTYSold').value)   || 0;
+  const up    = parseFloat(tr.querySelector('.edit-UnitPrice').value) || 0;
+
+  const total = qty * up;
+
+  tr.querySelector('.col-TotalSalesPrice').innerText = total.toFixed(2);
+}
+  </script>

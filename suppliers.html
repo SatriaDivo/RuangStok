@@ -1,0 +1,2064 @@
+<div class="suppliers-container">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <h1 style="font-family: 'Montserrat', sans-serif; color: #2c3e50; margin: 0;">
+      <i class="fas fa-truck-loading"></i> Manajemen Pemasok
+    </h1>
+    
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button onclick="openAddSupplierModal()" style="background: #1abc9c; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 14px; transition: all 0.3s;">
+        <i class="fas fa-plus" style="margin-right: 8px;"></i>
+        Tambah Pemasok Baru
+      </button>
+      <button onclick="openNewStateModal()" style="background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 14px; transition: all 0.3s;">
+        <i class="fas fa-plus" style="margin-right: 8px;"></i>
+        New State
+      </button>
+      <button onclick="openNewCityModal()" style="background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 14px; transition: all 0.3s;">
+        <i class="fas fa-plus" style="margin-right: 8px;"></i>
+        New City
+      </button>
+    </div>
+  </div>
+  
+  <!-- Search Section -->
+  <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+    <div style="display: flex; gap: 15px; align-items: end;">
+      <div style="flex: 1;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Cari Pemasok</label>
+        <input type="text" placeholder="Cari berdasarkan nama, kontak, atau perusahaan..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+      </div>
+      
+      <button style="background: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 14px;">
+        <i class="fas fa-search"></i> Cari
+      </button>
+    </div>
+  </div>
+  
+  <!-- Suppliers Table -->
+  <div id="suppliersContainer" style="background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
+    <table id="suppliersTable" style="width: 100%; border-collapse: collapse;">
+      <thead style="background: #34495e; color: white;">
+        <tr>
+          <th style="padding: 15px; text-align: left; font-weight: 600;">Supplier ID</th>
+          <th style="padding: 15px; text-align: left; font-weight: 600;">Supplier Name</th>
+          <th style="padding: 15px; text-align: left; font-weight: 600;">Contact</th>
+          <th style="padding: 15px; text-align: left; font-weight: 600;">Email</th>
+          <th style="padding: 15px; text-align: left; font-weight: 600;">State</th>
+          <th style="padding: 15px; text-align: left; font-weight: 600;">City</th>
+          <th style="padding: 15px; text-align: left; font-weight: 600;">Address</th>
+          <th style="padding: 15px; text-align: left; font-weight: 600;">No Rek</th>
+          <th style="padding: 15px; text-align: center; font-weight: 600;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="suppliersTableBody">
+        <!-- Loading Row -->
+        <tr id="loadingState">
+          <td colspan="9" style="padding: 60px; text-align: center; color: #7f8c8d;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-right: 10px;"></i>
+            Memuat data pemasok...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <!-- Empty State -->
+    <div id="emptyState" style="display: none; text-align: center; padding: 60px; color: #7f8c8d;">
+      <i class="fas fa-truck" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+      <p style="margin: 0; font-size: 16px;">Belum ada pemasok ditambahkan</p>
+      <p style="margin: 5px 0 0 0; font-size: 14px;">Tambahkan pemasok pertama Anda untuk memulai</p>
+      <button onclick="openAddSupplierModal()" style="background: #1abc9c; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; margin-top: 15px; display: inline-flex; align-items: center; font-size: 14px;">
+        <i class="fas fa-plus" style="margin-right: 8px;"></i>
+        Tambah Pemasok Pertama
+      </button>
+    </div>
+  </div>
+  
+  <!-- Sample Supplier Cards (Hidden by default, will be shown when data exists) -->
+  <div style="display: none;">
+    <!-- Supplier Card Template -->
+    <div class="supplier-card" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: all 0.3s;">
+      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+        <h3 style="margin: 0; color: #2c3e50; font-family: 'Poppins', sans-serif;">Supplier Name</h3>
+        <div style="display: flex; gap: 5px;">
+          <button style="background: #3498db; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button style="background: #e74c3c; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 10px;">
+        <p style="margin: 0; color: #7f8c8d; font-size: 14px;">
+          <i class="fas fa-building" style="margin-right: 8px; color: #1abc9c;"></i>
+          Company Name
+        </p>
+      </div>
+      
+      <div style="margin-bottom: 10px;">
+        <p style="margin: 0; color: #7f8c8d; font-size: 14px;">
+          <i class="fas fa-phone" style="margin-right: 8px; color: #1abc9c;"></i>
+          +62 123 456 7890
+        </p>
+      </div>
+      
+      <div style="margin-bottom: 10px;">
+        <p style="margin: 0; color: #7f8c8d; font-size: 14px;">
+          <i class="fas fa-envelope" style="margin-right: 8px; color: #1abc9c;"></i>
+          supplier@email.com
+        </p>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <p style="margin: 0; color: #7f8c8d; font-size: 14px;">
+          <i class="fas fa-map-marker-alt" style="margin-right: 8px; color: #1abc9c;"></i>
+          Address, City, State
+        </p>
+      </div>
+      
+      <div style="padding-top: 15px; border-top: 1px solid #eee; display: flex; justify-content: between; align-items: center;">
+        <span style="background: #d1f2eb; color: #00875a; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">
+          Active
+        </span>
+        <button style="background: #f8f9fa; color: #2c3e50; border: 1px solid #dee2e6; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-left: auto;">
+          View Details
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Supplier Modal -->
+<div id="addSupplierModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 style="margin: 0; color: #2c3e50;">Tambah Pemasok Baru</h3>
+      <button type="button" id="closeModal" onclick="closeAddSupplierModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999; line-height: 1;">&times;</button>
+    </div>
+    
+    <form id="addSupplierForm">
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Supplier ID *</label>
+        <input type="text" name="supplierId" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nama Pemasok *</label>
+        <input type="text" name="supplierName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kontak</label>
+          <input type="text" name="contact" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Email</label>
+          <input type="email" name="email" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        </div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;"><span style="color: #e74c3c;">*</span> Provinsi</label>
+          <select name="state" id="supplierState" class="form-control" style="width:100%"></select>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;"><span style="color: #e74c3c;">*</span> Kota</label>
+          <select name="city" id="supplierCity" class="form-control" style="width:100%"></select>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Alamat</label>
+        <textarea name="address" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; resize: vertical;"></textarea>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">No Rekening</label>
+        <input type="text" name="noRek" placeholder="Contoh: BCA 1234567890" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+      </div>
+      
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+        <button type="button" id="cancelBtn" onclick="closeAddSupplierModal()" style="background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Batal</button>
+        <button type="submit" style="background: #1abc9c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Tambah Pemasok</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Supplier Modal -->
+<div id="editSupplierModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 style="margin: 0; color: #2c3e50;">Edit Pemasok</h3>
+      <button id="closeEditModal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">×</button>
+    </div>
+    
+    <form id="editSupplierForm">
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Supplier ID</label>
+        <input type="text" id="editSupplierId" name="supplierId" readonly style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 5px; font-size: 14px; background: #f5f5f5; color: #999;">
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nama Pemasok *</label>
+        <input type="text" id="editSupplierName" name="supplierName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kontak</label>
+          <input type="text" id="editSupplierContact" name="contact" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Email</label>
+          <input type="email" id="editSupplierEmail" name="email" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        </div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Provinsi</label>
+          <select id="editSupplierState" name="state" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+          </select>
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kota</label>
+          <select id="editSupplierCity" name="city" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+          </select>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Alamat</label>
+        <textarea id="editSupplierAddress" name="address" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; resize: vertical;"></textarea>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">No Rekening</label>
+        <input type="text" id="editSupplierNoRek" name="noRek" placeholder="Contoh: BCA 1234567890" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+      </div>
+      
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+        <button type="button" id="deleteSupplierBtn" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+          <i class="fas fa-trash"></i> Hapus
+        </button>
+        <button type="button" id="cancelEditBtn" style="background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Batal</button>
+        <button type="submit" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Update</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="confirmDeleteSupplierModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 15000; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box;">
+  <div style="position: relative; background: white; border-radius: 12px; padding: 0; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 15px 40px rgba(0,0,0,0.4);">
+    <div style="padding: 25px 30px 20px; border-bottom: 2px solid #e74c3c; background: linear-gradient(135deg, #ff6b6b, #e74c3c);">
+      <h3 style="margin: 0; color: white; display: flex; align-items: center; font-family: 'Poppins', sans-serif; font-size: 18px;">
+        <i class="fas fa-exclamation-triangle" style="margin-right: 12px; font-size: 20px;"></i> 
+        Konfirmasi Penghapusan Pemasok
+      </h3>
+    </div>
+    <div style="padding: 25px 30px;">
+      <p style="margin: 0 0 20px 0; color: #2c3e50; font-size: 15px; line-height: 1.5;">
+        Apakah Anda yakin ingin menghapus pemasok berikut?
+      </p>
+      
+      <div id="deleteSupplierDetails" style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #e74c3c; margin-bottom: 20px;">
+        <!-- Supplier details will be populated here -->
+      </div>
+      
+      <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+        <div style="color: #856404; font-size: 14px; line-height: 1.5;">
+          <i class="fas fa-info-circle" style="margin-right: 8px;"></i> 
+          Data pemasok akan dihapus dari sistem lokal dan Google Sheets (jika terhubung). Tindakan ini tidak dapat dibatalkan.
+        </div>
+      </div>
+    </div>
+    <div style="padding: 20px 30px; background: #f8f9fa; border-top: 1px solid #dee2e6; display: flex; justify-content: flex-end; gap: 12px;">
+      <button id="cancelDeleteSupplierBtn" onclick="closeDeleteSupplierModal()" style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; transition: all 0.3s;">
+        <i class="fas fa-times" style="margin-right: 8px;"></i> Batal
+      </button>
+      <button id="confirmDeleteSupplierBtn" onclick="confirmDeleteSupplier()" style="background: #e74c3c; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; transition: all 0.3s;">
+        <i class="fas fa-trash" style="margin-right: 8px;"></i> Hapus
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- New State Modal -->
+<div id="newStateModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 style="margin: 0; color: #2c3e50;">Tambah Provinsi Baru</h3>
+      <button onclick="closeNewStateModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">×</button>
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nama Provinsi</label>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="newStateName" placeholder="Contoh: Jawa Barat" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        <button onclick="saveNewState()" style="background: #1abc9c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; white-space: nowrap;">Simpan</button>
+      </div>
+    </div>
+    
+    <div style="margin-top: 20px;">
+      <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Provinsi yang Ada</label>
+      <div id="existingStatesList" style="border: 1px solid #eee; border-radius: 5px; padding: 8px; max-height: 200px; overflow-y: auto; background: #f9f9f9; min-height: 50px;">
+        <div style="text-align: center; padding: 20px; color: #999;">Memuat...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New City Modal -->
+<div id="newCityModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 style="margin: 0; color: #2c3e50;">Tambah Kota Baru</h3>
+      <button onclick="closeNewCityModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">×</button>
+    </div>
+    
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nama Kota</label>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="newCityName" placeholder="Contoh: Bandung" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        <button onclick="saveNewCity()" style="background: #1abc9c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; white-space: nowrap;">Simpan</button>
+      </div>
+    </div>
+    
+    <div style="margin-top: 20px;">
+      <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kota yang Ada</label>
+      <div id="existingCitiesList" style="border: 1px solid #eee; border-radius: 5px; padding: 8px; max-height: 200px; overflow-y: auto; background: #f9f9f9; min-height: 50px;">
+        <div style="text-align: center; padding: 20px; color: #999;">Memuat...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Modal Styles */
+  .suppliers-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  
+  /* Button styles untuk memastikan clickable */
+  .edit-supplier-btn, .delete-supplier-btn {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 100 !important;
+  }
+  
+  .edit-supplier-btn:hover, .delete-supplier-btn:hover {
+    transform: scale(1.05) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3) !important;
+  }
+  
+  /* Modal button styles */
+  #confirmDeleteSupplierBtn, #cancelDeleteSupplierBtn {
+    pointer-events: auto !important;
+    position: relative !important;
+    z-index: 1000 !important;
+    cursor: pointer !important;
+  }
+  
+  #confirmDeleteSupplierBtn:hover {
+    background: #dc3545 !important;
+    transform: translateY(-1px) !important;
+  }
+  
+  #cancelDeleteSupplierBtn:hover {
+    background: #5a6268 !important;
+    transform: translateY(-1px) !important;
+  }
+  
+  .supplier-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  }
+  
+  .suppliers-container input:focus {
+    outline: none;
+    border-color: #1abc9c;
+    box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Loading state improvements */
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Responsive Design */
+  @media screen and (max-width: 1024px) {
+    .suppliers-container {
+      padding: 15px;
+    }
+    
+    #suppliersTable th,
+    #suppliersTable td {
+      padding: 10px;
+      font-size: 13px;
+    }
+  }
+  
+  @media screen and (max-width: 768px) {
+    .suppliers-container {
+      padding: 10px;
+      border-radius: 0;
+    }
+    
+    .suppliers-container > div:first-child {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 15px;
+    }
+    
+    .suppliers-container > div:first-child > div {
+      width: 100%;
+    }
+    
+    #addSupplierBtn {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .suppliers-container > div:nth-child(2) > div {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+    
+    .suppliers-container > div:nth-child(2) button {
+      width: 100%;
+    }
+    
+    #suppliersContainer {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    #suppliersTable {
+      min-width: 1000px;
+      font-size: 12px;
+    }
+    
+    #suppliersTable th,
+    #suppliersTable td {
+      padding: 8px;
+      white-space: nowrap;
+    }
+    
+    .modal-content {
+      width: 95% !important;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .form-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  
+  @media screen and (max-width: 480px) {
+    .suppliers-container h1 {
+      font-size: 18px !important;
+    }
+    
+    #addSupplierBtn {
+      padding: 10px 15px !important;
+      font-size: 13px !important;
+    }
+    
+    #suppliersTable {
+      font-size: 11px;
+    }
+    
+    #suppliersTable th,
+    #suppliersTable td {
+      padding: 6px;
+    }
+  }
+</style>
+
+<script>
+  // ========== GLOBAL VARIABLES ==========
+  var supplierData = [];
+  var supStates = [];
+  var supCities = [];
+  var editingIndex = -1;
+  var editingSupplierName = null;
+  var supplierToDelete = null;
+  var deleteSupplierIndex = -1;
+  
+  // ========== PAGE INITIALIZATION ==========
+  $(document).ready(function() {
+    console.log('=== SUPPLIER PAGE LOADED ===');
+    initializePage();
+    
+    // Setup form submit handlers to prevent default form submission
+    $('#addSupplierForm').on('submit', function(e) {
+      e.preventDefault();
+      submitSupplierForm();
+    });
+    
+    $('#editSupplierForm').on('submit', function(e) {
+      e.preventDefault();
+      submitEditSupplierForm();
+    });
+    
+    // Setup Edit Modal button handlers
+    $('#closeEditModal').on('click', function() {
+      closeEditSupplierModal();
+    });
+    
+    $('#cancelEditBtn').on('click', function() {
+      closeEditSupplierModal();
+    });
+    
+    $('#deleteSupplierBtn').on('click', function() {
+      // Close edit modal first, then open delete confirmation
+      closeEditSupplierModal();
+      // Use the stored editingIndex and call deleteSupplier
+      if (editingIndex >= 0 && supplierData[editingIndex]) {
+        deleteSupplier(editingIndex, supplierData[editingIndex].name);
+      }
+    });
+  });
+  
+  function initializePage() {
+    // Step 1: Setup named ranges
+    google.script.run
+      .withSuccessHandler(function() {
+        console.log('✅ Named ranges setup complete');
+        loadAllData();
+      })
+      .withFailureHandler(function(error) {
+        console.error('❌ Setup error:', error);
+        alert('Error setup: ' + error);
+      })
+      .supSetupNamedRanges();
+  }
+  
+  function loadAllData() {
+    // Step 2: Load states and cities
+    loadStatesData();
+    loadCitiesData();
+    loadSupplierData();
+  }
+  
+  // ========== LOAD STATES ==========
+  function loadStatesData() {
+    const user = SessionManager.getUser();
+    const userEmail = user ? user.username : null;
+    google.script.run
+      .withSuccessHandler(function(states) {
+        console.log('✅ States loaded:', states);
+        supStates = states || [];
+        console.log('✅ Saved', supStates.length, 'states to global variable');
+        // TIDAK perlu init dropdown di sini, akan diisi saat modal dibuka
+      })
+      .withFailureHandler(function(error) {
+        console.error('❌ Error loading states:', error);
+        supStates = [];
+      })
+      .supGetStates(userEmail);
+  }
+  
+  // ========== LOAD CITIES ==========
+  function loadCitiesData() {
+    const user = SessionManager.getUser();
+    const userEmail = user ? user.username : null;
+    google.script.run
+      .withSuccessHandler(function(cities) {
+        console.log('✅ Cities loaded:', cities);
+        supCities = cities || [];
+        console.log('✅ Saved', supCities.length, 'cities to global variable');
+        // TIDAK perlu init dropdown di sini, akan diisi saat modal dibuka
+      })
+      .withFailureHandler(function(error) {
+        console.error('❌ Error loading cities:', error);
+        supCities = [];
+      })
+      .supGetCities(userEmail);
+  }
+
+  // ========== MODAL & UI FUNCTIONS ==========
+  
+  // New State Modal Functions
+  function openNewStateModal() {
+    document.getElementById('newStateModal').style.display = 'block';
+    document.getElementById('newStateName').value = '';
+    loadExistingStates();
+  }
+
+  function closeNewStateModal() {
+  document.getElementById('newStateModal').style.display = 'none';
+}
+
+function loadExistingStates() {
+  const container = document.getElementById('existingStatesList');
+  container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Memuat...</div>';
+  
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+
+  google.script.run
+    .withSuccessHandler(function(states) {
+      if (states && states.length > 0) {
+        container.innerHTML = states.map(state => 
+          `<div style="padding: 8px; border-bottom: 1px solid #eee;">${state}</div>`
+        ).join('');
+      } else {
+        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Belum ada provinsi</div>';
+      }
+    })
+    .withFailureHandler(function(error) {
+      container.innerHTML = '<div style="text-align: center; padding: 20px; color: #e74c3c;">Error memuat data</div>';
+    })
+    .supGetStates(userEmail);
+}
+
+function saveNewState() {
+  const stateName = document.getElementById('newStateName').value.trim();
+  
+  if (!stateName) {
+    showAlert('Nama provinsi tidak boleh kosong', 'warning');
+    return;
+  }
+  
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.sessionExpired) {
+        SessionManager.clearSession();
+        SessionManager.redirectToLogin();
+        return;
+      }
+      if (result && result.success) {
+        showAlert(result.message || 'Provinsi berhasil ditambahkan!', 'success');
+        document.getElementById('newStateName').value = '';
+        loadExistingStates();
+        
+        // Reload state data and populate dropdowns
+        supLoadStates();
+      } else {
+        showAlert(result.message || 'Provinsi sudah ada', 'warning');
+      }
+    })
+    .withFailureHandler(function(error) {
+      showAlert('Error: ' + error.message, 'error');
+    })
+    .supAddNewState(stateName, userEmail);
+}
+
+// New City Modal Functions
+function openNewCityModal() {
+  document.getElementById('newCityModal').style.display = 'block';
+  document.getElementById('newCityName').value = '';
+  loadExistingCities();
+}
+
+function closeNewCityModal() {
+  document.getElementById('newCityModal').style.display = 'none';
+}
+
+function loadExistingCities() {
+  const container = document.getElementById('existingCitiesList');
+  container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Memuat...</div>';
+  
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+
+  google.script.run
+    .withSuccessHandler(function(cities) {
+      if (cities && cities.length > 0) {
+        container.innerHTML = cities.map(city => 
+          `<div style="padding: 8px; border-bottom: 1px solid #eee;">${city}</div>`
+        ).join('');
+      } else {
+        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Belum ada kota</div>';
+      }
+    })
+    .withFailureHandler(function(error) {
+      container.innerHTML = '<div style="text-align: center; padding: 20px; color: #e74c3c;">Error memuat data</div>';
+    })
+    .supGetCities(userEmail);
+}
+
+function saveNewCity() {
+  const cityName = document.getElementById('newCityName').value.trim();
+  
+  if (!cityName) {
+    showAlert('Nama kota tidak boleh kosong', 'warning');
+    return;
+  }
+  
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.sessionExpired) {
+        SessionManager.clearSession();
+        SessionManager.redirectToLogin();
+        return;
+      }
+      if (result && result.success) {
+        showAlert(result.message || 'Kota berhasil ditambahkan!', 'success');
+        document.getElementById('newCityName').value = '';
+        loadExistingCities();
+        
+        // Reload city data and populate dropdowns
+        supLoadCities();
+      } else {
+        showAlert(result.message || 'Kota sudah ada', 'warning');
+      }
+    })
+    .withFailureHandler(function(error) {
+      showAlert('Error: ' + error.message, 'error');
+    })
+    .supAddNewCity(cityName, userEmail);
+}
+
+// Reload state dropdowns yang sudah diinisialisasi
+function reloadStateDropdowns() {
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+  google.script.run
+    .withSuccessHandler(function(states) {
+      // Update add form dropdown
+      const stateSelect = $('#supplierState');
+      if (stateSelect.hasClass('select2-hidden-accessible')) {
+        const currentVal = stateSelect.val();
+        stateSelect.find('option:not(:first)').remove();
+        if (states && states.length > 0) {
+          states.forEach(function(state) {
+            stateSelect.append(new Option(state, state));
+          });
+        }
+        stateSelect.val(currentVal).trigger('change');
+      }
+      
+      // Update edit form dropdown
+      const editStateSelect = $('#editSupplierState');
+      if (editStateSelect.hasClass('select2-hidden-accessible')) {
+        const currentVal = editStateSelect.val();
+        editStateSelect.find('option:not(:first)').remove();
+        if (states && states.length > 0) {
+          states.forEach(function(state) {
+            editStateSelect.append(new Option(state, state));
+          });
+        }
+        editStateSelect.val(currentVal).trigger('change');
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error('Error reloading states:', error);
+    })
+    .supGetStates(userEmail);
+}
+
+// Reload city dropdowns yang sudah diinisialisasi
+function reloadCityDropdowns() {
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+  google.script.run
+    .withSuccessHandler(function(cities) {
+      // Update add form dropdown
+      const citySelect = $('#supplierCity');
+      if (citySelect.hasClass('select2-hidden-accessible')) {
+        const currentVal = citySelect.val();
+        citySelect.find('option:not(:first)').remove();
+        if (cities && cities.length > 0) {
+          cities.forEach(function(city) {
+            citySelect.append(new Option(city, city));
+          });
+        }
+        citySelect.val(currentVal).trigger('change');
+      }
+      
+      // Update edit form dropdown
+      const editCitySelect = $('#editSupplierCity');
+      if (editCitySelect.hasClass('select2-hidden-accessible')) {
+        const currentVal = editCitySelect.val();
+        editCitySelect.find('option:not(:first)').remove();
+        if (cities && cities.length > 0) {
+          cities.forEach(function(city) {
+            editCitySelect.append(new Option(city, city));
+          });
+        }
+        editCitySelect.val(currentVal).trigger('change');
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error('Error reloading cities:', error);
+    })
+    .supGetCities(userEmail);
+}
+
+// Load states from CState sheet
+function supLoadStates() {
+  console.log('🔄 Calling supGetStates()...');
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+  google.script.run
+    .withSuccessHandler(function(states) {
+      console.log('✅ States loaded:', states);
+      console.log('✅ States count:', states ? states.length : 0);
+      supStates = states || [];
+      populateSupStateDropdown();
+    })
+    .withFailureHandler(function(error) {
+      console.error('❌ Error loading states:', error);
+      supStates = [];
+    })
+    .supGetStates(userEmail);
+}
+
+// Load cities from CCity sheet
+function supLoadCities() {
+  console.log('🔄 Calling supGetCities()...');
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+  google.script.run
+    .withSuccessHandler(function(cities) {
+      console.log('✅ Cities loaded:', cities);
+      console.log('✅ Cities count:', cities ? cities.length : 0);
+      supCities = cities || [];
+      populateSupCityDropdown();
+    })
+    .withFailureHandler(function(error) {
+      console.error('❌ Error loading cities:', error);
+      supCities = [];
+    })
+    .supGetCities(userEmail);
+}
+
+function openAddSupplierModal() {
+  const modal = document.getElementById('addSupplierModal');
+  const form = document.getElementById('addSupplierForm');
+  
+  // Reset form
+  form.reset();
+  
+  // Show modal
+  modal.style.display = 'block';
+  
+  // PENTING: Isi dropdown setiap kali modal dibuka
+  fillDropdownsInModal();
+  
+  // Focus on first input
+  const firstInput = form.querySelector('input[name="supplierName"]');
+  if (firstInput) {
+    setTimeout(() => firstInput.focus(), 100);
+  }
+}
+
+// Fungsi untuk mengisi dropdown saat modal dibuka
+function fillDropdownsInModal() {
+  console.log('📋 Filling dropdowns in modal...');
+  console.log('📋 supStates:', supStates);
+  console.log('📋 supCities:', supCities);
+  
+  // Isi dropdown Provinsi
+  var $stateSelect = $('#supplierState');
+  if ($stateSelect.length > 0) {
+    // Destroy Select2 jika sudah ada
+    if ($stateSelect.data('select2')) {
+      $stateSelect.select2('destroy');
+    }
+    
+    // Clear dan isi ulang
+    $stateSelect.empty();
+    $stateSelect.append('<option value="">-- Pilih Provinsi --</option>');
+    
+    if (supStates && supStates.length > 0) {
+      supStates.forEach(function(state) {
+        if (state) {
+          $stateSelect.append($('<option></option>').val(state).text(state));
+        }
+      });
+      console.log('✅ Provinsi dropdown filled with', supStates.length, 'items');
+    } else {
+      console.warn('⚠️ No states data available');
+    }
+    
+    // Init Select2
+    $stateSelect.select2({
+      width: '100%',
+      placeholder: '-- Pilih Provinsi --',
+      dropdownParent: $('#addSupplierModal')
+    });
+  }
+  
+  // Isi dropdown Kota
+  var $citySelect = $('#supplierCity');
+  if ($citySelect.length > 0) {
+    // Destroy Select2 jika sudah ada
+    if ($citySelect.data('select2')) {
+      $citySelect.select2('destroy');
+    }
+    
+    // Clear dan isi ulang
+    $citySelect.empty();
+    $citySelect.append('<option value="">-- Pilih Kota --</option>');
+    
+    if (supCities && supCities.length > 0) {
+      supCities.forEach(function(city) {
+        if (city) {
+          $citySelect.append($('<option></option>').val(city).text(city));
+        }
+      });
+      console.log('✅ Kota dropdown filled with', supCities.length, 'items');
+    } else {
+      console.warn('⚠️ No cities data available');
+    }
+    
+    // Init Select2
+    $citySelect.select2({
+      width: '100%',
+      placeholder: '-- Pilih Kota --',
+      dropdownParent: $('#addSupplierModal')
+    });
+  }
+}
+
+function closeAddSupplierModal() {
+  const modal = document.getElementById('addSupplierModal');
+  const form = document.getElementById('addSupplierForm');
+  
+  modal.style.display = 'none';
+  form.reset();
+}
+
+
+function submitSupplierForm() {
+  const form = document.getElementById('addSupplierForm');
+  const formData = new FormData(form);
+  const submitBtn = form.querySelector('button[type="submit"]');
+  
+  // Show loading state
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'Menambahkan...';
+  submitBtn.disabled = true;
+  
+  console.log('🚀 Starting supplier submission...');
+  
+  // Check Google Apps Script availability first
+  if (typeof google === 'undefined' || !google.script) {
+    console.error('❌ Google Apps Script not available');
+    showAlert('Error: Google Apps Script tidak tersedia', 'error');
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+    return;
+  }
+  
+  const supplierData = {
+    id: formData.get('supplierId'),
+    name: formData.get('supplierName'),
+    contact: formData.get('contact'),
+    email: formData.get('email'),
+    state: formData.get('state'),
+    city: formData.get('city'),
+    address: formData.get('address'),
+    noRek: formData.get('noRek')
+  };
+  
+  console.log('📋 Supplier data to submit:', supplierData);
+
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+
+  // Call Google Apps Script function to add supplier
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.sessionExpired) {
+        SessionManager.clearSession();
+        SessionManager.redirectToLogin();
+        return;
+      }
+      console.log('✅ Add supplier SUCCESS result:', result);
+      console.log('Result type:', typeof result);
+      
+      // Handle different response formats
+      if (typeof result === 'string') {
+        try {
+          result = JSON.parse(result);
+        } catch (e) {
+          console.error('❌ Failed to parse result string:', result);
+        }
+      }
+      
+      console.log('Result structure:', JSON.stringify(result, null, 2));
+      
+      if (result && result.success === true) {
+        showAlert('Pemasok berhasil ditambahkan!', 'success');
+        closeAddSupplierModal();
+        form.reset(); // Reset form
+        loadSupplierData(); // Reload data
+      } else {
+        const errorMsg = result ? (result.message || 'Unknown server error') : 'Invalid server response';
+        console.error('❌ Server returned error result:', result);
+        showAlert('Error: ' + errorMsg, 'error');
+      }
+          
+      // Reset button state
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    })
+    .withFailureHandler(function(error) {
+      console.error('❌ Add supplier FAILURE:', error);
+      console.error('Error type:', typeof error);
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      
+      let errorMessage = 'Unknown error occurred';
+      if (error && error.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      showAlert('Error menambahkan pemasok: ' + errorMessage, 'error');
+      
+      // Reset button state
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    })
+    .supAddNewSupplier(supplierData, userEmail);
+}
+
+function submitEditSupplierForm() {
+  const form = document.getElementById('editSupplierForm');
+  const formData = new FormData(form);
+  const submitBtn = form.querySelector('button[type="submit"]');
+  
+  // Use the supplier name (more reliable than index which can change)
+  if (!editingSupplierName) {
+    showAlert('Error: Data pemasok tidak valid', 'error');
+    return;
+  }
+  
+  const originalSupplierName = editingSupplierName;
+  
+  console.log('🚀 Starting supplier update for name:', originalSupplierName);
+  
+  // Show loading state
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'Memperbarui...';
+  submitBtn.disabled = true;
+  
+  // Check Google Apps Script availability
+  if (typeof google === 'undefined' || !google.script) {
+    showAlert('Error: Google Apps Script tidak tersedia', 'error');
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+    return;
+  }
+  
+  const supplierDataToUpdate = {
+    originalName: originalSupplierName,
+    id: formData.get('supplierId'),
+    name: formData.get('supplierName'),
+    contact: formData.get('contact'),
+    email: formData.get('email'),
+    state: formData.get('state'),
+    city: formData.get('city'),
+    address: formData.get('address'),
+    noRek: formData.get('noRek')
+  };
+  
+  console.log('📋 Updating supplier with name:', originalSupplierName, 'Data:', supplierDataToUpdate);
+  
+  // Validate that this supplier still exists in our local data
+  const currentSupplierIndex = supplierData.findIndex(s => s.name === originalSupplierName);
+  if (currentSupplierIndex === -1) {
+    console.warn('⚠️ Supplier not found in current data, reloading...');
+    showAlert('Data pemasok telah berubah, silakan coba lagi', 'warning');
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+    loadSupplierData();
+    return;
+  }
+
+  // Set timeout to reset button if no response comes back
+  const timeoutId = setTimeout(() => {
+    console.warn('⚠️ Update operation timeout after 30 seconds');
+    showAlert('Operasi timeout, tetapi data mungkin sudah tersimpan. Silakan cek ulang.', 'warning');
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  }, 30000);
+
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+
+  // Call Google Apps Script function to update supplier
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.sessionExpired) {
+        SessionManager.clearSession();
+        SessionManager.redirectToLogin();
+        return;
+      }
+      clearTimeout(timeoutId); // Clear the timeout
+      console.log('✅ Update result:', result);
+      console.log('Result type:', typeof result);
+      console.log('Result structure:', JSON.stringify(result, null, 2));
+      
+      // Handle different response formats
+      if (typeof result === 'string') {
+        try {
+          result = JSON.parse(result);
+        } catch (e) {
+          console.error('❌ Failed to parse result string:', result);
+        }
+      }
+      
+      if (result && result.success === true) {
+        showAlert('Pemasok berhasil diperbarui!', 'success');
+        closeEditSupplierModal();
+        
+        // Reload data to ensure consistency with backend
+        setTimeout(() => {
+          loadSupplierData();
+        }, 500);
+      } else {
+        const errorMsg = result ? result.message || 'Unknown error' : 'Invalid response';
+        console.error('❌ Server returned error result:', result);
+        showAlert('Error: ' + errorMsg, 'error');
+      }
+      
+      // Reset button state - ALWAYS execute this
+      console.log('🔄 Resetting button state');
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    })
+    .withFailureHandler(function(error) {
+      clearTimeout(timeoutId); // Clear the timeout
+      console.error('❌ Update error:', error);
+      showAlert('Error memperbarui pemasok: ' + error.message, 'error');
+      
+      // Reset button state - ALWAYS execute this
+      console.log('🔄 Resetting button state after error');
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    })
+    .supUpdateSupplier(supplierDataToUpdate, userEmail);
+}
+
+function showAlert(message, type) {
+  // Create alert element
+  const alertDiv = document.createElement('div');
+  alertDiv.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 10001;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease;
+  `;
+  
+  if (type === 'success') {
+    alertDiv.style.background = '#27ae60';
+    alertDiv.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 8px;"></i>${message}`;
+  } else if (type === 'warning') {
+    alertDiv.style.background = '#f39c12';
+    alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>${message}`;
+  } else if (type === 'info') {
+    alertDiv.style.background = '#3498db';
+    alertDiv.innerHTML = `<i class="fas fa-info-circle" style="margin-right: 8px;"></i>${message}`;
+  } else {
+    alertDiv.style.background = '#e74c3c';
+    alertDiv.innerHTML = `<i class="fas fa-exclamation-circle" style="margin-right: 8px;"></i>${message}`;
+  }
+  
+  document.body.appendChild(alertDiv);
+  
+  // Auto remove after 4 seconds
+  setTimeout(() => {
+    if (alertDiv.parentNode) {
+      alertDiv.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          document.body.removeChild(alertDiv);
+        }
+      }, 300);
+    }
+  }, 4000);
+}
+
+function testConnection() {
+  google.script.run
+    .withSuccessHandler(function(result) {
+      console.log('Test connection result:', result);
+      if (result && result.success) {
+        showAlert('Koneksi berhasil! Sheet tersedia', 'success');
+      } else {
+        showAlert('Koneksi gagal: ' + (result ? result.message : 'Unknown error'), 'error');
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error('Connection test failed:', error);
+      showAlert('Error koneksi: ' + error.message, 'error');
+    })
+    .testConnection();
+}
+
+// Add test button in loadSupplierData for debugging
+function debugSupplierConnection() {
+  console.log('Testing supplier connection...');
+  google.script.run
+    .withSuccessHandler(function(result) {
+      console.log('Supplier test result:', result);
+      showAlert('Test supplier berhasil: ' + JSON.stringify(result), 'success');
+    })
+    .withFailureHandler(function(error) {
+      console.error('Supplier test failed:', error);
+      showAlert('Test supplier gagal: ' + error.message, 'error');
+    })
+    .supGetSuppliers();
+}
+
+function createSuppliersSheet() {
+  console.log('Creating suppliers sheet...');
+  showAlert('Membuat sheet Suppliers...', 'info');
+  
+  google.script.run
+    .withSuccessHandler(function(result) {
+      console.log('Create sheet result:', result);
+      if (result && result.success) {
+        showAlert(result.message, 'success');
+        console.log('Spreadsheet info:', result.data);
+        
+        if (result.data.created) {
+          // Reload after creating
+          setTimeout(() => {
+            showAlert('Sheet berhasil dibuat! Mencoba load data...', 'info');
+            loadSupplierData();
+          }, 1000);
+        } else {
+          // Sheet already exists, try to load data
+          setTimeout(() => loadSupplierData(), 500);
+        }
+      } else {
+        showAlert('Error membuat sheet: ' + (result ? result.message : 'Unknown'), 'error');
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error('Create sheet failed:', error);
+      showAlert('Error membuat sheet: ' + error.message, 'error');
+    })
+    .createSuppliersSheetIfNeeded();
+}
+
+// Utility function to re-render supplier grid without reloading data
+function renderSuppliersGrid() {
+  const tbody = document.getElementById('suppliersTableBody');
+  const emptyState = document.getElementById('emptyState');
+  
+  // Clear existing supplier rows
+  tbody.querySelectorAll('tr:not(#loadingState)').forEach(row => row.remove());
+  
+  if (supplierData && supplierData.length > 0) {
+    emptyState.style.display = 'none';
+    
+    console.log(`📊 Re-rendering ${supplierData.length} suppliers`);
+    
+    supplierData.forEach((supplier, index) => {
+      const supplierRow = createSupplierRow(supplier, index);
+      tbody.appendChild(supplierRow);
+    });
+    
+    console.log('✅ Table re-rendered successfully');
+    
+  } else {
+    emptyState.style.display = 'block';
+    console.log('📭 No suppliers to display, showing empty state');
+  }
+}
+
+function loadSupplierData() {
+  try {
+    console.log('🔄 Loading supplier data...');
+    
+    const tbody = document.getElementById('suppliersTableBody');
+    const loadingState = document.getElementById('loadingState');
+    const emptyState = document.getElementById('emptyState');
+    
+    console.log('📋 Elements check:', { 
+      tbody: !!tbody, 
+      loadingState: !!loadingState, 
+      emptyState: !!emptyState 
+    });
+    
+    if (!tbody || !loadingState || !emptyState) {
+      console.error('❌ Required elements not found:', { tbody, loadingState, emptyState });
+      return;
+    }
+    
+    // Show loading
+    loadingState.style.display = 'table-row';
+    emptyState.style.display = 'none';
+    
+    // Clear existing supplier rows
+    tbody.querySelectorAll('tr:not(#loadingState)').forEach(row => row.remove());
+    
+    // Check if Google Apps Script is available
+    if (typeof google === 'undefined' || !google.script) {
+      console.error('❌ Google Apps Script not available');
+      loadingState.style.display = 'none';
+      const errorRow = document.createElement('tr');
+      errorRow.innerHTML = `
+        <td colspan="9" style="padding: 60px; text-align: center; color: #e74c3c;">
+          <i class="fas fa-exclamation-triangle" style="font-size: 24px; margin-right: 10px;"></i>
+          Google Apps Script Tidak Tersedia - Buka dari Google Apps Script Web App
+        </td>
+      `;
+      tbody.appendChild(errorRow);
+      return;
+    }
+    
+    console.log('📞 Calling supGetSuppliers()...');
+    
+    // Set timeout (15 seconds - give more time)
+    const timeoutId = setTimeout(() => {
+      console.error('❌ Load supplier data timeout (15s)');
+      loadingState.style.display = 'none';
+      const errorRow = document.createElement('tr');
+      errorRow.innerHTML = `
+        <td colspan="9" style="padding: 60px; text-align: center; color: #e74c3c;">
+          <i class="fas fa-clock" style="font-size: 24px; margin-right: 10px;"></i>
+          Request timeout - <button onclick="loadSupplierData()" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; margin-left: 10px;">Coba Lagi</button>
+        </td>
+      `;
+      tbody.appendChild(errorRow);
+    }, 15000);
+    
+    // Get user email from session
+    const user = SessionManager.getUser();
+    const userEmail = user ? user.username : null;
+
+    // Call supGetSuppliers with email for session check
+    google.script.run
+      .withSuccessHandler(function(response) {
+        clearTimeout(timeoutId);
+        
+        // Check for session expiration
+        if (response && response.sessionExpired) {
+          console.warn('Session expired during data load');
+          SessionManager.clearSession();
+          SessionManager.redirectToLogin();
+          return;
+        }
+
+        console.log('✅ Raw supplier response:', response);
+      console.log('✅ Response type:', typeof response);
+      console.log('✅ Response.success:', response?.success);
+      console.log('✅ Response.data:', response?.data);
+      
+      loadingState.style.display = 'none';
+      
+      // Handle string response
+      if (typeof response === 'string') {
+        try {
+          response = JSON.parse(response);
+          console.log('✅ Parsed response:', response);
+        } catch (e) {
+          console.error('❌ Failed to parse response:', e);
+          showLoadingError('Invalid response format');
+          return;
+        }
+      }
+      
+      // Check if response is valid
+      if (!response) {
+        console.error('❌ Empty response');
+        showLoadingError('Empty response from server');
+        return;
+      }
+      
+      // Success with data
+      if (response.success === true && response.data && response.data.length > 0) {
+        const suppliers = response.data;
+        supplierData = suppliers;
+        window.supplierData = suppliers;
+        emptyState.style.display = 'none';
+        
+        // Clear existing rows
+        tbody.querySelectorAll('tr:not(#loadingState)').forEach(row => row.remove());
+        
+        console.log(`📊 Displaying ${suppliers.length} suppliers`);
+        
+        suppliers.forEach((supplier, index) => {
+          const supplierRow = createSupplierRow(supplier, index);
+          tbody.appendChild(supplierRow);
+        });
+        
+        console.log('✅ All supplier rows created');
+        
+      } else if (response.success === true) {
+        // Success but no data
+        supplierData = [];
+        console.log('📭 No suppliers found - showing empty state');
+        tbody.querySelectorAll('tr:not(#loadingState)').forEach(row => row.remove());
+        emptyState.style.display = 'block';
+        emptyState.style.display = 'block';
+      } else {
+        console.error('❌ Server returned error:', response);
+        const errorMessage = response ? (response.message || 'Unknown error') : 'Invalid response';
+        showLoadingError(errorMessage);
+      }
+    })
+    .withFailureHandler(function(error) {
+      clearTimeout(timeoutId);
+      console.error('❌ Failed to load supplier data:', error);
+      
+      loadingState.style.display = 'none';
+      
+      let errorMessage = 'Unknown error occurred';
+      if (error && error.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      showLoadingError(errorMessage);
+    })
+    .supGetSuppliers(userEmail);
+    
+  } catch (error) {
+    console.error('❌ Exception in loadSupplierData:', error);
+    const loadingState = document.getElementById('loadingState');
+    if (loadingState) loadingState.style.display = 'none';
+  }
+}
+
+function showLoadingError(errorMessage) {
+  const tbody = document.getElementById('suppliersTableBody');
+  
+  // Show error state
+  const errorRow = document.createElement('tr');
+  errorRow.innerHTML = `
+    <td colspan="8" style="padding: 60px; text-align: center; color: #e74c3c;">
+      <i class="fas fa-exclamation-triangle" style="font-size: 24px; margin-right: 10px;"></i>
+      <div style="margin-top: 10px;">
+        <p style="margin: 0 0 10px 0; font-weight: 500;">Error memuat pemasok</p>
+        <p style="margin: 0 0 10px 0; font-size: 14px;">${errorMessage}</p>
+        <button onclick="loadSupplierData()" style="
+          background: #3498db; 
+          color: white; 
+          border: none; 
+          padding: 8px 15px; 
+          border-radius: 4px; 
+          cursor: pointer;
+          font-size: 13px;
+        ">Coba Lagi</button>
+      </div>
+    </td>
+  `;
+  
+  tbody.appendChild(errorRow);
+}
+
+function createSupplierRow(supplier, index) {
+  const row = document.createElement('tr');
+  row.style.cssText = 'border-bottom: 1px solid #f0f0f0;';
+  
+  row.addEventListener('mouseenter', function() {
+    this.style.backgroundColor = '#f9f9f9';
+  });
+  
+  row.addEventListener('mouseleave', function() {
+    this.style.backgroundColor = 'transparent';
+  });
+  
+  const address = formatAddress(supplier);
+  
+  row.innerHTML = `
+    <td style="padding: 12px 15px; color: #2c3e50;">${supplier.id || 'N/A'}</td>
+    <td style="padding: 12px 15px; color: #2c3e50; font-weight: 500;">${supplier.name || 'Tanpa Nama'}</td>
+    <td style="padding: 12px 15px; color: #2c3e50;">${supplier.contact || 'N/A'}</td>
+    <td style="padding: 12px 15px; color: #2c3e50;">${supplier.email || 'N/A'}</td>
+    <td style="padding: 12px 15px; color: #2c3e50;">${supplier.state || 'N/A'}</td>
+    <td style="padding: 12px 15px; color: #2c3e50;">${supplier.city || 'N/A'}</td>
+    <td style="padding: 12px 15px; color: #2c3e50;">${address}</td>
+    <td style="padding: 12px 15px; color: #2c3e50;">${supplier.noRek || 'N/A'}</td>
+    <td style="padding: 12px 15px; text-align: center;">
+      <button class="edit-supplier-btn" data-supplier-index="${index}" style="
+        background: #3498db; 
+        color: white; 
+        border: none; 
+        padding: 6px 10px; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 13px;
+        margin-right: 5px;
+      " title="Edit Pemasok">
+        <i class="fas fa-edit"></i>
+      </button>
+      <button class="delete-supplier-btn" data-supplier-index="${index}" data-supplier-name="${(supplier.name || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}" style="
+        background: #e74c3c; 
+        color: white; 
+        border: none; 
+        padding: 6px 10px; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 13px;
+      " title="Hapus Pemasok">
+        <i class="fas fa-trash"></i>
+      </button>
+    </td>
+  `;
+  
+  // Add event listeners for edit and delete buttons
+  const editBtn = row.querySelector('.edit-supplier-btn');
+  const deleteBtn = row.querySelector('.delete-supplier-btn');
+  
+  if (editBtn) {
+    editBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      editSupplier(index);
+    });
+  }
+  
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      deleteSupplierWithChecks(index, supplier.name);
+    });
+  }
+  
+  return row;
+}
+
+function formatAddress(supplier) {
+  const parts = [];
+  
+  if (supplier.address && supplier.address.trim() !== '') {
+    parts.push(supplier.address);
+  }
+  
+  if (supplier.city && supplier.city.trim() !== '') {
+    parts.push(supplier.city);
+  }
+  
+  if (supplier.state && supplier.state.trim() !== '') {
+    parts.push(supplier.state);
+  }
+  
+  return parts.length > 0 ? parts.join(', ') : 'Tidak ada alamat';
+}
+
+// editingIndex, editingSupplierName already declared at top
+// let supplierData = []; // REMOVED - already declared
+// let editingIndex = -1; // REMOVED - already declared
+// let editingSupplierName = null; // REMOVED - already declared
+let isInitialized = false; // Flag untuk track apakah sheet sudah di-initialize
+
+function editSupplier(index) {
+  console.log('🔍 Edit supplier index:', index);
+  
+  // Wait for data to be loaded
+  if (!supplierData || supplierData.length === 0) {
+    console.warn('Data not loaded, reloading...');
+    loadSupplierData();
+    setTimeout(() => editSupplier(index), 1000); // Retry after 1 second
+    return;
+  }
+  
+  // Get supplier by index
+  const supplier = supplierData[index];
+  
+  if (!supplier) {
+    console.error('Supplier not found at index:', index);
+    console.log('Available suppliers count:', supplierData.length);
+    showAlert('Data pemasok tidak ditemukan!', 'error');
+    return;
+  }
+
+  console.log('Found supplier:', supplier);
+
+  // Store both editing index and supplier name for safety
+  editingIndex = index;
+  editingSupplierName = supplier.name;
+  console.log('✅ Set editingIndex to:', editingIndex, 'and editingSupplierName to:', editingSupplierName);
+
+  // Fill form with supplier data
+  document.getElementById('editSupplierId').value = supplier.id || '';
+  document.getElementById('editSupplierName').value = supplier.name || '';
+  document.getElementById('editSupplierContact').value = supplier.contact || '';
+  document.getElementById('editSupplierEmail').value = supplier.email || '';
+  document.getElementById('editSupplierAddress').value = supplier.address || '';
+  document.getElementById('editSupplierNoRek').value = supplier.noRek || '';
+  
+  // Set dropdown values
+  $('#editSupplierState').val(supplier.state || '').trigger('change');
+  $('#editSupplierCity').val(supplier.city || '').trigger('change');
+  
+  // Show edit modal
+  openEditSupplierModal();
+}
+
+// supplierToDelete, deleteSupplierIndex already declared at top
+// let supplierToDelete = null; // REMOVED
+// let deleteSupplierIndex = -1; // REMOVED
+
+function deleteSupplier(index, name) {
+  console.log('🗑️ Delete supplier called - index:', index, 'Name:', name);
+  console.log('📊 Current supplierData:', supplierData);
+  console.log('📊 SupplierData length:', supplierData?.length);
+  
+  // Wait for data to be loaded
+  if (!supplierData || supplierData.length === 0) {
+    console.warn('Data not loaded, reloading...');
+    loadSupplierData();
+    setTimeout(() => deleteSupplier(index, name), 1000); // Retry after 1 second
+    return;
+  }
+  
+  // Get supplier by index
+  const supplier = supplierData[index];
+  
+  if (!supplier) {
+    console.error('Supplier not found at index:', index);
+    console.log('Available suppliers count:', supplierData.length);
+    showAlert('Data pemasok tidak ditemukan!', 'error');
+    return;
+  }
+
+  console.log('Found supplier for delete:', supplier);
+  
+  // Store the index for later use (following inventory.html pattern)
+  window.deleteSupplierIndex = index;
+  window.supplierToDelete = supplier;
+
+  // Update delete confirmation modal content
+  const deleteSupplierDetails = document.getElementById('deleteSupplierDetails');
+  if (deleteSupplierDetails) {
+    deleteSupplierDetails.innerHTML = `
+      <div style="display: grid; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+          <span style="font-weight: 500; color: #6c757d;">Nama Pemasok:</span>
+          <span style="font-weight: 600; color: #2c3e50;">${supplier.name || 'Tidak diketahui'}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+          <span style="font-weight: 500; color: #6c757d;">Email:</span>
+          <span style="font-weight: 600; color: #2c3e50;">${supplier.email || 'Tidak ada'}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 8px;">
+          <span style="font-weight: 500; color: #6c757d;">Kontak:</span>
+          <span style="font-weight: 600; color: #2c3e50;">${supplier.contact || supplier.phone || 'Tidak ada'}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 500; color: #6c757d;">Alamat:</span>
+          <span style="font-weight: 600; color: #2c3e50;">${formatAddress(supplier)}</span>
+        </div>
+      </div>
+    `;
+    console.log('✅ Delete modal content updated');
+  } else {
+    console.error('❌ deleteSupplierDetails element not found');
+  }
+
+  console.log('🔍 About to show delete modal for:', supplier.name);
+  
+  // Show delete confirmation modal
+  const modal = document.getElementById('confirmDeleteSupplierModal');
+  console.log('🔍 Modal element found:', !!modal);
+  if (modal) {
+    modal.style.display = 'flex';
+    console.log('✅ Delete modal should now be visible');
+    console.log('✅ Modal display style:', modal.style.display);
+    
+    // Re-check buttons after modal is shown (following inventory.html pattern)
+    setTimeout(() => {
+      const confirmBtn = document.getElementById('confirmDeleteSupplierBtn');
+      const cancelBtn = document.getElementById('cancelDeleteSupplierBtn');
+      
+      console.log('🔍 After modal shown - Confirm button found:', !!confirmBtn);
+      console.log('🔍 After modal shown - Cancel button found:', !!cancelBtn);
+      
+      if (confirmBtn) {
+        console.log('🔍 Confirm button cursor style:', window.getComputedStyle(confirmBtn).cursor);
+        console.log('🔍 Confirm button pointer-events:', window.getComputedStyle(confirmBtn).pointerEvents);
+        console.log('🔍 Confirm button z-index:', window.getComputedStyle(confirmBtn).zIndex);
+      }
+    }, 100);
+    
+  } else {
+    console.error('❌ Delete modal not found!');
+  }
+}
+
+function openEditSupplierModal() {
+  document.getElementById('editSupplierModal').style.display = 'flex';
+}
+
+function closeEditSupplierModal() {
+  document.getElementById('editSupplierModal').style.display = 'none';
+  
+  // Reset editing state
+  editingIndex = -1;
+  editingSupplierName = null;
+  
+  // Clear form
+  document.getElementById('editSupplierForm').reset();
+}
+
+function closeDeleteSupplierModal() {
+  console.log('🚪 Closing delete modal');
+  const modal = document.getElementById('confirmDeleteSupplierModal');
+  if (modal) {
+    modal.style.display = 'none';
+    console.log('✅ Delete modal closed');
+  }
+  
+  // Reset delete state (using window variables following inventory.html pattern)
+  window.supplierToDelete = null;
+  window.deleteSupplierIndex = -1;
+  console.log('🔄 Delete state reset');
+}
+
+function confirmDeleteSupplier() {
+  console.log('🗑️🗑️🗑️ CONFIRM DELETE SUPPLIER CALLED 🗑️🗑️🗑️');
+  
+  // Get index and supplier from window variables (following inventory.html pattern)
+  const index = window.deleteSupplierIndex;
+  const supplier = window.supplierToDelete;
+  
+  console.log('deleteSupplierIndex:', index);
+  console.log('supplierToDelete:', supplier);
+  
+  if (!supplier || index === undefined) {
+    console.error('❌ No supplier to delete');
+    showAlert('Tidak ada pemasok yang akan dihapus!', 'error');
+    closeDeleteSupplierModal();
+    return;
+  }
+
+  console.log('✅ Proceeding with delete for:', supplier.name);
+
+  // Show loading state (following inventory.html pattern)
+  const confirmBtn = document.getElementById('confirmDeleteSupplierBtn');
+  const originalBtnText = confirmBtn.innerHTML;
+  confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+  confirmBtn.disabled = true;
+  
+  // Check if Google Apps Script is available
+  if (typeof google === 'undefined' || !google.script) {
+    console.error('❌ Google Apps Script not available');
+    showAlert('Error: Google Apps Script tidak tersedia', 'error');
+    
+    // Reset button state
+    confirmBtn.innerHTML = originalBtnText;
+    confirmBtn.disabled = false;
+    return;
+  }
+  
+  const supplierNameToDelete = supplier.name;
+  
+  // Validate supplier name is not empty or invalid
+  if (!supplierNameToDelete || supplierNameToDelete.trim() === '') {
+    console.error('❌ Invalid supplier name for delete');
+    showAlert('Error: Nama pemasok tidak valid untuk dihapus', 'error');
+    
+    // Reset button state and close modal
+    confirmBtn.innerHTML = originalBtnText;
+    confirmBtn.disabled = false;
+    closeDeleteSupplierModal();
+    return;
+  }
+  
+  console.log('📤 Sending delete request to supDeleteSupplier with name:', supplierNameToDelete);
+  
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.sessionExpired) {
+        SessionManager.clearSession();
+        SessionManager.redirectToLogin();
+        return;
+      }
+      console.log('✅ Delete result received:', result);
+      console.log('📋 Delete result type:', typeof result);
+      console.log('📋 Delete result structure:', JSON.stringify(result, null, 2));
+      
+      // Handle different response formats
+      if (typeof result === 'string') {
+        try {
+          result = JSON.parse(result);
+          console.log('✅ Parsed string result to object');
+        } catch (e) {
+          console.error('❌ Failed to parse delete result string:', result);
+          showAlert('Error: Response format tidak valid', 'error');
+          
+          // Reset button state and close modal
+          confirmBtn.innerHTML = originalBtnText;
+          confirmBtn.disabled = false;
+          closeDeleteSupplierModal();
+          return;
+        }
+      }
+      
+      console.log('🔍 Checking delete result success flag...');
+      
+      if (result && result.success === true) {
+        console.log('✅ Backend confirmed delete success!');
+        
+        // Remove from local array (following inventory.html pattern)
+        supplierData.splice(index, 1);
+        console.log('✅ Removed supplier from local array, new length:', supplierData.length);
+        
+        // Re-render table without reloading data (much faster than full reload)
+        renderSuppliersGrid();
+        
+        // Reset button state and close modal
+        confirmBtn.innerHTML = originalBtnText;
+        confirmBtn.disabled = false;
+        closeDeleteSupplierModal();
+        
+        // Show success message
+        showAlert('Pemasok "' + supplierNameToDelete + '" berhasil dihapus!', 'success');
+        
+        console.log('✅ Delete completed without page reload');
+        
+      } else {
+        const errorMsg = result ? result.message || 'Unknown delete error' : 'Invalid delete response';
+        console.error('❌ Delete failed with result:', result);
+        
+        // Check if it's a balance issue
+        if (errorMsg.includes('saldo hutang') || errorMsg.includes('balance')) {
+          showAlert('Tidak dapat menghapus: ' + errorMsg, 'warning');
+        } else {
+          showAlert('Error menghapus pemasok: ' + errorMsg, 'error');
+        }
+        
+        // Reset button state
+        confirmBtn.innerHTML = originalBtnText;
+        confirmBtn.disabled = false;
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error('❌ Delete operation failed with error:', error);
+      console.error('❌ Error type:', typeof error);
+      console.error('❌ Error message:', error.message);
+      console.error('❌ Error stack:', error.stack);
+      
+      let errorMessage = 'Unknown error occurred';
+      if (error && error.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      showAlert('Error menghapus pemasok: ' + errorMessage, 'error');
+      
+      // Reset button state
+      confirmBtn.innerHTML = originalBtnText;
+      confirmBtn.disabled = false;
+    })
+    .supDeleteSupplier(supplierNameToDelete, userEmail);
+    
+  console.log('📤 Delete request sent to backend for supplier:', supplierNameToDelete);
+}
+
+// Function to reattach event listeners after dynamic content update
+function attachSupplierEventListeners() {
+  console.log('🔗 Reattaching event listeners...');
+  
+  // Get all edit buttons and attach event listeners
+  const editButtons = document.querySelectorAll('.supplier-card .edit-supplier-btn');
+  editButtons.forEach((button, index) => {
+    button.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log(`✏️ Edit button clicked for index: ${index}`);
+      editSupplier(index);
+    };
+  });
+  
+  // Get all delete buttons and attach event listeners
+  const deleteButtons = document.querySelectorAll('.supplier-card .delete-supplier-btn');
+  deleteButtons.forEach((button, index) => {
+    button.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const supplier = supplierData[index];
+      console.log(`🗑️ Delete button clicked for index: ${index}, supplier:`, supplier);
+      if (supplier) {
+        deleteSupplier(index, supplier.name);
+      }
+    };
+  });
+  
+  console.log(`✅ Reattached listeners for ${editButtons.length} edit and ${deleteButtons.length} delete buttons`);
+}
+
+// Debug function to test delete backend directly
+function testDeleteSupplier(supplierName) {
+  console.log('🧪 Testing delete supplier:', supplierName);
+  
+  if (typeof google === 'undefined' || !google.script) {
+    console.error('❌ Google Apps Script not available for testing');
+    return;
+  }
+  
+  const user = SessionManager.getUser();
+  const userEmail = user ? user.username : null;
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      console.log('🧪 Test delete result:', result);
+      console.log('🧪 Test delete result type:', typeof result);
+      console.log('🧪 Test delete result structure:', JSON.stringify(result, null, 2));
+    })
+    .withFailureHandler(function(error) {
+      console.error('🧪 Test delete error:', error);
+    })
+    .supDeleteSupplier(supplierName, userEmail);
+}
+
+// Function to check supplier data and balance before delete
+function checkSupplierBeforeDelete(supplierName) {
+  console.log('🔍 Checking supplier before delete:', supplierName);
+  
+  if (!supplierData || supplierData.length === 0) {
+    console.error('❌ No supplier data available');
+    return null;
+  }
+  
+  const supplier = supplierData.find(s => s.name === supplierName);
+  if (!supplier) {
+    console.error('❌ Supplier not found:', supplierName);
+    return null;
+  }
+  
+  console.log('📊 Supplier found:', supplier);
+  console.log('💰 Balance:', supplier.balance);
+  console.log('💰 Balance Payable:', supplier.balancePayable);
+  
+  const balance = supplier.balance || supplier.balancePayable || 0;
+  
+  if (balance > 0) {
+    console.warn('⚠️ Supplier has positive balance:', balance);
+    showAlert(`Tidak dapat menghapus pemasok "${supplierName}" karena masih memiliki saldo hutang: ${balance}`, 'warning');
+    return false;
+  }
+  
+  console.log('✅ Supplier can be deleted (balance: ' + balance + ')');
+  return true;
+}
+
+// Enhanced delete function with pre-checks
+function deleteSupplierWithChecks(index, name) {
+  console.log('🔍 Delete with checks - Index:', index, 'Name:', name);
+  
+  // First check if supplier can be deleted
+  const canDelete = checkSupplierBeforeDelete(name);
+  if (canDelete === false) {
+    return; // Stop if balance check fails
+  }
+  
+  if (canDelete === null) {
+    showAlert('Error: Data pemasok tidak valid', 'error');
+    return;
+  }
+  
+  // Proceed with normal delete
+  deleteSupplier(index, name);
+}
+
+// Force reload function for troubleshooting
+function forceReloadSupplierData() {
+  console.log('🔄 Force reloading supplier data...');
+  
+  // Clear local data
+  supplierData = [];
+  
+  // Clear grid
+  const grid = document.getElementById('suppliersGrid');
+  const existingCards = grid.querySelectorAll('.supplier-card');
+  existingCards.forEach(card => card.remove());
+  
+  // Clear any error messages
+  const errorDivs = grid.querySelectorAll('div[style*="color: #e74c3c"]');
+  errorDivs.forEach(div => div.remove());
+  
+  // Show loading and reload
+  const loadingState = document.getElementById('loadingState');
+  const emptyState = document.getElementById('emptyState');
+  
+  loadingState.style.display = 'block';
+  emptyState.style.display = 'none';
+  
+  // Force reload after short delay
+  setTimeout(() => {
+    loadSupplierData();
+  }, 500);
+  
+  showAlert('Memuat ulang data pemasok...', 'info');
+}
+
+// Function to validate if supplier exists before operations
+function validateSupplierExists(supplierName) {
+  console.log('🔍 Validating supplier exists:', supplierName);
+  
+  if (!supplierData || supplierData.length === 0) {
+    console.warn('⚠️ No supplier data loaded');
+    return false;
+  }
+  
+  const exists = supplierData.some(s => s.name === supplierName);
+  console.log('✅ Supplier exists:', exists);
+  
+  return exists;
+}
+
+</script>
