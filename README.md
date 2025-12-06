@@ -602,10 +602,17 @@ Menu Laporan menyediakan berbagai laporan untuk analisis bisnis dan pengambilan 
 
 | Laporan | Deskripsi |
 |---------|-----------|
-| **Rekap Penjualan** | Ringkasan dan detail penjualan |
-| **Laporan Inventory** | Status stok dan pergerakan barang |
-| **Laporan Keuangan** | Ringkasan keuangan (pendapatan, pengeluaran) |
-| **Laporan Pelanggan** | Analisis pelanggan dan transaksi |
+| **Rekap Penjualan** | Analisis data penjualan, tren bulanan, dan performa produk terbaik untuk membantu pengambilan keputusan bisnis |
+| **Rekap Inventory** | Pantau stok barang, identifikasi produk dengan stok rendah, dan analisis perputaran inventory |
+| **Rekap Keuangan** | Ringkasan pendapatan, pengeluaran, laba rugi, dan analisis profitabilitas bisnis Anda |
+
+#### Pilihan Periode Filter
+
+| Periode | Deskripsi |
+|---------|-----------|
+| **Minggu Ini** | Data dari hari Senin hingga hari ini |
+| **Bulan Ini** | Data dari tanggal 1 hingga hari ini |
+| **Custom** | Pilih rentang tanggal sesuai kebutuhan |
 
 #### Laporan Rekap Penjualan
 
@@ -627,27 +634,38 @@ Menu Laporan menyediakan berbagai laporan untuk analisis bisnis dan pengambilan 
 **Detail Transaksi:**
 - Tanggal, ID Pesanan, Item, Qty, Harga, Total, Pelanggan
 
-#### Filter Laporan
+#### Laporan Rekap Inventory
 
-| Filter | Fungsi |
-|--------|--------|
-| **Periode** | Pilih rentang tanggal |
-| **Tanggal Mulai** | Tanggal awal laporan |
-| **Tanggal Selesai** | Tanggal akhir laporan |
+**Ringkasan yang ditampilkan:**
+- Total Item (jumlah jenis barang)
+- Total Stok (jumlah unit keseluruhan)
+- Total Nilai Inventory (dalam Rupiah)
+- Stok Rendah (item dengan stok < 10)
+
+**Daftar yang ditampilkan:**
+- Item Stok Rendah (warning kuning/merah)
+- Item Stok Terbanyak
+
+#### Laporan Rekap Keuangan
+
+**Ringkasan yang ditampilkan:**
+- Total Pendapatan (dari penjualan)
+- Total Pengeluaran (dari pembelian)
+- Laba/Rugi Bersih
+- Margin Keuntungan (%)
+
+**Analisis yang ditampilkan:**
+- Grafik pendapatan vs pengeluaran
+- Tren laba rugi per periode
 
 #### Alur Membuat Laporan
 
-1. Pilih jenis laporan yang diinginkan
-2. Klik tombol **"Buat Laporan"**
-3. Pilih filter periode (opsional)
-4. Klik **"Generate"**
-5. Laporan akan ditampilkan dalam popup
-6. Klik **"Download PDF"** atau **"Download Excel"** untuk mengunduh
-
-#### Fitur Export
-
-- **PDF** - Format dokumen untuk cetak
-- **Excel** - Format spreadsheet untuk analisis lanjutan
+1. Pilih jenis laporan yang diinginkan (Rekap Penjualan / Rekap Inventory / Rekap Keuangan)
+2. Pilih periode: **Minggu Ini**, **Bulan Ini**, atau **Custom**
+3. Jika Custom, masukkan tanggal mulai dan selesai
+4. Klik tombol **"Generate Laporan"**
+5. Laporan akan ditampilkan dalam popup modal
+6. Gunakan tombol export jika tersedia
 
 ---
 
