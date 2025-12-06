@@ -441,16 +441,18 @@
         <i class="fas fa-credit-card"></i> <span>Pembayaran</span>
       </a>
 
-      <!-- Admin-only menu items - rendered by client-side JS -->
-      <a href="?page=reports" class="nav-item admin-only <?= currentPage == 'reports' ? 'active' : '' ?>" style="display:none;">
+      <!-- Laporan - accessible to all users -->
+      <a href="?page=reports" class="nav-item <?= currentPage == 'reports' ? 'active' : '' ?>">
         <i class="fas fa-chart-pie"></i> <span>Laporan</span>
       </a>
 
+      <!-- Admin-only menu items - rendered by client-side JS -->
       <a href="?page=users" class="nav-item admin-only <?= currentPage == 'users' ? 'active' : '' ?>" style="display:none;">
         <i class="fas fa-user-cog"></i> <span>Pengguna</span>
       </a>
 
-      <a href="?page=settings" class="nav-item admin-only <?= currentPage == 'settings' ? 'active' : '' ?>" style="display:none;">
+      <!-- Settings - accessible to all, but limited for Staff -->
+      <a href="?page=settings" class="nav-item <?= currentPage == 'settings' ? 'active' : '' ?>">
         <i class="fas fa-cogs"></i> <span>Pengaturan</span>
       </a>
 

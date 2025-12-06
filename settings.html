@@ -337,8 +337,8 @@
   </div>
   
   <div class="settings-grid">
-    <!-- Database & Connection -->
-    <div class="settings-card">
+    <!-- Database & Connection - Admin Only -->
+    <div class="settings-card admin-only-section">
       <div class="card-header">
         <h3><i class="fas fa-database"></i> Koneksi Database</h3>
       </div>
@@ -369,8 +369,8 @@
       </div>
     </div>
     
-    <!-- Business Information -->
-    <div class="settings-card">
+    <!-- Business Information - Admin Only -->
+    <div class="settings-card admin-only-section">
       <div class="card-header">
         <h3><i class="fas fa-building"></i> Informasi Bisnis</h3>
       </div>
@@ -406,8 +406,8 @@
       </div>
     </div>
     
-    <!-- Backup & Data -->
-    <div class="settings-card">
+    <!-- Backup & Data - Admin Only -->
+    <div class="settings-card admin-only-section">
       <div class="card-header">
         <h3><i class="fas fa-shield-alt"></i> Backup & Data</h3>
       </div>
@@ -448,10 +448,36 @@
         </div>
       </div>
     </div>
+    
+    <!-- Account Settings - Available to all users -->
+    <div class="settings-card" id="accountSettingsCard">
+      <div class="card-header">
+        <h3><i class="fas fa-user-shield"></i> Pengaturan Akun</h3>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Ubah Password</h4>
+          <p>Ganti password akun Anda</p>
+        </div>
+        <div class="setting-control">
+          <button class="btn btn-primary" onclick="showChangePasswordModal()">
+            <i class="fas fa-key"></i> Ubah Password
+          </button>
+        </div>
+      </div>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Informasi Akun</h4>
+          <p id="accountInfo">Memuat...</p>
+        </div>
+      </div>
+    </div>
   </div>
   
   <!-- System Information -->
-  <div class="system-info">
+  <div class="system-info admin-only-section">
     <h3><i class="fas fa-info-circle"></i> Informasi Sistem</h3>
     <div class="info-grid">
       <div class="info-item">
@@ -661,6 +687,121 @@ function showToast(message, type = 'success') {
     setTimeout(() => document.body.removeChild(toast), 300);
   }, 3000);
 }
+
+// Role-based visibility for settings sections
+function applyRoleBasedSettings() {
+  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  const adminSections = document.querySelectorAll('.admin-only-section');
+  const accountInfo = document.getElementById('accountInfo');
+  
+  if (user) {
+    // Update account info display
+    if (accountInfo) {
+      accountInfo.innerHTML = `<strong>${user.name}</strong> (${user.role})<br><small>${user.email}</small>`;
+    }
+    
+    // Show/Hide admin sections based on role
+    if (user.role === 'Admin') {
+      adminSections.forEach(section => {
+        section.style.display = '';
+      });
+    } else {
+      // Staff role - hide admin-only sections
+      adminSections.forEach(section => {
+        section.style.display = 'none';
+      });
+    }
+  }
+}
+
+// Change Password Modal
+function showChangePasswordModal() {
+  // Create modal if not exists
+  let modal = document.getElementById('changePasswordModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'changePasswordModal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:10000;';
+    modal.innerHTML = `
+      <div style="background:white;border-radius:12px;padding:25px;width:90%;max-width:400px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <h3 style="margin:0 0 20px;color:#2c3e50;display:flex;align-items:center;gap:10px;">
+          <i class="fas fa-key" style="color:#3498db;"></i> Ubah Password
+        </h3>
+        <div style="margin-bottom:15px;">
+          <label style="display:block;margin-bottom:5px;color:#2c3e50;font-weight:500;">Password Lama</label>
+          <input type="password" id="oldPassword" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;">
+        </div>
+        <div style="margin-bottom:15px;">
+          <label style="display:block;margin-bottom:5px;color:#2c3e50;font-weight:500;">Password Baru</label>
+          <input type="password" id="newPassword" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;">
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:block;margin-bottom:5px;color:#2c3e50;font-weight:500;">Konfirmasi Password Baru</label>
+          <input type="password" id="confirmNewPassword" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button onclick="closeChangePasswordModal()" style="padding:10px 20px;border:1px solid #ddd;background:#f8f9fa;border-radius:6px;cursor:pointer;font-weight:500;">Batal</button>
+          <button onclick="submitChangePassword()" style="padding:10px 20px;border:none;background:#3498db;color:white;border-radius:6px;cursor:pointer;font-weight:500;">
+            <i class="fas fa-save"></i> Simpan
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+  modal.style.display = 'flex';
+}
+
+function closeChangePasswordModal() {
+  const modal = document.getElementById('changePasswordModal');
+  if (modal) {
+    modal.style.display = 'none';
+    // Clear inputs
+    document.getElementById('oldPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+  }
+}
+
+function submitChangePassword() {
+  const oldPassword = document.getElementById('oldPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmNewPassword').value;
+  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    showToast('Semua field harus diisi', 'error');
+    return;
+  }
+  
+  if (newPassword.length < 4) {
+    showToast('Password baru minimal 4 karakter', 'error');
+    return;
+  }
+  
+  if (newPassword !== confirmPassword) {
+    showToast('Konfirmasi password tidak cocok', 'error');
+    return;
+  }
+  
+  // Call backend to change password
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        showToast('Password berhasil diubah', 'success');
+        closeChangePasswordModal();
+      } else {
+        showToast(result.message || 'Gagal mengubah password', 'error');
+      }
+    })
+    .withFailureHandler(function(error) {
+      showToast('Terjadi kesalahan: ' + error.message, 'error');
+    })
+    .changeUserPassword(user.email, oldPassword, newPassword);
+}
+
+// Apply role-based settings on load
+applyRoleBasedSettings();
 </script>
 
 <!-- End Settings Page Fragment -->

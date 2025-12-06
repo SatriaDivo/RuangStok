@@ -499,3 +499,44 @@ function fixUserIds() {
   
   return 'Fixed ' + fixedCount + ' user IDs';
 }
+
+/**
+ * Change user's own password (for Settings page)
+ */
+function changeUserPassword(email, oldPassword, newPassword) {
+  try {
+    const sheet = usersSetupSheet();
+    const data = sheet.getDataRange().getValues();
+    
+    // Find user by email
+    let userRow = -1;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][2] === email) {
+        userRow = i + 1;
+        break;
+      }
+    }
+    
+    if (userRow === -1) {
+      return { success: false, message: 'Pengguna tidak ditemukan' };
+    }
+    
+    // Verify old password
+    const currentHashedPassword = data[userRow - 1][3];
+    const oldHashedPassword = hashPassword(oldPassword);
+    
+    if (currentHashedPassword !== oldHashedPassword) {
+      return { success: false, message: 'Password lama tidak benar' };
+    }
+    
+    // Update to new password
+    const newHashedPassword = hashPassword(newPassword);
+    sheet.getRange(userRow, 4).setValue(newHashedPassword);
+    
+    return { success: true, message: 'Password berhasil diubah' };
+    
+  } catch (error) {
+    console.error('Error changing password:', error);
+    return { success: false, message: 'Terjadi kesalahan: ' + error.message };
+  }
+}
