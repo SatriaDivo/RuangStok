@@ -328,6 +328,58 @@
       grid-template-columns: 1fr;
     }
   }
+  
+  /* Large tablets (1024px and below) */
+  @media (max-width: 1024px) {
+    .settings-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .settings-container {
+      padding: 15px;
+    }
+  }
+  
+  /* Mobile phones (480px and below) */
+  @media (max-width: 480px) {
+    .settings-container {
+      padding: 10px;
+    }
+    
+    .page-header {
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .page-header h1 {
+      font-size: 1.2rem;
+    }
+    
+    .page-header p {
+      font-size: 0.8rem;
+    }
+    
+    .settings-card {
+      padding: 12px;
+    }
+    
+    .card-header h3 {
+      font-size: 1rem;
+    }
+    
+    .setting-info h4 {
+      font-size: 0.9rem;
+    }
+    
+    .setting-info p {
+      font-size: 0.75rem;
+    }
+    
+    .btn {
+      padding: 10px 15px;
+      font-size: 0.85rem;
+    }
+  }
 </style>
 
 <div class="settings-container">

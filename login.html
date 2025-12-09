@@ -309,6 +309,101 @@
       position: static;
       transform: none;
     }
+    
+    /* ========== RESPONSIVE DESIGN ========== */
+    
+    /* Tablets (768px and below) */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      .login-container {
+        max-width: 100%;
+      }
+      
+      .login-header {
+        padding: 30px 20px;
+      }
+      
+      .login-header h1 {
+        font-size: 24px;
+      }
+      
+      .login-logo {
+        width: 60px;
+        height: 60px;
+      }
+      
+      .login-form {
+        padding: 30px 20px;
+      }
+      
+      .modal {
+        width: 95%;
+        padding: 20px;
+      }
+    }
+    
+    /* Mobile phones (480px and below) */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+      
+      .login-header {
+        padding: 25px 15px;
+      }
+      
+      .login-header h1 {
+        font-size: 20px;
+      }
+      
+      .login-header p {
+        font-size: 12px;
+      }
+      
+      .login-logo {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .login-form {
+        padding: 25px 15px;
+      }
+      
+      .form-group input {
+        padding: 10px 40px 10px 40px;
+        font-size: 13px;
+      }
+      
+      .btn-login {
+        padding: 12px;
+        font-size: 14px;
+      }
+      
+      .remember-forgot {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      
+      .footer {
+        padding: 15px;
+      }
+      
+      .modal {
+        padding: 15px;
+      }
+      
+      .modal-header h3 {
+        font-size: 18px;
+      }
+      
+      .modal-footer {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>

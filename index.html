@@ -63,6 +63,102 @@
 
     .dash-row { display:flex; gap:20px; }
     .dash-half { width:48%; }
+    
+    /* ========== RESPONSIVE DESIGN ========== */
+    
+    /* Tablets (1024px and below) */
+    @media (max-width: 1024px) {
+      .dash-kpi-row {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .dash-charts-row {
+        flex-direction: column;
+      }
+      
+      .dash-col-1, .dash-col-3 {
+        width: 100%;
+      }
+    }
+    
+    /* Small tablets (768px and below) */
+    @media (max-width: 768px) {
+      .dash-header h2 {
+        font-size: 1.5rem;
+      }
+      
+      .dash-header p {
+        font-size: 0.9rem;
+      }
+      
+      .dash-kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+      }
+      
+      .dash-kpi-card {
+        padding: 12px;
+        height: auto;
+        min-height: 80px;
+      }
+      
+      .dash-kpi-card h3 {
+        font-size: 0.8rem;
+      }
+      
+      .dash-kpi-card h2 {
+        font-size: 1rem;
+        word-break: break-word;
+      }
+      
+      .dash-chart-card {
+        padding: 10px;
+      }
+      
+      #dash-chart1, #dash-chart3, #dash-chart6 {
+        height: 250px !important;
+      }
+    }
+    
+    /* Mobile phones (480px and below) */
+    @media (max-width: 480px) {
+      .dash-header h2 {
+        font-size: 1.2rem;
+      }
+      
+      .dash-header p {
+        font-size: 0.8rem;
+      }
+      
+      .dash-kpi-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      
+      .dash-kpi-card {
+        padding: 10px;
+      }
+      
+      .dash-kpi-card h3 {
+        font-size: 0.75rem;
+      }
+      
+      .dash-kpi-card h2 {
+        font-size: 0.9rem;
+      }
+      
+      .dash-row {
+        flex-direction: column;
+      }
+      
+      .dash-half, .dash-full {
+        width: 100% !important;
+      }
+      
+      #dash-chart1, #dash-chart3, #dash-chart6 {
+        height: 200px !important;
+      }
+    }
     .dash-full { width:100%; }
 
     /* Chart Heights */

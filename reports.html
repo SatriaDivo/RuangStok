@@ -192,6 +192,18 @@
         padding: 8px 12px;
         font-size: 12px;
       }
+      
+      /* Make radio buttons stack on mobile */
+      .report-card div[style*="margin-bottom: 10px"] label {
+        display: block !important;
+        margin-bottom: 8px !important;
+        margin-right: 0 !important;
+      }
+      
+      /* Custom date range stacks on mobile */
+      .report-card div[style*="display: flex; gap: 10px"] {
+        flex-direction: column !important;
+      }
     }
     
     @keyframes spin {
