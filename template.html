@@ -357,6 +357,11 @@
       .mobile-menu-btn {
         display: block;
       }
+      
+      /* Hide user text on tablet, show only icons */
+      #user-display span {
+        display: none;
+      }
     }
     
     /* Mobile phones (480px and below) */
@@ -372,6 +377,22 @@
       .mobile-menu-btn {
         padding: 10px 12px;
         font-size: 1rem;
+      }
+      
+      /* Simplify top bar on mobile */
+      .top-bar-links a {
+        width: 32px !important;
+        height: 32px !important;
+        line-height: 32px !important;
+        margin-left: 8px !important;
+      }
+      
+      .top-bar-links a i {
+        font-size: 1rem !important;
+      }
+      
+      #user-display {
+        display: none !important;
       }
       
       .app-title {
@@ -491,7 +512,7 @@
 </head>
 <body>
   <!-- Sidebar Overlay (for mobile) -->
-  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
   
   <!-- Sidebar Navigation -->
   <div class="sidebar">
@@ -602,7 +623,7 @@
     // Sidebar Toggle Function
     function toggleSidebar() {
       const sidebar = document.querySelector('.sidebar');
-      const overlay = document.querySelector('.sidebar-overlay');
+      const overlay = document.getElementById('sidebarOverlay');
       const toggleIcon = document.getElementById('sidebar-toggle-icon');
       
       if (sidebar) {
@@ -610,51 +631,97 @@
         const isMobile = window.innerWidth <= 768;
         
         if (isMobile) {
-          sidebar.classList.toggle('mobile-open');
-          if (overlay) {
-            overlay.classList.toggle('show');
+          const isOpen = sidebar.classList.contains('mobile-open');
+          
+          if (isOpen) {
+            // Close sidebar
+            sidebar.classList.remove('mobile-open');
+            if (overlay) overlay.classList.remove('show');
+          } else {
+            // Open sidebar
+            sidebar.classList.add('mobile-open');
+            if (overlay) overlay.classList.add('show');
           }
         } else {
           sidebar.classList.toggle('collapsed');
+          // Save state to localStorage (only for desktop)
+          localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
         }
         
         // Update icon
-        if (toggleIcon) {
-          if (sidebar.classList.contains('collapsed') || !sidebar.classList.contains('mobile-open') && isMobile) {
-            toggleIcon.className = 'fas fa-bars';
-          } else {
-            toggleIcon.className = 'fas fa-times';
-          }
+        updateToggleIcon();
+      }
+    }
+    
+    // Update toggle icon based on sidebar state
+    function updateToggleIcon() {
+      const sidebar = document.querySelector('.sidebar');
+      const toggleIcon = document.getElementById('sidebar-toggle-icon');
+      const isMobile = window.innerWidth <= 768;
+      
+      if (toggleIcon && sidebar) {
+        if (isMobile) {
+          toggleIcon.className = sidebar.classList.contains('mobile-open') ? 'fas fa-times' : 'fas fa-bars';
+        } else {
+          toggleIcon.className = sidebar.classList.contains('collapsed') ? 'fas fa-bars' : 'fas fa-times';
         }
-        
-        // Save state to localStorage
-        localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+      }
+    }
+    
+    // Close sidebar when clicking overlay
+    function closeSidebarMobile() {
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      
+      if (sidebar && sidebar.classList.contains('mobile-open')) {
+        sidebar.classList.remove('mobile-open');
+        if (overlay) overlay.classList.remove('show');
+        updateToggleIcon();
       }
     }
     
     // Restore sidebar state on page load
     document.addEventListener('DOMContentLoaded', function() {
       const sidebar = document.querySelector('.sidebar');
-      const toggleIcon = document.getElementById('sidebar-toggle-icon');
+      const overlay = document.getElementById('sidebarOverlay');
       const savedState = localStorage.getItem('sidebarCollapsed');
       
+      // Setup overlay click handler
+      if (overlay) {
+        overlay.addEventListener('click', closeSidebarMobile);
+        overlay.addEventListener('touchstart', closeSidebarMobile);
+      }
+      
+      // Restore desktop sidebar state
       if (savedState === 'true' && window.innerWidth > 768) {
         sidebar.classList.add('collapsed');
-        if (toggleIcon) toggleIcon.className = 'fas fa-bars';
-      } else {
-        if (toggleIcon) toggleIcon.className = 'fas fa-times';
       }
+      
+      // Update icon
+      updateToggleIcon();
     });
     
     // Handle window resize
     window.addEventListener('resize', function() {
       const sidebar = document.querySelector('.sidebar');
-      const overlay = document.querySelector('.sidebar-overlay');
+      const overlay = document.getElementById('sidebarOverlay');
       
       if (window.innerWidth > 768) {
+        // Switching to desktop mode
         sidebar.classList.remove('mobile-open');
         if (overlay) overlay.classList.remove('show');
+        
+        // Restore desktop state
+        const savedState = localStorage.getItem('sidebarCollapsed');
+        if (savedState === 'true') {
+          sidebar.classList.add('collapsed');
+        }
+      } else {
+        // Switching to mobile mode - reset collapsed state
+        sidebar.classList.remove('collapsed');
       }
+      
+      updateToggleIcon();
     });
     
     // Handle logout
