@@ -519,6 +519,19 @@ function generateInventoryReport(filter, email) {
       .sort((a, b) => b.remainingQty - a.remainingQty)
       .slice(0, 10);
 
+    // All items with complete stock info for detailed view
+    const allItems = inventoryData
+      .map(row => ({
+        itemId: getStr(row, ['Kode Barang', 'Item ID', 'SKU', 'ID']),
+        itemName: getStr(row, ['Nama Barang', 'Item Name', 'Item', 'Product Name']),
+        category: getStr(row, ['Kategori Barang', 'Item Category', 'Category', 'Item Type']),
+        remainingQty: getVal(row, ['Jumlah Barang', 'Quantity', 'QTY', 'Qty On Hand']),
+        unitPrice: getVal(row, ['Harga Satuan', 'Unit Price', 'Price']),
+        totalValue: getVal(row, ['Total Harga', 'Total Value', 'Total'])
+      }))
+      .filter(item => item.itemName !== 'Unknown')
+      .sort((a, b) => a.itemName.localeCompare(b.itemName));
+
     const report = {
       summary: {
         totalItems: totalItems,
@@ -530,6 +543,7 @@ function generateInventoryReport(filter, email) {
       categoryStock: categoryStock,
       lowStockList: lowStockList.concat(outOfStockList),
       topSelling: topSelling,
+      allItems: allItems,
       generatedAt: new Date().toISOString()
     };
 
