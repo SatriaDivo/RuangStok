@@ -881,7 +881,7 @@
                 <th>Nama Barang</th>
                 <th>Kategori Barang</th>
                 <th>Jumlah Barang</th>
-                <th>Harga Satuan</th>
+                <th>Satuan Barang</th>
                 <th>Total Harga</th>
                 <th>Action</th>
               </tr>
@@ -1256,7 +1256,7 @@
         </td>
         <td><span class="item-category"></span></td>
         <td><input type="number" min="1" class="qty-purchased" onchange="poCalculateRow(this)" oninput="poCalculateRow(this)"></td>
-        <td><input type="number" min="0.01" step="0.01" class="unit-cost" onchange="poCalculateRow(this)" oninput="poCalculateRow(this)"></td>
+        <td><input type="text" class="unit-type" placeholder="kg, lusin, ball, dll"></td>
         <td><span class="total-price">0.00</span></td>
         <td><button class="remove-item-btn" onclick="poRemoveItemRow(this)"><i class="fas fa-times"></i></button></td>
       `;
@@ -1286,17 +1286,11 @@
       poCalculateRow(select);
     }
 
-    // Calculate row values
+    // Calculate row values - Total Harga tidak lagi dihitung otomatis
     function poCalculateRow(input) {
-      const row = input.closest('tr');
-      const qty = parseFloat(row.querySelector('.qty-purchased').value) || 0;
-      const unitCost = parseFloat(row.querySelector('.unit-cost').value) || 0;
-
-      // Calculate total price (qty * unit cost)
-      const totalPrice = qty * unitCost;
-
-      // Update field
-      row.querySelector('.total-price').textContent = totalPrice.toFixed(2);
+      // Fungsi ini sekarang hanya placeholder
+      // Satuan Barang adalah text input (kg, lusin, ball, dll)
+      // Total Harga akan diinput manual atau dari sumber lain
     }
 
     // Remove item row (no change, just for context)
@@ -1350,7 +1344,7 @@
         const itemSelectElement = row.querySelector('.item-select');
         const itemId = row.querySelector('.item-id').textContent;
         const qty = parseFloat(row.querySelector('.qty-purchased').value) || 0;
-        const unitCost = parseFloat(row.querySelector('.unit-cost').value) || 0;
+        const unitType = row.querySelector('.unit-type').value.trim();
 
         if (!itemId) {
           isValid = false;
@@ -1364,9 +1358,9 @@
           return;
         }
 
-        if (unitCost <= 0) {
+        if (!unitType) {
           isValid = false;
-          poShowAlert('Please enter a valid unit cost for all items', 'warning');
+          poShowAlert('Please enter unit type (satuan barang) for all items', 'warning');
           return;
         }
 
@@ -1387,8 +1381,8 @@
           itemCategory: row.cells[9].textContent,
           itemName: selectedItemName,
           qtyPurchased: qty,
-          unitCost: unitCost,
-          totalPrice: parseFloat(row.querySelector('.total-price').textContent)
+          unitType: unitType,
+          totalPrice: 0
         };
 
         items.push(item);
@@ -1438,7 +1432,7 @@
                   <th>Supplier ID</th><th>Supplier Name</th><th>State</th>
                   <th>City</th>
                   <th>Kode Barang</th><th>Nama Barang</th><th>Kategori Barang</th>
-                  <th>Jumlah Barang</th><th>Harga Satuan</th>
+                  <th>Jumlah Barang</th><th>Satuan Barang</th>
                   <th>Total Harga</th><th>Actions</th>
                 </tr>
               </thead>
@@ -1461,8 +1455,8 @@
             <td class="item-name">${detail.itemName}</td>
             <td class="item-category">${detail.itemCategory}</td>
             <td class="qty-purchased">${detail.qtyPurchased}</td>
-            <td class="unit-cost">${detail.unitCost.toFixed(2)}</td>
-            <td class="total-price">${detail.totalPrice.toFixed(2)}</td>
+            <td class="unit-type">${detail.unitType || ''}</td>
+            <td class="total-price">${detail.totalPrice ? detail.totalPrice.toFixed(2) : '0.00'}</td>
             <td class="actions-cell">
               <button class="action-btn delete-btn"
                       onclick="poDeleteDetail('${detail.detailId}')"
@@ -1625,23 +1619,11 @@ function poEnableEditMode() {
     const q = row.querySelector('.qty-purchased').textContent;
     row.querySelector('.qty-purchased').innerHTML =
       `<input type="number" class="edit-qty" value="${q}" min="0">`;
-    row.querySelector('.edit-qty').oninput = (event)=> {
-      const row = event.target.closest('tr');
-      const qty = parseFloat(row.querySelector('.edit-qty').value) || 0;
-      const cost = parseFloat(row.querySelector('.edit-cost').value) || 0;
-      row.querySelector('.total-price').textContent = (qty * cost).toFixed(2);
-    };
 
-    // Unit Cost
-    const c = row.querySelector('.unit-cost').textContent;
-    row.querySelector('.unit-cost').innerHTML =
-      `<input type="number" class="edit-cost" value="${c}" step="0.01" min="0">`;
-    row.querySelector('.edit-cost').oninput = (event)=> {
-      const row = event.target.closest('tr');
-      const qty = parseFloat(row.querySelector('.edit-qty').value) || 0;
-      const cost = parseFloat(row.querySelector('.edit-cost').value) || 0;
-      row.querySelector('.total-price').textContent = (qty * cost).toFixed(2);
-    };
+    // Satuan Barang (Unit Type)
+    const u = row.querySelector('.unit-type').textContent;
+    row.querySelector('.unit-type').innerHTML =
+      `<input type="text" class="edit-unit-type" value="${u}" placeholder="kg, lusin, ball, dll">`;
   });
 }
 
@@ -1663,7 +1645,7 @@ function poSavePODetails() {
       itemId:       row.querySelector('.item-id').textContent.trim(),
       itemName:     row.querySelector('.edit-item-select').selectedOptions[0].textContent,
       qtyPurchased: parseFloat(row.querySelector('.edit-qty').value) || 0,
-      unitCost:     parseFloat(row.querySelector('.edit-cost').value) || 0,
+      unitType:     row.querySelector('.edit-unit-type').value.trim(),
       totalPrice:   parseFloat(row.querySelector('.total-price').textContent) || 0
     });
   });
@@ -1714,13 +1696,13 @@ function poEditDetail(detailId, btnElement) {
   const itemNameCell = row.querySelector('.item-name');
   const itemCategoryCell = row.querySelector('.item-category');
   const qtyCell = row.querySelector('.qty-purchased');
-  const unitCostCell = row.querySelector('.unit-cost');
+  const unitTypeCell = row.querySelector('.unit-type');
   
   const currentItemId = itemIdCell.textContent;
   const currentItemName = itemNameCell.textContent;
   const currentItemCategory = itemCategoryCell.textContent;
   const currentQty = parseFloat(qtyCell.textContent);
-  const currentUnitCost = parseFloat(unitCostCell.textContent);
+  const currentUnitType = unitTypeCell.textContent;
   
   // Build item dropdown
   let itemOptions = '<option value="">-- Select Item --</option>';
@@ -1736,7 +1718,7 @@ function poEditDetail(detailId, btnElement) {
   itemNameCell.innerHTML = `<input type="text" class="edit-item-name" value="${currentItemName}" readonly style="width:100%; background:#f0f0f0">`;
   itemCategoryCell.innerHTML = `<input type="text" class="edit-item-category" value="${currentItemCategory}" readonly style="width:100%; background:#f0f0f0">`;
   qtyCell.innerHTML = `<input type="number" class="edit-qty" value="${currentQty}" min="0.01" step="0.01" style="width:100%">`;
-  unitCostCell.innerHTML = `<input type="number" class="edit-unit-cost" value="${currentUnitCost}" min="0" step="0.01" style="width:100%">`;
+  unitTypeCell.innerHTML = `<input type="text" class="edit-unit-type" value="${currentUnitType}" placeholder="kg, lusin, ball, dll" style="width:100%">`;
   
   // Update item name and category when selection changes
   const selectElement = itemIdCell.querySelector('.edit-item-select');
@@ -1769,7 +1751,7 @@ function poSaveEditDetail(detailId, btnElement) {
   const itemName = row.querySelector('.edit-item-name').value;
   const itemCategory = row.querySelector('.edit-item-category').value;
   const qty = parseFloat(row.querySelector('.edit-qty').value);
-  const unitCost = parseFloat(row.querySelector('.edit-unit-cost').value);
+  const unitType = row.querySelector('.edit-unit-type').value.trim();
   
   // Validate
   if (!itemId) {
@@ -1780,8 +1762,8 @@ function poSaveEditDetail(detailId, btnElement) {
     poShowAlert('Quantity must be greater than 0', 'error');
     return;
   }
-  if (unitCost < 0) {
-    poShowAlert('Unit cost cannot be negative', 'error');
+  if (!unitType) {
+    poShowAlert('Please enter unit type (satuan barang)', 'error');
     return;
   }
   
@@ -1792,7 +1774,7 @@ function poSaveEditDetail(detailId, btnElement) {
     itemName: itemName,
     itemCategory: itemCategory,
     qty: qty,
-    unitCost: unitCost
+    unitType: unitType
   };
   
   google.script.run

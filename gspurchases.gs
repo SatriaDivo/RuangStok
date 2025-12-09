@@ -289,7 +289,7 @@ function poGetPODetails(poId, email) {
         itemName: getVal("Nama Barang", row),
         itemCategory: getVal("Kategori Barang", row),
         qtyPurchased: getVal("Jumlah Barang", row),
-        unitCost: getVal("Harga Satuan", row),
+        unitType: getVal("Satuan Barang", row),
         totalPrice: getVal("Total Harga", row)
       });
     }
@@ -320,13 +320,13 @@ function poSaveNewPO(items, email) {
   // Validate each item has required fields
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    if (!item.poId || !item.detailId || !item.itemId || !item.qtyPurchased || !item.unitCost) {
+    if (!item.poId || !item.detailId || !item.itemId || !item.qtyPurchased) {
       console.error(`poSaveNewPO: Item ${i} missing required fields:`, item);
-      throw new Error(`Item ${i + 1} is missing required information (PO ID, Detail ID, Item ID, Quantity, or Unit Cost).`);
+      throw new Error(`Item ${i + 1} is missing required information (PO ID, Detail ID, Item ID, or Quantity).`);
     }
-    if (item.qtyPurchased <= 0 || item.unitCost <= 0) {
+    if (item.qtyPurchased <= 0) {
       console.error(`poSaveNewPO: Item ${i} has invalid values:`, item);
-      throw new Error(`Item ${i + 1} has invalid quantity or unit cost (must be greater than 0).`);
+      throw new Error(`Item ${i + 1} has invalid quantity (must be greater than 0).`);
     }
   }
 
@@ -364,7 +364,7 @@ function poSaveNewPO(items, email) {
           case "Nama Barang": newRow.push(item.itemName); break;
           case "Kategori Barang": newRow.push(item.itemCategory); break;
           case "Jumlah Barang": newRow.push(item.qtyPurchased); break;
-          case "Harga Satuan": newRow.push(item.unitCost); break;
+          case "Satuan Barang": newRow.push(item.unitType); break;
           case "Total Harga": newRow.push(item.totalPrice); break;
           default: newRow.push(''); break;
         }
@@ -660,7 +660,7 @@ function poEditPODetail(detailId, updatedData, email) {
   const itemNameCol = headers.indexOf("Nama Barang") !== -1 ? headers.indexOf("Nama Barang") : headers.indexOf("Item Name");
   const itemCategoryCol = headers.indexOf("Kategori Barang") !== -1 ? headers.indexOf("Kategori Barang") : headers.indexOf("Item Category");
   const qtyCol = headers.indexOf("Jumlah Barang") !== -1 ? headers.indexOf("Jumlah Barang") : headers.indexOf("QTY Purchased");
-  const unitCostCol = headers.indexOf("Harga Satuan") !== -1 ? headers.indexOf("Harga Satuan") : headers.indexOf("Unit Cost");
+  const unitTypeCol = headers.indexOf("Satuan Barang") !== -1 ? headers.indexOf("Satuan Barang") : headers.indexOf("Unit Type");
   const totalPriceCol = headers.indexOf("Total Harga");
 
   // Find row with matching Detail ID
@@ -681,16 +681,9 @@ function poEditPODetail(detailId, updatedData, email) {
       if (qtyCol !== -1 && updatedData.qty !== undefined) {
         sheet.getRange(sheetRow, qtyCol + 1).setValue(updatedData.qty);
       }
-      if (unitCostCol !== -1 && updatedData.unitCost !== undefined) {
-        sheet.getRange(sheetRow, unitCostCol + 1).setValue(updatedData.unitCost);
+      if (unitTypeCol !== -1 && updatedData.unitType !== undefined) {
+        sheet.getRange(sheetRow, unitTypeCol + 1).setValue(updatedData.unitType);
       }
-      
-      // Recalculate total price
-      const qty = updatedData.qty !== undefined ? updatedData.qty : data[i][qtyCol];
-      const unitCost = updatedData.unitCost !== undefined ? updatedData.unitCost : data[i][unitCostCol];
-      const totalPrice = qty * unitCost;
-      
-      if (totalPriceCol !== -1) sheet.getRange(sheetRow, totalPriceCol + 1).setValue(totalPrice);
       
       break;
     }
@@ -733,7 +726,7 @@ function poSavePODetails(updates, email) {
       "Item ID": "Kode Barang",
       "Item Name": "Nama Barang",
       "QTY Purchased": "Jumlah Barang",
-      "Unit Cost": "Harga Satuan"
+      "Unit Type": "Satuan Barang"
     };
     
     if (nameMap[name]) {
@@ -752,7 +745,7 @@ function poSavePODetails(updates, email) {
     sheet.getRange(sheetRow, range.getColumn() + ci("Kode Barang") ).setValue(u.itemId);
     sheet.getRange(sheetRow, range.getColumn() + ci("Nama Barang") ).setValue(u.itemName);
     sheet.getRange(sheetRow, range.getColumn() + ci("Jumlah Barang")).setValue(u.qtyPurchased);
-    sheet.getRange(sheetRow, range.getColumn() + ci("Harga Satuan") ).setValue(u.unitCost);
+    sheet.getRange(sheetRow, range.getColumn() + ci("Satuan Barang") ).setValue(u.unitType);
     sheet.getRange(sheetRow, range.getColumn() + ci("Total Harga")).setValue(u.totalPrice);
   });
 
