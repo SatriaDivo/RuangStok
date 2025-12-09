@@ -475,6 +475,11 @@ function generateInventoryReport(filter, email) {
     const totalStock = inventoryData.reduce((sum, row) => sum + getVal(row, ['Jumlah Barang', 'Quantity', 'QTY', 'Qty On Hand']), 0);
     const totalValue = inventoryData.reduce((sum, row) => sum + getVal(row, ['Total Harga', 'Total Value', 'Total', 'Nilai Inventory']), 0);
     
+    // Get sales data to calculate initial stock (remaining + sold)
+    const salesData = reportGetRangeDataAsObjects('RANGESD');
+    const totalSold = salesData.reduce((sum, row) => sum + getVal(row, ['QTY Sold', 'Jumlah Terjual', 'Quantity', 'Qty']), 0);
+    const initialStock = totalStock + totalSold; // Stok Awal = Stok Sisa + Terjual
+    
     const lowStockQty = 10;
     const lowStockItems = inventoryData.filter(row => {
       const qty = getVal(row, ['Jumlah Barang', 'Quantity', 'QTY', 'Qty On Hand']);
@@ -535,7 +540,9 @@ function generateInventoryReport(filter, email) {
     const report = {
       summary: {
         totalItems: totalItems,
+        initialStock: initialStock,
         totalStock: totalStock,
+        totalSold: totalSold,
         totalValue: totalValue,
         lowStockItems: lowStockItems,
         outOfStockItems: outOfStockItems
