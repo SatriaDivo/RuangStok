@@ -128,8 +128,11 @@ function generateSalesReport(filter, email) {
   try {
     Logger.log('Step 1: Filter received: ' + JSON.stringify(filter));
 
-    // Set default filter if not provided
-    if (!filter || Object.keys(filter).length === 0) {
+    // Check if filter is 'all' - get all data without date filtering
+    const isAllData = filter && filter.period === 'all';
+    
+    // Set default filter if not provided (and not 'all')
+    if (!isAllData && (!filter || Object.keys(filter).length === 0)) {
       const now = new Date();
       filter = {
         startDate: new Date(now.getFullYear(), now.getMonth(), 1).toISOString(),
@@ -237,7 +240,13 @@ function generateSalesReport(filter, email) {
     let usedEndDate = endDate;
     let isFallbackMode = false;
 
-    if (startDate && endDate) {
+    // If 'all' mode, use all data without filtering
+    if (isAllData) {
+      Logger.log('Mode: ALL DATA - No date filtering');
+      filteredData = salesData;
+      usedStartDate = minDate;
+      usedEndDate = maxDate;
+    } else if (startDate && endDate) {
       const strictFiltered = salesData.filter(row => {
         try {
           let rawDateVal = null;
