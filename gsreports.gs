@@ -604,7 +604,10 @@ function generateFinancialReport(filter, email) {
     let filteredPayments = paymentData;
     let filteredReceipts = receiptData;
     
-    if (filter && filter.startDate && filter.endDate) {
+    // Check if filter is 'all' - skip date filtering
+    const isAllData = filter && filter.period === 'all';
+    
+    if (!isAllData && filter && filter.startDate && filter.endDate) {
       const start = new Date(filter.startDate);
       const end = new Date(filter.endDate);
       end.setHours(23, 59, 59, 999);
