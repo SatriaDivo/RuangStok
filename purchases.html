@@ -1255,9 +1255,9 @@
           </select>
         </td>
         <td><span class="item-category"></span></td>
-        <td><input type="number" min="1" class="qty-purchased" onchange="poCalculateRow(this)" oninput="poCalculateRow(this)"></td>
+        <td><input type="number" min="1" class="qty-purchased"></td>
         <td><input type="text" class="unit-type" placeholder="kg, lusin, ball, dll"></td>
-        <td><span class="total-price">0.00</span></td>
+        <td><input type="number" min="0" step="0.01" class="total-price" placeholder="0.00"></td>
         <td><button class="remove-item-btn" onclick="poRemoveItemRow(this)"><i class="fas fa-times"></i></button></td>
       `;
 
@@ -1282,18 +1282,10 @@
         row.querySelector('.item-category').textContent = item.category;
       }
 
-      // Trigger calculation
-      poCalculateRow(select);
+      // Item selection complete
     }
 
-    // Calculate row values - Total Harga tidak lagi dihitung otomatis
-    function poCalculateRow(input) {
-      // Fungsi ini sekarang hanya placeholder
-      // Satuan Barang adalah text input (kg, lusin, ball, dll)
-      // Total Harga akan diinput manual atau dari sumber lain
-    }
-
-    // Remove item row (no change, just for context)
+    // Remove item row
     function poRemoveItemRow(button) {
       const row = button.closest('tr');
       row.remove();
@@ -1382,7 +1374,7 @@
           itemName: selectedItemName,
           qtyPurchased: qty,
           unitType: unitType,
-          totalPrice: 0
+          totalPrice: parseFloat(row.querySelector('.total-price').value) || 0
         };
 
         items.push(item);
@@ -1624,6 +1616,11 @@ function poEnableEditMode() {
     const u = row.querySelector('.unit-type').textContent;
     row.querySelector('.unit-type').innerHTML =
       `<input type="text" class="edit-unit-type" value="${u}" placeholder="kg, lusin, ball, dll">`;
+
+    // Total Harga (manual input)
+    const t = row.querySelector('.total-price').textContent;
+    row.querySelector('.total-price').innerHTML =
+      `<input type="number" class="edit-total-price" value="${parseFloat(t) || 0}" min="0" step="0.01">`;
   });
 }
 
@@ -1646,7 +1643,7 @@ function poSavePODetails() {
       itemName:     row.querySelector('.edit-item-select').selectedOptions[0].textContent,
       qtyPurchased: parseFloat(row.querySelector('.edit-qty').value) || 0,
       unitType:     row.querySelector('.edit-unit-type').value.trim(),
-      totalPrice:   parseFloat(row.querySelector('.total-price').textContent) || 0
+      totalPrice:   parseFloat(row.querySelector('.edit-total-price').value) || 0
     });
   });
 
