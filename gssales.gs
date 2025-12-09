@@ -159,10 +159,20 @@ function soSaveNewSO(payload, email) {
   
   // Get headers to determine column order and structure
   const soHeaders = soRange.getValues()[0];
-  const sdHeaders = sdRange.getValues()[0];
+  const sdHeadersAll = sdRange.getValues()[0];
+  
+  // Get valid headers only (exclude empty and "Column X" headers)
+  const validHeaders = [];
+  const validHeaderIndices = [];
+  sdHeadersAll.forEach((h, idx) => {
+    if (h && !String(h).startsWith('Column')) {
+      validHeaders.push(h);
+      validHeaderIndices.push(idx);
+    }
+  });
   
   Logger.log('SO Headers (' + soHeaders.length + '): ' + JSON.stringify(soHeaders));
-  Logger.log('SD Headers (' + sdHeaders.length + '): ' + JSON.stringify(sdHeaders));
+  Logger.log('SD Valid Headers (' + validHeaders.length + '): ' + JSON.stringify(validHeaders));
   
   // Step 1: append master row to SalesOrders sheet
   const master = payload.master;
@@ -197,9 +207,9 @@ function soSaveNewSO(payload, email) {
     Logger.log('  Unit Price: ' + d['Unit Price']);
     Logger.log('  Total Sales Price: ' + d['Total Sales Price']);
     
-    // Map data to match sheet columns (flexible mapping)
+    // Map data to match sheet columns (only valid headers)
     const rowData = [];
-    sdHeaders.forEach(header => {
+    validHeaders.forEach(header => {
       let value = '';
       
       // Map based on header name
@@ -253,7 +263,8 @@ function soSaveNewSO(payload, email) {
           value = parseFloat(d['Total Sales Price']) || 0;
           break;
         default:
-          value = '';
+          // Skip unknown headers
+          break;
       }
       
       rowData.push(value);
@@ -261,8 +272,14 @@ function soSaveNewSO(payload, email) {
     
     Logger.log('Detail row to append (' + rowData.length + ' cols): ' + JSON.stringify(rowData));
     
-    // Append to the actual sheet, not the named range
-    sdSheet.appendRow(rowData);
+    // Write data only to valid column positions
+    const lastRow = sdSheet.getLastRow() + 1;
+    const startCol = sdRange.getColumn();
+    
+    // Write each value to the correct column position
+    validHeaderIndices.forEach((colIdx, i) => {
+      sdSheet.getRange(lastRow, startCol + colIdx).setValue(rowData[i]);
+    });
     
     // Reduce stock in inventory
     soReduceInventoryStock(d['Item ID'], d['QTY Sold']);
