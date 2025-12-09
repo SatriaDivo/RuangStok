@@ -159,7 +159,18 @@ function soSaveNewSO(payload, email) {
   
   // Get headers to determine column order and structure
   const soHeaders = soRange.getValues()[0];
+  const soData = soRange.getValues();
   const sdHeadersAll = sdRange.getValues()[0];
+  
+  // Check for duplicate SO ID to prevent multiple saves
+  const soIdCol = soHeaders.indexOf('SO ID');
+  if (soIdCol !== -1) {
+    for (let i = 1; i < soData.length; i++) {
+      if (soData[i][soIdCol] === payload.master.soID) {
+        throw new Error('SO ID "' + payload.master.soID + '" sudah ada. Tidak dapat menyimpan duplikat.');
+      }
+    }
+  }
   
   // Get valid headers only (exclude empty and "Column X" headers)
   const validHeaders = [];

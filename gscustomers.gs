@@ -101,7 +101,7 @@ function custAddNewCustomer(customer, email) {
   // Session Check
   const session = checkServerSession(email);
   if (!session.active) {
-    return false;
+    return { success: false, message: "Sesi berakhir", sessionExpired: true };
   }
 
   try {
@@ -111,11 +111,20 @@ function custAddNewCustomer(customer, email) {
     
     if (!range) {
       console.log('RANGECUSTOMERS not found');
-      return false;
+      return { success: false, message: "Named range tidak ditemukan" };
     }
     
     const data = range.getValues();
     const headers = data[0];
+    const idIndex = headers.indexOf("Customer ID");
+    
+    // Check for duplicate ID to prevent multiple adds
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][idIndex] === customer.id) {
+        console.log('Customer ID already exists:', customer.id);
+        return { success: false, message: "Customer dengan ID '" + customer.id + "' sudah ada" };
+      }
+    }
     
     const newRow = [];
     headers.forEach(header => {
@@ -135,10 +144,10 @@ function custAddNewCustomer(customer, email) {
     // Append to sheet
     sheet.appendRow(newRow);
     console.log('Customer added:', customer.id);
-    return true;
+    return { success: true, message: "Customer berhasil ditambahkan", data: { id: customer.id } };
   } catch (error) {
     console.error('Error adding customer:', error);
-    return false;
+    return { success: false, message: "Error: " + error.toString() };
   }
 }
 

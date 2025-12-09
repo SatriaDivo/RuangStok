@@ -334,6 +334,21 @@ function poSaveNewPO(items, email) {
   const detailsSheet = ss.getSheetByName("PurchaseDetails");
   const ordersSheet = ss.getSheetByName("PurchaseOrders");
 
+  // Check for duplicate PO ID to prevent multiple saves
+  const poRange = ss.getRangeByName("RANGEPO");
+  if (poRange) {
+    const poData = poRange.getValues();
+    const poHeaders = poData[0];
+    const poIdCol = poHeaders.indexOf('PO ID');
+    if (poIdCol !== -1) {
+      for (let i = 1; i < poData.length; i++) {
+        if (poData[i][poIdCol] === items[0].poId) {
+          throw new Error('PO ID "' + items[0].poId + '" sudah ada. Tidak dapat menyimpan duplikat.');
+        }
+      }
+    }
+  }
+
   // Save to PurchaseDetails
   const detailsRange = ss.getRangeByName("RANGEPD");
   if (!detailsRange) {

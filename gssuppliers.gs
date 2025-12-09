@@ -345,6 +345,18 @@ function supAddNewSupplier(supplier, email) {
     
     const data = range.getValues();
     const headers = data[0];
+    const idIndex = headers.indexOf("Supplier ID");
+    
+    // Check for duplicate ID to prevent multiple adds
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][idIndex] === supplier.id) {
+        Logger.log('Supplier ID already exists:', supplier.id);
+        return {
+          success: false,
+          message: "Supplier dengan ID '" + supplier.id + "' sudah ada"
+        };
+      }
+    }
     
     const newRow = [];
     headers.forEach(header => {
