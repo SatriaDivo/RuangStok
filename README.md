@@ -2,25 +2,63 @@
 
 ## Panduan Lengkap Penggunaan Sistem Manajemen Inventory
 
-**Versi:** 2.0  
-**Tanggal:** Desember 2025
+**Versi:** 2.1  
+**Tanggal:** Desember 2025  
+**Update Terakhir:** Responsive Design & UI Improvements
 
 ---
 
 ## DAFTAR ISI
 
-1. [Login](#1-login)
-2. [Dashboard](#2-dashboard)
-3. [Menu Inventaris](#3-menu-inventaris)
-4. [Menu Pemasok](#4-menu-pemasok)
-5. [Menu Pelanggan](#5-menu-pelanggan)
-6. [Menu Pembelian](#6-menu-pembelian)
-7. [Menu Penjualan](#7-menu-penjualan)
-8. [Menu Penerimaan](#8-menu-penerimaan)
-9. [Menu Pembayaran](#9-menu-pembayaran)
-10. [Menu Laporan](#10-menu-laporan)
-11. [Menu Pengguna](#11-menu-pengguna)
-12. [Menu Pengaturan](#12-menu-pengaturan)
+1. [Fitur Terbaru v2.1](#fitur-terbaru-v21)
+2. [Login](#1-login)
+3. [Dashboard](#2-dashboard)
+4. [Menu Inventaris](#3-menu-inventaris)
+5. [Menu Pemasok](#4-menu-pemasok)
+6. [Menu Pelanggan](#5-menu-pelanggan)
+7. [Menu Pembelian](#6-menu-pembelian)
+8. [Menu Penjualan](#7-menu-penjualan)
+9. [Menu Penerimaan](#8-menu-penerimaan)
+10. [Menu Pembayaran](#9-menu-pembayaran)
+11. [Menu Laporan](#10-menu-laporan)
+12. [Menu Pengguna](#11-menu-pengguna)
+13. [Menu Pengaturan](#12-menu-pengaturan)
+
+---
+
+## FITUR TERBARU v2.1
+
+### 🎨 Responsive Design
+Aplikasi sekarang **fully responsive** dan dapat digunakan dengan nyaman di:
+- **Desktop** (1024px ke atas)
+- **Tablet** (768px - 1024px)  
+- **Mobile/HP** (di bawah 768px)
+
+### 📱 Sidebar Toggle
+- **Desktop:** Sidebar dapat di-collapse menjadi icon-only (60px) dengan tombol toggle
+- **Tablet:** Sidebar menyesuaikan ukuran (220px)
+- **Mobile:** Sidebar tersembunyi, muncul dengan tombol hamburger menu di top bar
+- Logo disembunyikan saat sidebar collapsed, muncul kembali saat expanded
+- State sidebar tersimpan di localStorage
+
+### ✅ Validasi Duplikat
+Sistem mencegah input data duplikat saat tombol Add/Simpan diklik berkali-kali:
+- Customer ID
+- Supplier ID
+- Sales Order (SO) ID
+- Purchase Order (PO) ID
+
+### 📊 Laporan Enhanced
+- **Filter "Semua Data"** - Melihat semua data tanpa filter periode
+- **Stok Awal & Stok Sisa** - Ditampilkan di Rekap Penjualan dan Rekap Inventory
+- **Daftar Sisa Stok** - Tabel lengkap stok per item di Rekap Inventory
+
+### 🔧 Perbaikan UI/UX
+- Form input menggunakan text input manual untuk Provinsi/Kota (bukan dropdown)
+- Satuan Barang menggantikan label "Harga Satuan" di beberapa tempat
+- Total Harga dapat diinput manual
+- Responsive tables dengan horizontal scroll di mobile
+- Touch-friendly buttons dan form elements
 
 ---
 
@@ -101,20 +139,33 @@ Dashboard adalah halaman utama yang menampilkan ringkasan data bisnis secara rea
 
 #### Sidebar Menu
 
-| Menu | Fungsi |
-|------|--------|
-| 🏠 Dashboard | Kembali ke halaman utama |
-| 📦 Inventaris | Kelola stok barang |
-| 🚚 Pemasok | Kelola data pemasok |
-| 👥 Pelanggan | Kelola data pelanggan |
-| 🛒 Pembelian | Kelola transaksi pembelian |
-| 💰 Penjualan | Kelola transaksi penjualan |
-| 📥 Penerimaan | Kelola penerimaan barang |
-| 💳 Pembayaran | Kelola pembayaran hutang/piutang |
-| 📊 Laporan | Lihat berbagai laporan |
-| 👤 Pengguna | Kelola akun pengguna (Admin only) |
-| ⚙️ Pengaturan | Konfigurasi sistem |
-| 🚪 Keluar | Logout dari sistem |
+| Menu | Fungsi | Icon |
+|------|--------|------|
+| 🏠 Dashboard | Kembali ke halaman utama | `fa-tachometer-alt` |
+| 📦 Inventaris | Kelola stok barang | `fa-boxes` |
+| 🚚 Pemasok | Kelola data pemasok | `fa-truck-loading` |
+| 👥 Pelanggan | Kelola data pelanggan | `fa-user-friends` |
+| 🛒 Pembelian | Kelola transaksi pembelian | `fa-file-invoice-dollar` |
+| 💰 Penjualan | Kelola transaksi penjualan | `fa-chart-line` |
+| 📥 Penerimaan | Kelola penerimaan barang | `fa-receipt` |
+| 💳 Pembayaran | Kelola pembayaran hutang/piutang | `fa-credit-card` |
+| 📊 Laporan | Lihat berbagai laporan | `fa-chart-pie` |
+| 👤 Pengguna | Kelola akun pengguna (Admin only) | `fa-user-cog` |
+| ⚙️ Pengaturan | Konfigurasi sistem | `fa-cogs` |
+| 🚪 Keluar | Logout dari sistem | `fa-sign-out-alt` |
+
+#### Fitur Sidebar Toggle (Baru v2.1)
+
+| Mode | Perilaku |
+|------|----------|
+| **Desktop Expanded** | Sidebar 260px, menampilkan icon + text |
+| **Desktop Collapsed** | Sidebar 60px, hanya icon (logo tersembunyi) |
+| **Tablet** | Sidebar 220px, menyesuaikan konten |
+| **Mobile** | Sidebar tersembunyi, buka dengan tombol ☰ di top bar |
+
+**Cara Toggle Sidebar:**
+1. **Desktop:** Klik tombol toggle (☰/✕) di header sidebar
+2. **Mobile:** Klik tombol hamburger (☰) di top bar, klik overlay untuk menutup
 
 #### Alur Penggunaan
 
@@ -243,8 +294,8 @@ Menu Pemasok digunakan untuk mengelola data supplier/pemasok barang, termasuk in
 | **Nama Pemasok** | Nama supplier/perusahaan | ✅ |
 | **Kontak** | Nomor telepon | ❌ |
 | **Email** | Alamat email | ❌ |
-| **Provinsi** | Pilih provinsi | ❌ |
-| **Kota** | Pilih kota | ❌ |
+| **Provinsi** | Input manual alamat provinsi | ❌ |
+| **Kota** | Input manual alamat kota | ❌ |
 | **Alamat** | Alamat lengkap | ❌ |
 | **No Rekening** | Nomor rekening bank | ❌ |
 
@@ -252,26 +303,15 @@ Menu Pemasok digunakan untuk mengelola data supplier/pemasok barang, termasuk in
 
 1. Klik tombol **"+ Tambah Pemasok Baru"**
 2. Isi nama pemasok (wajib)
-3. Lengkapi informasi lainnya
-4. Klik tombol **"Simpan"**
-5. Pemasok baru akan muncul di tabel
-
-#### Alur Menambah Provinsi/Kota Baru
-
-**Menambah Provinsi:**
-1. Klik tombol **"+ New State"**
-2. Masukkan nama provinsi
-3. Klik **"Simpan"**
-
-**Menambah Kota:**
-1. Klik tombol **"+ New City"**
-2. Pilih provinsi
-3. Masukkan nama kota
-4. Klik **"Simpan"**
+3. Lengkapi informasi lainnya (kontak, email, alamat)
+4. Input provinsi dan kota secara manual
+5. Klik tombol **"Simpan"**
+6. Pemasok baru akan muncul di tabel
 
 #### Catatan Penting
 - Pemasok dengan saldo hutang tidak dapat dihapus
-- Dropdown provinsi dan kota saling terhubung (cascade)
+- Provinsi dan Kota diinput secara manual (text input)
+- Sistem mencegah duplikat Supplier ID saat klik Simpan berkali-kali
 
 ---
 
@@ -326,6 +366,7 @@ Menu Pelanggan digunakan untuk mengelola data customer/pelanggan termasuk inform
 #### Catatan Penting
 - Pelanggan dengan saldo piutang tidak dapat dihapus
 - ID Pelanggan dibuat otomatis: CUST001, CUST002, dst
+- Sistem mencegah duplikat Customer ID saat klik Simpan berkali-kali
 
 ---
 
@@ -397,6 +438,7 @@ Menu Pembelian digunakan untuk mencatat transaksi pembelian barang dari pemasok.
 #### Catatan Penting
 - Pembelian yang sudah diterima tidak dapat dihapus
 - Stok otomatis bertambah setelah status "Received"
+- Sistem mencegah duplikat PO ID saat klik Simpan berkali-kali
 
 ---
 
@@ -468,6 +510,7 @@ Menu Penjualan digunakan untuk mencatat transaksi penjualan barang kepada pelang
 - Stok otomatis berkurang setelah penjualan disimpan
 - Tidak dapat menjual melebihi stok tersedia
 - Penjualan yang sudah dibayar tidak dapat dihapus
+- Sistem mencegah duplikat SO ID saat klik Simpan berkali-kali
 
 ---
 
@@ -602,14 +645,15 @@ Menu Laporan menyediakan berbagai laporan untuk analisis bisnis dan pengambilan 
 
 | Laporan | Deskripsi |
 |---------|-----------|
-| **Rekap Penjualan** | Analisis data penjualan, tren bulanan, dan performa produk terbaik untuk membantu pengambilan keputusan bisnis |
-| **Rekap Inventory** | Pantau stok barang, identifikasi produk dengan stok rendah, dan analisis perputaran inventory |
-| **Rekap Keuangan** | Ringkasan pendapatan, pengeluaran, laba rugi, dan analisis profitabilitas bisnis Anda |
+| **Rekap Penjualan** | Analisis data penjualan, tren bulanan, performa produk terbaik, **Stok Awal & Stok Sisa** |
+| **Rekap Inventory** | Pantau stok barang, stok rendah, **Daftar Sisa Stok lengkap**, nilai inventory |
+| **Rekap Keuangan** | Ringkasan pendapatan, pengeluaran, laba rugi, dan analisis profitabilitas |
 
 #### Pilihan Periode Filter
 
 | Periode | Deskripsi |
 |---------|-----------|
+| **Semua Data** | Menampilkan seluruh data tanpa filter tanggal **(Baru v2.1)** |
 | **Minggu Ini** | Data dari hari Senin hingga hari ini |
 | **Bulan Ini** | Data dari tanggal 1 hingga hari ini |
 | **Custom** | Pilih rentang tanggal sesuai kebutuhan |
@@ -621,8 +665,8 @@ Menu Laporan menyediakan berbagai laporan untuk analisis bisnis dan pengambilan 
 - Total Order
 - Item Terjual (unit)
 - Rata-rata Order
-- **Stok Awal** (total stok di awal periode)
-- **Stok Sisa** (total stok tersisa)
+- **Stok Awal** - Total stok di awal periode **(Baru v2.1)**
+- **Stok Sisa** - Total stok tersisa saat ini **(Baru v2.1)**
 
 **Top 10 Item Terlaris:**
 - ID Item dan Nama
@@ -641,10 +685,20 @@ Menu Laporan menyediakan berbagai laporan untuk analisis bisnis dan pengambilan 
 - Total Stok (jumlah unit keseluruhan)
 - Total Nilai Inventory (dalam Rupiah)
 - Stok Rendah (item dengan stok < 10)
+- **Stok Awal** - Total stok sebelum penjualan **(Baru v2.1)**
+- **Terjual** - Total unit terjual dalam periode **(Baru v2.1)**
+- **Stok Sisa** - Total stok tersisa **(Baru v2.1)**
 
 **Daftar yang ditampilkan:**
 - Item Stok Rendah (warning kuning/merah)
 - Item Stok Terbanyak
+- **Daftar Sisa Stok** - Tabel lengkap semua item dengan kolom: **(Baru v2.1)**
+  - Kode Barang
+  - Nama Barang
+  - Kategori
+  - Sisa Stok
+  - Harga Satuan
+  - Total Nilai
 
 #### Laporan Rekap Keuangan
 
@@ -661,11 +715,16 @@ Menu Laporan menyediakan berbagai laporan untuk analisis bisnis dan pengambilan 
 #### Alur Membuat Laporan
 
 1. Pilih jenis laporan yang diinginkan (Rekap Penjualan / Rekap Inventory / Rekap Keuangan)
-2. Pilih periode: **Minggu Ini**, **Bulan Ini**, atau **Custom**
+2. Pilih periode: **Semua Data**, **Minggu Ini**, **Bulan Ini**, atau **Custom**
 3. Jika Custom, masukkan tanggal mulai dan selesai
 4. Klik tombol **"Generate Laporan"**
 5. Laporan akan ditampilkan dalam popup modal
 6. Gunakan tombol export jika tersedia
+
+#### Tips Penggunaan Laporan (v2.1)
+- Gunakan **"Semua Data"** untuk melihat keseluruhan data historis
+- Perhatikan **Stok Awal vs Stok Sisa** untuk analisis pergerakan inventory
+- **Daftar Sisa Stok** di Rekap Inventory berguna untuk stock opname
 
 ---
 
@@ -830,10 +889,56 @@ Menu Pengaturan digunakan untuk mengkonfigurasi parameter sistem dan preferensi 
 | Data tidak muncul | Refresh halaman, periksa koneksi internet |
 | Error saat simpan | Pastikan semua field wajib terisi |
 | Halaman blank | Clear cache browser, login ulang |
+| Sidebar tidak muncul (mobile) | Klik tombol hamburger (☰) di top bar |
+| Tombol tidak responsif | Pastikan tidak ada modal yang terbuka, refresh halaman |
+| Laporan kosong | Coba pilih periode "Semua Data" untuk melihat data lengkap |
+
+### Kompatibilitas Browser
+
+| Browser | Status |
+|---------|--------|
+| Google Chrome | ✅ Recommended |
+| Mozilla Firefox | ✅ Supported |
+| Microsoft Edge | ✅ Supported |
+| Safari | ✅ Supported |
+| Mobile Chrome | ✅ Supported |
+| Mobile Safari | ✅ Supported |
+
+### Resolusi Layar yang Didukung
+
+| Perangkat | Resolusi | Status |
+|-----------|----------|--------|
+| Desktop | 1920x1080 ke atas | ✅ Optimal |
+| Laptop | 1366x768 - 1920x1080 | ✅ Optimal |
+| Tablet | 768x1024 - 1024x1366 | ✅ Optimal |
+| Mobile | 320x568 - 414x896 | ✅ Optimal |
 
 ### Kontak Support
 Jika mengalami kendala, hubungi administrator sistem.
 
 ---
 
-**© 2025 Ruang Stok - Sistem Manajemen Inventory**
+## CHANGELOG
+
+### v2.1 (Desember 2025)
+- ✨ **Responsive Design** - Aplikasi sekarang mendukung semua ukuran layar (mobile, tablet, desktop)
+- ✨ **Sidebar Toggle** - Sidebar dapat di-collapse di desktop, hidden di mobile
+- ✨ **Mobile Menu Button** - Tombol hamburger di top bar untuk akses sidebar di mobile
+- ✨ **Filter "Semua Data"** - Opsi baru di semua laporan untuk melihat data lengkap
+- ✨ **Stok Awal & Stok Sisa** - Metrik baru di Rekap Penjualan dan Inventory
+- ✨ **Daftar Sisa Stok** - Tabel lengkap stok di Rekap Inventory
+- ✨ **Validasi Duplikat** - Mencegah input duplikat saat klik tombol berkali-kali
+- 🔧 **Manual Input Provinsi/Kota** - Mengganti dropdown dengan text input
+- 🔧 **Improved Touch Events** - Overlay click dan touch support untuk mobile
+- 🔧 **Optimized Top Bar** - Simplified icons di mobile untuk menghemat ruang
+
+### v2.0 (Desember 2025)
+- Initial release dengan fitur lengkap inventory management
+- User management dengan role Admin dan Staff
+- Dashboard dengan statistik real-time
+- Laporan Penjualan, Inventory, dan Keuangan
+
+---
+
+**© 2025 Ruang Stok - Sistem Manajemen Inventory**  
+**Developed with ❤️ using Google Apps Script**
