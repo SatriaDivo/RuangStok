@@ -87,12 +87,24 @@ function processLogout(email) {
  * Check Server Session based on Timestamps
  * This function is called by the client to verify if the session is still valid
  * Accepts email OR name as identifier
+ * @param {string} identifier - Email or Name
+ * @param {boolean} throwIfInvalid - If true, throw error when session invalid (default: true for backend calls)
+ * @returns {Object} Session info with active status
+ * @throws {Error} If throwIfInvalid=true and session is not active
  */
-function checkServerSession(identifier) {
+function checkServerSession(identifier, throwIfInvalid) {
+  // Default throwIfInvalid to true for backend enforcement
+  if (throwIfInvalid === undefined) {
+    throwIfInvalid = true;
+  }
+  
   console.log('checkServerSession called with:', identifier);
   
   if (!identifier) {
     console.log('No identifier provided');
+    if (throwIfInvalid) {
+      throw new Error('SESSION_EXPIRED: Identifier tidak ditemukan');
+    }
     return { active: false };
   }
   
@@ -101,6 +113,9 @@ function checkServerSession(identifier) {
   
   if (!timestamps) {
     console.log('No timestamps found');
+    if (throwIfInvalid) {
+      throw new Error('SESSION_EXPIRED: Session tidak ditemukan');
+    }
     return { active: false };
   }
   
@@ -128,15 +143,19 @@ function checkServerSession(identifier) {
     };
   } else {
     console.log('Session NOT active - login time not greater than logout time');
+    if (throwIfInvalid) {
+      throw new Error('SESSION_EXPIRED: Sesi telah berakhir, silakan login kembali');
+    }
     return { active: false };
   }
 }
 
 /**
  * Wrapper for client-side calls to avoid caching issues
+ * Uses throwIfInvalid=false to return object instead of throwing
  */
 function apiCheckServerSession(email) {
-  return checkServerSession(email);
+  return checkServerSession(email, false);
 }
 
 // Alias for compatibility with existing code if any

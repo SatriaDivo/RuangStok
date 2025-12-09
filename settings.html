@@ -561,7 +561,8 @@ function testConnection() {
   statusEl.className = 'connection-status status-testing';
   statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
   
-  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+  const user = userStr ? JSON.parse(userStr) : null;
   
   google.script.run
     .withSuccessHandler(function(result) {
@@ -586,7 +587,8 @@ function testConnection() {
 function createBackup() {
   showToast('Membuat backup database...', 'warning');
   
-  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+  const user = userStr ? JSON.parse(userStr) : null;
   
   // Call Google Apps Script backend to generate Excel export URL
   google.script.run
@@ -651,7 +653,8 @@ function updateSystemInfo() {
   document.getElementById('storageUsed').textContent = `${(storageUsed / 1024).toFixed(2)} KB`;
 
   // Fetch Database Info
-  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+  const user = userStr ? JSON.parse(userStr) : null;
   if (user && user.email) {
     google.script.run
       .withSuccessHandler(function(info) {
@@ -690,7 +693,8 @@ function showToast(message, type = 'success') {
 
 // Role-based visibility for settings sections
 function applyRoleBasedSettings() {
-  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+  const user = userStr ? JSON.parse(userStr) : null;
   const adminSections = document.querySelectorAll('.admin-only-section');
   const accountInfo = document.getElementById('accountInfo');
   
@@ -767,7 +771,8 @@ function submitChangePassword() {
   const oldPassword = document.getElementById('oldPassword').value;
   const newPassword = document.getElementById('newPassword').value;
   const confirmPassword = document.getElementById('confirmNewPassword').value;
-  const user = JSON.parse(localStorage.getItem('ruangStokUser'));
+  const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+  const user = userStr ? JSON.parse(userStr) : null;
   
   if (!oldPassword || !newPassword || !confirmPassword) {
     showToast('Semua field harus diisi', 'error');

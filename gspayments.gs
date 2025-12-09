@@ -42,6 +42,8 @@ function ptGetPO(email) {
 }
 
 function ptGetDimensions(email) {
+  // TODO: remove-after-review - fungsi ini tidak dipanggil di manapun
+  // @deprecated Unused function
   checkServerSession(email);
   return _ptGetRangeData('RANGEDIMENSIONS');
 }

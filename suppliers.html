@@ -9,14 +9,6 @@
         <i class="fas fa-plus" style="margin-right: 8px;"></i>
         Tambah Pemasok Baru
       </button>
-      <button onclick="openNewStateModal()" style="background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 14px; transition: all 0.3s;">
-        <i class="fas fa-plus" style="margin-right: 8px;"></i>
-        New State
-      </button>
-      <button onclick="openNewCityModal()" style="background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; font-size: 14px; transition: all 0.3s;">
-        <i class="fas fa-plus" style="margin-right: 8px;"></i>
-        New City
-      </button>
     </div>
   </div>
   
@@ -162,11 +154,11 @@
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
         <div>
           <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;"><span style="color: #e74c3c;">*</span> Provinsi</label>
-          <select name="state" id="supplierState" class="form-control" style="width:100%"></select>
+          <input type="text" name="state" id="supplierState" placeholder="Contoh: Jawa Barat" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
         </div>
         <div>
           <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;"><span style="color: #e74c3c;">*</span> Kota</label>
-          <select name="city" id="supplierCity" class="form-control" style="width:100%"></select>
+          <input type="text" name="city" id="supplierCity" placeholder="Contoh: Bandung" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
         </div>
       </div>
       
@@ -221,13 +213,11 @@
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
         <div>
           <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Provinsi</label>
-          <select id="editSupplierState" name="state" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-          </select>
+          <input type="text" id="editSupplierState" name="state" placeholder="Contoh: Jawa Barat" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
         </div>
         <div>
           <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kota</label>
-          <select id="editSupplierCity" name="city" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-          </select>
+          <input type="text" id="editSupplierCity" name="city" placeholder="Contoh: Bandung" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
         </div>
       </div>
       
@@ -288,55 +278,7 @@
   </div>
 </div>
 
-<!-- New State Modal -->
-<div id="newStateModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
-  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h3 style="margin: 0; color: #2c3e50;">Tambah Provinsi Baru</h3>
-      <button onclick="closeNewStateModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">×</button>
-    </div>
-    
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nama Provinsi</label>
-      <div style="display: flex; gap: 10px;">
-        <input type="text" id="newStateName" placeholder="Contoh: Jawa Barat" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-        <button onclick="saveNewState()" style="background: #1abc9c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; white-space: nowrap;">Simpan</button>
-      </div>
-    </div>
-    
-    <div style="margin-top: 20px;">
-      <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Provinsi yang Ada</label>
-      <div id="existingStatesList" style="border: 1px solid #eee; border-radius: 5px; padding: 8px; max-height: 200px; overflow-y: auto; background: #f9f9f9; min-height: 50px;">
-        <div style="text-align: center; padding: 20px; color: #999;">Memuat...</div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- New City Modal -->
-<div id="newCityModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
-  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h3 style="margin: 0; color: #2c3e50;">Tambah Kota Baru</h3>
-      <button onclick="closeNewCityModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">×</button>
-    </div>
-    
-    <div style="margin-bottom: 15px;">
-      <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nama Kota</label>
-      <div style="display: flex; gap: 10px;">
-        <input type="text" id="newCityName" placeholder="Contoh: Bandung" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-        <button onclick="saveNewCity()" style="background: #1abc9c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; white-space: nowrap;">Simpan</button>
-      </div>
-    </div>
-    
-    <div style="margin-top: 20px;">
-      <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kota yang Ada</label>
-      <div id="existingCitiesList" style="border: 1px solid #eee; border-radius: 5px; padding: 8px; max-height: 200px; overflow-y: auto; background: #f9f9f9; min-height: 50px;">
-        <div style="text-align: center; padding: 20px; color: #999;">Memuat...</div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <style>
   /* Modal Styles */
@@ -578,301 +520,11 @@
   }
   
   function loadAllData() {
-    // Step 2: Load states and cities
-    loadStatesData();
-    loadCitiesData();
+    // Load supplier data only (State/City are now manual text inputs)
     loadSupplierData();
-  }
-  
-  // ========== LOAD STATES ==========
-  function loadStatesData() {
-    const user = SessionManager.getUser();
-    const userEmail = user ? user.username : null;
-    google.script.run
-      .withSuccessHandler(function(states) {
-        console.log('✅ States loaded:', states);
-        supStates = states || [];
-        console.log('✅ Saved', supStates.length, 'states to global variable');
-        // TIDAK perlu init dropdown di sini, akan diisi saat modal dibuka
-      })
-      .withFailureHandler(function(error) {
-        console.error('❌ Error loading states:', error);
-        supStates = [];
-      })
-      .supGetStates(userEmail);
-  }
-  
-  // ========== LOAD CITIES ==========
-  function loadCitiesData() {
-    const user = SessionManager.getUser();
-    const userEmail = user ? user.username : null;
-    google.script.run
-      .withSuccessHandler(function(cities) {
-        console.log('✅ Cities loaded:', cities);
-        supCities = cities || [];
-        console.log('✅ Saved', supCities.length, 'cities to global variable');
-        // TIDAK perlu init dropdown di sini, akan diisi saat modal dibuka
-      })
-      .withFailureHandler(function(error) {
-        console.error('❌ Error loading cities:', error);
-        supCities = [];
-      })
-      .supGetCities(userEmail);
   }
 
   // ========== MODAL & UI FUNCTIONS ==========
-  
-  // New State Modal Functions
-  function openNewStateModal() {
-    document.getElementById('newStateModal').style.display = 'block';
-    document.getElementById('newStateName').value = '';
-    loadExistingStates();
-  }
-
-  function closeNewStateModal() {
-  document.getElementById('newStateModal').style.display = 'none';
-}
-
-function loadExistingStates() {
-  const container = document.getElementById('existingStatesList');
-  container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Memuat...</div>';
-  
-  const user = SessionManager.getUser();
-  const userEmail = user ? user.username : null;
-
-  google.script.run
-    .withSuccessHandler(function(states) {
-      if (states && states.length > 0) {
-        container.innerHTML = states.map(state => 
-          `<div style="padding: 8px; border-bottom: 1px solid #eee;">${state}</div>`
-        ).join('');
-      } else {
-        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Belum ada provinsi</div>';
-      }
-    })
-    .withFailureHandler(function(error) {
-      container.innerHTML = '<div style="text-align: center; padding: 20px; color: #e74c3c;">Error memuat data</div>';
-    })
-    .supGetStates(userEmail);
-}
-
-function saveNewState() {
-  const stateName = document.getElementById('newStateName').value.trim();
-  
-  if (!stateName) {
-    showAlert('Nama provinsi tidak boleh kosong', 'warning');
-    return;
-  }
-  
-  const user = SessionManager.getUser();
-  const userEmail = user ? user.username : null;
-
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result && result.sessionExpired) {
-        SessionManager.clearSession();
-        SessionManager.redirectToLogin();
-        return;
-      }
-      if (result && result.success) {
-        showAlert(result.message || 'Provinsi berhasil ditambahkan!', 'success');
-        document.getElementById('newStateName').value = '';
-        loadExistingStates();
-        
-        // Reload state data and populate dropdowns
-        supLoadStates();
-      } else {
-        showAlert(result.message || 'Provinsi sudah ada', 'warning');
-      }
-    })
-    .withFailureHandler(function(error) {
-      showAlert('Error: ' + error.message, 'error');
-    })
-    .supAddNewState(stateName, userEmail);
-}
-
-// New City Modal Functions
-function openNewCityModal() {
-  document.getElementById('newCityModal').style.display = 'block';
-  document.getElementById('newCityName').value = '';
-  loadExistingCities();
-}
-
-function closeNewCityModal() {
-  document.getElementById('newCityModal').style.display = 'none';
-}
-
-function loadExistingCities() {
-  const container = document.getElementById('existingCitiesList');
-  container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Memuat...</div>';
-  
-  const user = SessionManager.getUser();
-  const userEmail = user ? user.username : null;
-
-  google.script.run
-    .withSuccessHandler(function(cities) {
-      if (cities && cities.length > 0) {
-        container.innerHTML = cities.map(city => 
-          `<div style="padding: 8px; border-bottom: 1px solid #eee;">${city}</div>`
-        ).join('');
-      } else {
-        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Belum ada kota</div>';
-      }
-    })
-    .withFailureHandler(function(error) {
-      container.innerHTML = '<div style="text-align: center; padding: 20px; color: #e74c3c;">Error memuat data</div>';
-    })
-    .supGetCities(userEmail);
-}
-
-function saveNewCity() {
-  const cityName = document.getElementById('newCityName').value.trim();
-  
-  if (!cityName) {
-    showAlert('Nama kota tidak boleh kosong', 'warning');
-    return;
-  }
-  
-  const user = SessionManager.getUser();
-  const userEmail = user ? user.username : null;
-
-  google.script.run
-    .withSuccessHandler(function(result) {
-      if (result && result.sessionExpired) {
-        SessionManager.clearSession();
-        SessionManager.redirectToLogin();
-        return;
-      }
-      if (result && result.success) {
-        showAlert(result.message || 'Kota berhasil ditambahkan!', 'success');
-        document.getElementById('newCityName').value = '';
-        loadExistingCities();
-        
-        // Reload city data and populate dropdowns
-        supLoadCities();
-      } else {
-        showAlert(result.message || 'Kota sudah ada', 'warning');
-      }
-    })
-    .withFailureHandler(function(error) {
-      showAlert('Error: ' + error.message, 'error');
-    })
-    .supAddNewCity(cityName, userEmail);
-}
-
-// Reload state dropdowns yang sudah diinisialisasi
-function reloadStateDropdowns() {
-  const user = SessionManager.getUser();
-  const userEmail = user ? user.username : null;
-  google.script.run
-    .withSuccessHandler(function(states) {
-      // Update add form dropdown
-      const stateSelect = $('#supplierState');
-      if (stateSelect.hasClass('select2-hidden-accessible')) {
-        const currentVal = stateSelect.val();
-        stateSelect.find('option:not(:first)').remove();
-        if (states && states.length > 0) {
-          states.forEach(function(state) {
-            stateSelect.append(new Option(state, state));
-          });
-        }
-        stateSelect.val(currentVal).trigger('change');
-      }
-      
-      // Update edit form dropdown
-      const editStateSelect = $('#editSupplierState');
-      if (editStateSelect.hasClass('select2-hidden-accessible')) {
-        const currentVal = editStateSelect.val();
-        editStateSelect.find('option:not(:first)').remove();
-        if (states && states.length > 0) {
-          states.forEach(function(state) {
-            editStateSelect.append(new Option(state, state));
-          });
-        }
-        editStateSelect.val(currentVal).trigger('change');
-      }
-    })
-    .withFailureHandler(function(error) {
-      console.error('Error reloading states:', error);
-    })
-    .supGetStates(userEmail);
-}
-
-// Reload city dropdowns yang sudah diinisialisasi
-function reloadCityDropdowns() {
-  const user = SessionManager.getUser();
-  const userEmail = user ? user.username : null;
-  google.script.run
-    .withSuccessHandler(function(cities) {
-      // Update add form dropdown
-      const citySelect = $('#supplierCity');
-      if (citySelect.hasClass('select2-hidden-accessible')) {
-        const currentVal = citySelect.val();
-        citySelect.find('option:not(:first)').remove();
-        if (cities && cities.length > 0) {
-          cities.forEach(function(city) {
-            citySelect.append(new Option(city, city));
-          });
-        }
-        citySelect.val(currentVal).trigger('change');
-      }
-      
-      // Update edit form dropdown
-      const editCitySelect = $('#editSupplierCity');
-      if (editCitySelect.hasClass('select2-hidden-accessible')) {
-        const currentVal = editCitySelect.val();
-        editCitySelect.find('option:not(:first)').remove();
-        if (cities && cities.length > 0) {
-          cities.forEach(function(city) {
-            editCitySelect.append(new Option(city, city));
-          });
-        }
-        editCitySelect.val(currentVal).trigger('change');
-      }
-    })
-    .withFailureHandler(function(error) {
-      console.error('Error reloading cities:', error);
-    })
-    .supGetCities(userEmail);
-}
-
-// Load states from CState sheet
-function supLoadStates() {
-  console.log('🔄 Calling supGetStates()...');
-  const user = SessionManager.getUser();
-  const userEmail = user ? user.username : null;
-  google.script.run
-    .withSuccessHandler(function(states) {
-      console.log('✅ States loaded:', states);
-      console.log('✅ States count:', states ? states.length : 0);
-      supStates = states || [];
-      populateSupStateDropdown();
-    })
-    .withFailureHandler(function(error) {
-      console.error('❌ Error loading states:', error);
-      supStates = [];
-    })
-    .supGetStates(userEmail);
-}
-
-// Load cities from CCity sheet
-function supLoadCities() {
-  console.log('🔄 Calling supGetCities()...');
-  const user = SessionManager.getUser();
-  const userEmail = user ? user.username : null;
-  google.script.run
-    .withSuccessHandler(function(cities) {
-      console.log('✅ Cities loaded:', cities);
-      console.log('✅ Cities count:', cities ? cities.length : 0);
-      supCities = cities || [];
-      populateSupCityDropdown();
-    })
-    .withFailureHandler(function(error) {
-      console.error('❌ Error loading cities:', error);
-      supCities = [];
-    })
-    .supGetCities(userEmail);
-}
 
 function openAddSupplierModal() {
   const modal = document.getElementById('addSupplierModal');
@@ -884,82 +536,10 @@ function openAddSupplierModal() {
   // Show modal
   modal.style.display = 'block';
   
-  // PENTING: Isi dropdown setiap kali modal dibuka
-  fillDropdownsInModal();
-  
   // Focus on first input
   const firstInput = form.querySelector('input[name="supplierName"]');
   if (firstInput) {
     setTimeout(() => firstInput.focus(), 100);
-  }
-}
-
-// Fungsi untuk mengisi dropdown saat modal dibuka
-function fillDropdownsInModal() {
-  console.log('📋 Filling dropdowns in modal...');
-  console.log('📋 supStates:', supStates);
-  console.log('📋 supCities:', supCities);
-  
-  // Isi dropdown Provinsi
-  var $stateSelect = $('#supplierState');
-  if ($stateSelect.length > 0) {
-    // Destroy Select2 jika sudah ada
-    if ($stateSelect.data('select2')) {
-      $stateSelect.select2('destroy');
-    }
-    
-    // Clear dan isi ulang
-    $stateSelect.empty();
-    $stateSelect.append('<option value="">-- Pilih Provinsi --</option>');
-    
-    if (supStates && supStates.length > 0) {
-      supStates.forEach(function(state) {
-        if (state) {
-          $stateSelect.append($('<option></option>').val(state).text(state));
-        }
-      });
-      console.log('✅ Provinsi dropdown filled with', supStates.length, 'items');
-    } else {
-      console.warn('⚠️ No states data available');
-    }
-    
-    // Init Select2
-    $stateSelect.select2({
-      width: '100%',
-      placeholder: '-- Pilih Provinsi --',
-      dropdownParent: $('#addSupplierModal')
-    });
-  }
-  
-  // Isi dropdown Kota
-  var $citySelect = $('#supplierCity');
-  if ($citySelect.length > 0) {
-    // Destroy Select2 jika sudah ada
-    if ($citySelect.data('select2')) {
-      $citySelect.select2('destroy');
-    }
-    
-    // Clear dan isi ulang
-    $citySelect.empty();
-    $citySelect.append('<option value="">-- Pilih Kota --</option>');
-    
-    if (supCities && supCities.length > 0) {
-      supCities.forEach(function(city) {
-        if (city) {
-          $citySelect.append($('<option></option>').val(city).text(city));
-        }
-      });
-      console.log('✅ Kota dropdown filled with', supCities.length, 'items');
-    } else {
-      console.warn('⚠️ No cities data available');
-    }
-    
-    // Init Select2
-    $citySelect.select2({
-      width: '100%',
-      placeholder: '-- Pilih Kota --',
-      dropdownParent: $('#addSupplierModal')
-    });
   }
 }
 
@@ -1636,9 +1216,9 @@ function editSupplier(index) {
   document.getElementById('editSupplierAddress').value = supplier.address || '';
   document.getElementById('editSupplierNoRek').value = supplier.noRek || '';
   
-  // Set dropdown values
-  $('#editSupplierState').val(supplier.state || '').trigger('change');
-  $('#editSupplierCity').val(supplier.city || '').trigger('change');
+  // Set text input values for state and city
+  document.getElementById('editSupplierState').value = supplier.state || '';
+  document.getElementById('editSupplierCity').value = supplier.city || '';
   
   // Show edit modal
   openEditSupplierModal();

@@ -32,11 +32,15 @@ function rcGetCustomers(email) {
   return _rcGetRangeData('RANGECUSTOMERS');
 }
 
+// TODO: remove-after-review - fungsi ini tidak dipanggil di manapun
+// @deprecated Unused function - rcGetSalesOrders
 function rcGetSalesOrders(email) {
   checkServerSession(email);
   return _rcGetRangeData('RANGESO');
 }
 
+// TODO: remove-after-review - fungsi ini tidak dipanggil di manapun
+// @deprecated Unused function - rcGetDimensions
 function rcGetDimensions(email) {
   checkServerSession(email);
   return _rcGetRangeData('RANGEDIMENSIONS');
@@ -142,18 +146,66 @@ function rcDeleteReceipt(trxID, email) {
 
 /**
  * Calc SO Balance = Total SO Amount - Total Received
- * (reuse from sales module)
+ * @deprecated TODO: remove-after-review - Fungsi ini duplikasi dari soCalcSOBalance
+ * Fungsi asli ada di gssales.gs tapi tidak accessible karena nested
+ * Untuk sementara diimplementasikan langsung di sini
  */
 function rcCalcSOBalance() {
-  // assuming soCalcSOBalance exists in gssales.gs
-  return this.soCalcSOBalance();
+  try {
+    const ss = SpreadsheetApp.getActive();
+    const soSheet = ss.getSheetByName('SalesOrders');
+    if (!soSheet) return;
+    
+    const lastRow = soSheet.getLastRow();
+    if (lastRow < 2) return;
+    
+    const headers = soSheet.getRange(1, 1, 1, 12).getValues()[0];
+    const totalCol = headers.indexOf('Total SO Amount') + 1;
+    const receivedCol = headers.indexOf('Total Received') + 1;
+    const balCol = headers.indexOf('SO Balance') + 1;
+    
+    if (totalCol < 1 || receivedCol < 1 || balCol < 1) return;
+    
+    for (let i = 2; i <= lastRow; i++) {
+      const total = soSheet.getRange(i, totalCol).getValue() || 0;
+      const received = soSheet.getRange(i, receivedCol).getValue() || 0;
+      const balance = total - received;
+      soSheet.getRange(i, balCol).setValue(balance);
+    }
+  } catch (e) {
+    Logger.log('Error in rcCalcSOBalance: ' + e.message);
+  }
 }
 
 /**
  * Calc Balance Receivable = Total Sales - Total Receipts
+ * @deprecated TODO: remove-after-review - Fungsi ini duplikasi dari soCalcBalanceReceivable
  */
 function rcCalcBalanceReceivable() {
-  return this.soCalcBalanceReceivable();
+  try {
+    const ss = SpreadsheetApp.getActive();
+    const custRange = ss.getRangeByName('RANGECUSTOMERS');
+    if (!custRange) return;
+    
+    const sheet = custRange.getSheet();
+    const startRow = custRange.getRow();
+    const vals = custRange.getValues();
+    const headers = vals[0];
+    const data = vals.slice(1);
+
+    const totalSalesCol = headers.indexOf('Total Sales');
+    const receiptsCol = headers.indexOf('Total Receipts');
+    const balanceRecCol = headers.indexOf('Balance Receivable');
+
+    if (totalSalesCol < 0 || receiptsCol < 0 || balanceRecCol < 0) return;
+
+    data.forEach((row, i) => {
+      const bal = (row[totalSalesCol] || 0) - (row[receiptsCol] || 0);
+      sheet.getRange(startRow + 1 + i, custRange.getColumn() + balanceRecCol).setValue(bal);
+    });
+  } catch (e) {
+    Logger.log('Error in rcCalcBalanceReceivable: ' + e.message);
+  }
 }
 
 /**

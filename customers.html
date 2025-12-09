@@ -505,12 +505,6 @@
       <button class="btn btn-primary" onclick="custOpenNewCustomerModal()">
         <i class="fas fa-plus"></i> New Customer
       </button>
-      <button class="btn btn-secondary" onclick="custOpenNewStateModal()">
-        <i class="fas fa-plus"></i> New State
-      </button>
-      <button class="btn btn-secondary" onclick="custOpenNewCityModal()">
-        <i class="fas fa-plus"></i> New City
-      </button>
     </div>
     
     <div class="search-group">
@@ -565,58 +559,6 @@
   </div>
 </div>
 
-<!-- New State Modal -->
-<div id="custStateModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Add New State</h2>
-      <span class="close-btn" onclick="custCloseStateModal()">&times;</span>
-    </div>
-    <div class="form-group">
-      <label class="required">State Name</label>
-      <div style="display: flex; gap: 10px;">
-        <input type="text" id="custNewState" class="form-control" required style="flex: 1;">
-        <button class="btn btn-primary" onclick="custSaveNewState()" style="padding: 10px 20px; white-space: nowrap;">Save</button>
-      </div>
-    </div>
-    <div class="form-group" style="margin-top: 20px; margin-bottom: 0;">
-      <label>Existing States</label>
-      <div id="custExistingStatesList" style="border: 1px solid #eee; border-radius: 5px; padding: 8px; max-height: 200px; overflow-y: auto; background: #f9f9f9; min-height: 50px;">
-        <!-- States will be populated here -->
-      </div>
-    </div>
-    <div style="text-align: right; margin-top: 15px;">
-      <button class="btn btn-outline" onclick="custCloseStateModal()">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- New City Modal -->
-<div id="custCityModal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h2>Add New City</h2>
-      <span class="close-btn" onclick="custCloseCityModal()">&times;</span>
-    </div>
-    <div class="form-group">
-      <label class="required">City Name</label>
-      <div style="display: flex; gap: 10px;">
-        <input type="text" id="custNewCity" class="form-control" required style="flex: 1;">
-        <button class="btn btn-primary" onclick="custSaveNewCity()" style="padding: 10px 20px; white-space: nowrap;">Save</button>
-      </div>
-    </div>
-    <div class="form-group" style="margin-top: 20px; margin-bottom: 0;">
-      <label>Existing Cities</label>
-      <div id="custExistingCitiesList" style="border: 1px solid #eee; border-radius: 5px; padding: 8px; max-height: 200px; overflow-y: auto; background: #f9f9f9; min-height: 50px;">
-        <!-- Cities will be populated here -->
-      </div>
-    </div>
-    <div style="text-align: right; margin-top: 15px;">
-      <button class="btn btn-outline" onclick="custCloseCityModal()">Close</button>
-    </div>
-  </div>
-</div>
-
 <!-- New Customer Modal -->
 <div id="custCustomerModal" class="modal">
   <div class="modal-content">
@@ -646,11 +588,11 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
       <div>
         <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;"><span style="color: #e74c3c;">*</span> Provinsi</label>
-        <select id="custCustomerState" class="form-control" style="width:100%"></select>
+        <input type="text" id="custCustomerState" class="form-control" placeholder="Contoh: Jawa Barat" style="width:100%">
       </div>
       <div>
         <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;"><span style="color: #e74c3c;">*</span> Kota</label>
-        <select id="custCustomerCity" class="form-control" style="width:100%"></select>
+        <input type="text" id="custCustomerCity" class="form-control" placeholder="Contoh: Bandung" style="width:100%">
       </div>
     </div>
     
@@ -675,80 +617,6 @@
 <div id="custProcessingOverlay" class="processing-overlay">
   <div class="spinner"></div>
   <p>Processing...</p>
-</div>
-
-<!-- Delete State Confirmation Modal -->
-<div id="custDeleteStateConfirmModal" class="modal">
-  <div class="modal-content" style="width: 400px;">
-    <div class="modal-header">
-      <h2>Confirm Delete</h2>
-      <span class="close-btn" onclick="custCloseDeleteStateConfirm()">&times;</span>
-    </div>
-    <div style="padding: 20px; text-align: center;">
-      <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 15px;"></i>
-      <p style="font-size: 16px; color: #2c3e50; margin: 15px 0;">Are you sure you want to delete this state?</p>
-      <p style="font-size: 12px; color: #7f8c8d;">This action cannot be undone.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="custCloseDeleteStateConfirm()">Cancel</button>
-      <button class="btn" style="background: #e74c3c; color: white;" onclick="custConfirmDeleteState()">Delete</button>
-    </div>
-  </div>
-</div>
-
-<!-- Delete City Confirmation Modal -->
-<div id="custDeleteCityConfirmModal" class="modal">
-  <div class="modal-content" style="width: 400px;">
-    <div class="modal-header">
-      <h2>Confirm Delete</h2>
-      <span class="close-btn" onclick="custCloseDeleteCityConfirm()">&times;</span>
-    </div>
-    <div style="padding: 20px; text-align: center;">
-      <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #e74c3c; margin-bottom: 15px;"></i>
-      <p style="font-size: 16px; color: #2c3e50; margin: 15px 0;">Are you sure you want to delete this city?</p>
-      <p style="font-size: 12px; color: #7f8c8d;">This action cannot be undone.</p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="custCloseDeleteCityConfirm()">Cancel</button>
-      <button class="btn" style="background: #e74c3c; color: white;" onclick="custConfirmDeleteCity()">Delete</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit State Modal -->
-<div id="custEditStateModal" class="modal">
-  <div class="modal-content" style="width: 400px;">
-    <div class="modal-header">
-      <h2>Edit State</h2>
-      <span class="close-btn" onclick="custCloseEditStateModal()">&times;</span>
-    </div>
-    <div class="form-group">
-      <label class="required">State Name</label>
-      <input type="text" id="custEditStateName" class="form-control" required>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="custCloseEditStateModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="custConfirmEditState()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit City Modal -->
-<div id="custEditCityModal" class="modal">
-  <div class="modal-content" style="width: 400px;">
-    <div class="modal-header">
-      <h2>Edit City</h2>
-      <span class="close-btn" onclick="custCloseEditCityModal()">&times;</span>
-    </div>
-    <div class="form-group">
-      <label class="required">City Name</label>
-      <input type="text" id="custEditCityName" class="form-control" required>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="custCloseEditCityModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="custConfirmEditCity()">Save</button>
-    </div>
-  </div>
 </div>
 
 <!-- Success Message Modal -->
@@ -790,11 +658,11 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
       <div>
         <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;"><span style="color: #e74c3c;">*</span> Provinsi</label>
-        <select id="custEditCustomerState" class="form-control" style="width:100%"></select>
+        <input type="text" id="custEditCustomerState" class="form-control" placeholder="Contoh: Jawa Barat" style="width:100%">
       </div>
       <div>
         <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;"><span style="color: #e74c3c;">*</span> Kota</label>
-        <select id="custEditCustomerCity" class="form-control" style="width:100%"></select>
+        <input type="text" id="custEditCustomerCity" class="form-control" placeholder="Contoh: Bandung" style="width:100%">
       </div>
     </div>
     <div class="form-group">
@@ -849,110 +717,11 @@
     google.script.run
       .withSuccessHandler(function() {
         console.log('Named ranges setup complete');
-        custLoadStates();
-        custLoadCities();
+        // Load customers only (State/City are now manual text inputs)
         custLoadCustomers();
       })
       .custSetupNamedRanges();
-    
-    // Initialize dropdowns
-    $('#custCustomerState').select2();
-    $('#custCustomerCity').select2();
   // });
-  
-  // Load states from Dimensions sheet
-  function custLoadStates() {
-    google.script.run
-      .withSuccessHandler(function(states) {
-        custStates = states;
-        populateCustStateDropdown();
-      })
-      .custGetStates();
-  }
-  
-  // Load cities from Dimensions sheet
-  function custLoadCities() {
-    google.script.run
-      .withSuccessHandler(function(cities) {
-        custCities = cities;
-        populateCustCityDropdown();
-      })
-      .custGetCities();
-  }
-  
-  // Populate state dropdown
-  function populateCustStateDropdown() {
-    const stateSelect = $('#custCustomerState');
-    stateSelect.empty();
-    
-    custStates.forEach(state => {
-      if (state) {
-        stateSelect.append(new Option(state, state));
-      }
-    });
-    
-    stateSelect.trigger('change');
-  }
-  
-  // Populate city dropdown
-  function populateCustCityDropdown() {
-    const citySelect = $('#custCustomerCity');
-    citySelect.empty();
-    
-    custCities.forEach(city => {
-      if (city) {
-        citySelect.append(new Option(city, city));
-      }
-    });
-    
-    citySelect.trigger('change');
-  }
-  
-  // Render existing states list
-  function custRenderExistingStatesList() {
-    const statesList = document.getElementById('custExistingStatesList');
-    if (custStates.length === 0) {
-      statesList.innerHTML = '<p style="margin: 0; color: #999; font-size: 12px; padding: 4px 0;">Belum ada provinsi</p>';
-      return;
-    }
-    
-    statesList.innerHTML = custStates.map((state, idx) => `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: white; border: 1px solid #e0e0e0; border-radius: 4px; margin-bottom: 6px;">
-        <span style="font-size: 13px; color: #2c3e50; flex: 1;">${state}</span>
-        <div style="display: flex; gap: 5px;">
-          <button type="button" onclick="custEditExistingState('${state}')" style="background: #3498db; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;" title="Edit">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button type="button" onclick="custDeleteExistingState('${state}')" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;" title="Hapus">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      </div>
-    `).join('');
-  }
-  
-  // Render existing cities list
-  function custRenderExistingCitiesList() {
-    const citiesList = document.getElementById('custExistingCitiesList');
-    if (custCities.length === 0) {
-      citiesList.innerHTML = '<p style="margin: 0; color: #999; font-size: 12px; padding: 4px 0;">Belum ada kota</p>';
-      return;
-    }
-    
-    citiesList.innerHTML = custCities.map((city, idx) => `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: white; border: 1px solid #e0e0e0; border-radius: 4px; margin-bottom: 6px;">
-        <span style="font-size: 13px; color: #2c3e50; flex: 1;">${city}</span>
-        <div style="display: flex; gap: 5px;">
-          <button type="button" onclick="custEditExistingCity('${city}')" style="background: #3498db; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;" title="Edit">
-            <i class="fas fa-edit"></i>
-          </button>
-          <button type="button" onclick="custDeleteExistingCity('${city}')" style="background: #e74c3c; color: white; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;" title="Hapus">
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
-      </div>
-    `).join('');
-  }
   
   // Load customers from sheet
   function custLoadCustomers() {
@@ -1068,353 +837,6 @@
     paginationDiv.appendChild(nextBtn);
   }
   
-  // Open new state modal
-  function custOpenNewStateModal() {
-    document.getElementById('custStateModal').style.display = 'block';
-    document.getElementById('custNewState').value = '';
-    custRenderExistingStatesList();
-  }
-  
-  // Close new state modal
-  function custCloseStateModal() {
-    document.getElementById('custStateModal').style.display = 'none';
-  }
-  
-  // Save new state
-  function custSaveNewState() {
-    const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    
-    if (!user) {
-      custShowAlert('Sesi tidak valid. Silakan login kembali.', 'error');
-      return;
-    }
-
-    const stateName = document.getElementById('custNewState').value.trim();
-    
-    if (!stateName) {
-      custShowAlert('Please enter a state name', 'warning');
-      return;
-    }
-    
-    showCustProcessing();
-    google.script.run
-      .withSuccessHandler(function(success) {
-        hideCustProcessing();
-        if (success) {
-          document.getElementById('custNewState').value = '';
-          custCloseStateModal();
-          custLoadStates();
-          custShowSuccessMessage('New State Added');
-          setTimeout(custCloseSuccessModal, 2000);
-        } else {
-          custShowAlert('Failed to add state. It may already exist.', 'error');
-        }
-      })
-      .withFailureHandler(function(error) {
-        hideCustProcessing();
-        custShowAlert('Error: ' + error, 'error');
-      })
-      .custAddNewState(stateName, user.username);
-  }
-  
-  // Open new city modal
-  function custOpenNewCityModal() {
-    document.getElementById('custCityModal').style.display = 'block';
-    document.getElementById('custNewCity').value = '';
-    custRenderExistingCitiesList();
-  }
-  
-  // Close new city modal
-  function custCloseCityModal() {
-    document.getElementById('custCityModal').style.display = 'none';
-  }
-  
-  // Save new city
-  function custSaveNewCity() {
-    const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    
-    if (!user) {
-      custShowAlert('Sesi tidak valid. Silakan login kembali.', 'error');
-      return;
-    }
-
-    const cityName = document.getElementById('custNewCity').value.trim();
-    
-    if (!cityName) {
-      custShowAlert('Please enter a city name', 'warning');
-      return;
-    }
-    
-    showCustProcessing();
-    google.script.run
-      .withSuccessHandler(function(success) {
-        hideCustProcessing();
-        if (success) {
-          document.getElementById('custNewCity').value = '';
-          custCloseCityModal();
-          custLoadCities();
-          custShowSuccessMessage('New City Added');
-          setTimeout(custCloseSuccessModal, 2000);
-        } else {
-          custShowAlert('Failed to add city. It may already exist.', 'error');
-        }
-      })
-      .withFailureHandler(function(error) {
-        hideCustProcessing();
-        custShowAlert('Error: ' + error, 'error');
-      })
-      .custAddNewCity(cityName, user.username);
-  }
-  
-  // Edit existing state
-  function custEditExistingState(stateName) {
-    document.getElementById('custEditStateName').value = stateName;
-    window.custEditingStateName = stateName;
-    document.getElementById('custEditStateModal').style.display = 'block';
-  }
-  
-  function custCloseEditStateModal() {
-    document.getElementById('custEditStateModal').style.display = 'none';
-    window.custEditingStateName = null;
-  }
-  
-  function custConfirmEditState() {
-    const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    if (!user) {
-      custShowAlert('Sesi tidak valid. Silakan login kembali.', 'error');
-      return;
-    }
-
-    const oldName = window.custEditingStateName;
-    const newName = document.getElementById('custEditStateName').value.trim();
-    
-    console.log('Edit State:', { oldName, newName });
-    
-    if (!newName) {
-      custShowAlert('Please enter a state name', 'warning');
-      return;
-    }
-    
-    if (!oldName) {
-      custShowAlert('Error: Original state name not found', 'error');
-      return;
-    }
-    
-    if (oldName === newName) {
-      custShowAlert('Name is the same, no changes made', 'info');
-      custCloseEditStateModal();
-      return;
-    }
-    
-    showCustProcessing();
-    google.script.run
-      .withSuccessHandler(function(success) {
-        hideCustProcessing();
-        console.log('custUpdateState result:', success);
-        if (success) {
-          // Close all modals immediately
-          document.getElementById('custStateModal').style.display = 'none';
-          document.getElementById('custEditStateModal').style.display = 'none';
-          custLoadStates();
-          custShowSuccessMessage('State Updated Successfully');
-          setTimeout(custCloseSuccessModal, 2000);
-        } else {
-          custShowAlert('Failed to update state', 'error');
-          custCloseEditStateModal();
-        }
-      })
-      .withFailureHandler(function(error) {
-        hideCustProcessing();
-        console.error('custUpdateState error:', error);
-        custShowAlert('Error: ' + error, 'error');
-        custCloseEditStateModal();
-      })
-      .custUpdateState(oldName, newName, user.username);
-  }
-  
-  // Delete existing state
-  function custDeleteExistingState(stateName) {
-    window.custDeletingStateName = stateName;
-    document.getElementById('custDeleteStateConfirmModal').style.display = 'block';
-  }
-  
-  function custCloseDeleteStateConfirm() {
-    document.getElementById('custDeleteStateConfirmModal').style.display = 'none';
-    window.custDeletingStateName = null;
-  }
-  
-  function custConfirmDeleteState() {
-    const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    if (!user) {
-      custShowAlert('Sesi tidak valid. Silakan login kembali.', 'error');
-      return;
-    }
-
-    // SAVE STATE NAME FIRST before closing modal
-    const stateToDelete = window.custDeletingStateName;
-    
-    if (!stateToDelete) {
-      custShowAlert('Error: State name is empty', 'error');
-      return;
-    }
-    
-    // NOW close modal AFTER saving the value
-    showCustProcessing();
-    google.script.run
-      .withSuccessHandler(function(success) {
-        hideCustProcessing();
-        if (success) {
-          // Close all modals immediately
-          document.getElementById('custStateModal').style.display = 'none';
-          document.getElementById('custDeleteStateConfirmModal').style.display = 'none';
-          custLoadStates();
-          custShowSuccessMessage('State Deleted Successfully');
-          setTimeout(custCloseSuccessModal, 2000);
-        } else {
-          custShowAlert('Failed to delete state', 'error');
-          custCloseDeleteStateConfirm();
-        }
-      })
-      .withFailureHandler(function(error) {
-        hideCustProcessing();
-        custShowAlert('Error: ' + error, 'error');
-        custCloseDeleteStateConfirm();
-      })
-      .custDeleteState(stateToDelete, user.username);
-  }
-  
-  // Edit existing city
-  function custEditExistingCity(cityName) {
-    document.getElementById('custEditCityName').value = cityName;
-    window.custEditingCityName = cityName;
-    document.getElementById('custEditCityModal').style.display = 'block';
-  }
-  
-  function custCloseEditCityModal() {
-    document.getElementById('custEditCityModal').style.display = 'none';
-    window.custEditingCityName = null;
-  }
-  
-  function custConfirmEditCity() {
-    const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    if (!user) {
-      custShowAlert('Sesi tidak valid. Silakan login kembali.', 'error');
-      return;
-    }
-
-    const oldName = window.custEditingCityName;
-    const newName = document.getElementById('custEditCityName').value.trim();
-    
-    console.log('Edit City:', { oldName, newName });
-    
-    if (!newName) {
-      custShowAlert('Please enter a city name', 'warning');
-      return;
-    }
-    
-    if (!oldName) {
-      custShowAlert('Error: Original city name not found', 'error');
-      return;
-    }
-    
-    if (oldName === newName) {
-      custShowAlert('Name is the same, no changes made', 'info');
-      custCloseEditCityModal();
-      return;
-    }
-    
-    showCustProcessing();
-    google.script.run
-      .withSuccessHandler(function(success) {
-        hideCustProcessing();
-        console.log('custUpdateCity result:', success);
-        if (success) {
-          // Close all modals immediately
-          document.getElementById('custCityModal').style.display = 'none';
-          document.getElementById('custEditCityModal').style.display = 'none';
-          custLoadCities();
-          custShowSuccessMessage('City Updated Successfully');
-          setTimeout(custCloseSuccessModal, 2000);
-        } else {
-          custShowAlert('Failed to update city', 'error');
-          custCloseEditCityModal();
-        }
-      })
-      .withFailureHandler(function(error) {
-        hideCustProcessing();
-        console.error('custUpdateCity error:', error);
-        custShowAlert('Error: ' + error, 'error');
-        custCloseEditCityModal();
-      })
-      .custUpdateCity(oldName, newName, user.username);
-  }
-  
-  // Delete existing city
-  function custDeleteExistingCity(cityName) {
-    window.custDeletingCityName = cityName;
-    document.getElementById('custDeleteCityConfirmModal').style.display = 'block';
-  }
-  
-  function custCloseDeleteCityConfirm() {
-    document.getElementById('custDeleteCityConfirmModal').style.display = 'none';
-    window.custDeletingCityName = null;
-  }
-  
-  function custConfirmDeleteCity() {
-    const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
-    const user = userStr ? JSON.parse(userStr) : null;
-    if (!user) {
-      custShowAlert('Sesi tidak valid. Silakan login kembali.', 'error');
-      return;
-    }
-
-    // SAVE CITY NAME FIRST before closing modal
-    const cityToDelete = window.custDeletingCityName;
-    console.log("custConfirmDeleteCity started");
-    console.log("City to delete: [" + cityToDelete + "]");
-    console.log("Type: " + typeof cityToDelete);
-    
-    if (!cityToDelete) {
-      console.log("ERROR: cityToDelete is empty!");
-      custShowAlert('Error: City name is empty', 'error');
-      return;
-    }
-    
-    console.log("Calling google.script.run.custDeleteCity...");
-    
-    showCustProcessing();
-    google.script.run
-      .withSuccessHandler(function(success) {
-        hideCustProcessing();
-        console.log("Backend returned: " + success + " (type: " + typeof success + ")");
-        if (success) {
-          console.log("Delete successful!");
-          // Close all modals immediately
-          document.getElementById('custCityModal').style.display = 'none';
-          document.getElementById('custDeleteCityConfirmModal').style.display = 'none';
-          custLoadCities();
-          custShowSuccessMessage('City Deleted Successfully');
-          setTimeout(custCloseSuccessModal, 2000);
-        } else {
-          console.log("Delete failed - success was false");
-          custShowAlert('Failed to delete city', 'error');
-          custCloseDeleteCityConfirm();
-        }
-      })
-      .withFailureHandler(function(error) {
-        hideCustProcessing();
-        console.log("ERROR handler called: " + error);
-        custShowAlert('Error: ' + error, 'error');
-        custCloseDeleteCityConfirm();
-      })
-      .custDeleteCity(cityToDelete, user.username);
-  }
-  
   // Show success message
   function custShowSuccessMessage(message) {
     document.getElementById('custSuccessMessage').textContent = message;
@@ -1423,13 +845,6 @@
   
   function custCloseSuccessModal() {
     document.getElementById('custSuccessModal').style.display = 'none';
-    // Close all modals to return to main customer view
-    document.getElementById('custStateModal').style.display = 'none';
-    document.getElementById('custCityModal').style.display = 'none';
-    document.getElementById('custEditStateModal').style.display = 'none';
-    document.getElementById('custEditCityModal').style.display = 'none';
-    document.getElementById('custDeleteStateConfirmModal').style.display = 'none';
-    document.getElementById('custDeleteCityConfirmModal').style.display = 'none';
   }
   
   // Open new customer modal
@@ -1441,10 +856,8 @@
     document.getElementById('custCustomerEmail').value = '';
     document.getElementById('custCustomerAddress').value = '';
     document.getElementById('custCustomerNoRek').value = '';
-    
-    // Reset dropdowns
-    $('#custCustomerState').val('').trigger('change');
-    $('#custCustomerCity').val('').trigger('change');
+    document.getElementById('custCustomerState').value = '';
+    document.getElementById('custCustomerCity').value = '';
   }
   
   // Close new customer modal
@@ -1477,8 +890,8 @@
       name: document.getElementById('custCustomerName').value.trim(),
       contact: document.getElementById('custCustomerContact').value.trim(),
       email: document.getElementById('custCustomerEmail').value.trim(),
-      state: $('#custCustomerState').val(),
-      city: $('#custCustomerCity').val(),
+      state: document.getElementById('custCustomerState').value.trim(),
+      city: document.getElementById('custCustomerCity').value.trim(),
       address: document.getElementById('custCustomerAddress').value.trim(),
       noRek: document.getElementById('custCustomerNoRek').value.trim()
     };
@@ -1495,12 +908,12 @@
     }
     
     if (!customer.state) {
-      custShowAlert('Please select State', 'warning');
+      custShowAlert('Please enter State', 'warning');
       return;
     }
     
     if (!customer.city) {
-      custShowAlert('Please select City', 'warning');
+      custShowAlert('Please enter City', 'warning');
       return;
     }
     
@@ -1521,66 +934,18 @@
     const pageIndex = startIndex + index;
     const customer = custFilteredCustomers[pageIndex];
     
-    // Fill edit form
+    // Fill edit form with text inputs
     document.getElementById('custEditCustomerId').value = customer.id;
     document.getElementById('custEditCustomerName').value = customer.name;
     document.getElementById('custEditCustomerContact').value = customer.contact || '';
     document.getElementById('custEditCustomerEmail').value = customer.email || '';
     document.getElementById('custEditCustomerAddress').value = customer.address || '';
     document.getElementById('custEditCustomerNoRek').value = customer.noRek || '';
-    
-    // Populate dropdowns with available states and cities
-    populateCustEditStateDropdown();
-    populateCustEditCityDropdown();
-    
-    // Set selected values
-    const customerStates = customer.state ? customer.state.split(',').map(s => s.trim()) : [];
-    const customerCities = customer.city ? customer.city.split(',').map(c => c.trim()) : [];
-    
-    // Set state dropdown values
-    if (customerStates.length > 0) {
-      $('#custEditCustomerState').val(customerStates[0]).trigger('change');
-    }
-    
-    // Set city dropdown values
-    if (customerCities.length > 0) {
-      $('#custEditCustomerCity').val(customerCities[0]).trigger('change');
-    }
-    
-    // Initialize Select2 for edit dropdowns if not already done
-    if (!$('#custEditCustomerState').data('select2')) {
-      $('#custEditCustomerState').select2();
-    }
-    if (!$('#custEditCustomerCity').data('select2')) {
-      $('#custEditCustomerCity').select2();
-    }
+    document.getElementById('custEditCustomerState').value = customer.state || '';
+    document.getElementById('custEditCustomerCity').value = customer.city || '';
     
     // Open modal
     document.getElementById('custEditCustomerModal').style.display = 'block';
-  }
-  
-  // Populate state dropdown in edit form
-  function populateCustEditStateDropdown() {
-    const stateSelect = $('#custEditCustomerState');
-    stateSelect.empty();
-    
-    custStates.forEach(state => {
-      if (state) {
-        stateSelect.append(new Option(state, state));
-      }
-    });
-  }
-  
-  // Populate city dropdown in edit form
-  function populateCustEditCityDropdown() {
-    const citySelect = $('#custEditCustomerCity');
-    citySelect.empty();
-    
-    custCities.forEach(city => {
-      if (city) {
-        citySelect.append(new Option(city, city));
-      }
-    });
   }
   
   function custCloseEditCustomerModal() {
@@ -1602,8 +967,8 @@
       name: document.getElementById('custEditCustomerName').value.trim(),
       contact: document.getElementById('custEditCustomerContact').value.trim(),
       email: document.getElementById('custEditCustomerEmail').value.trim(),
-      state: $('#custEditCustomerState').val(),
-      city: $('#custEditCustomerCity').val(),
+      state: document.getElementById('custEditCustomerState').value.trim(),
+      city: document.getElementById('custEditCustomerCity').value.trim(),
       address: document.getElementById('custEditCustomerAddress').value.trim(),
       noRek: document.getElementById('custEditCustomerNoRek').value.trim()
     };
