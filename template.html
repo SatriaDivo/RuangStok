@@ -507,10 +507,21 @@
       },
       
       redirectToLogin: function() {
-        // Avoid redirect loop
-        if (window.location.href.indexOf('page=login') === -1 && window.location.href.indexOf('page=logout') === -1) {
-           var currentUrl = window.location.href.split('?')[0];
-           window.top.location.href = currentUrl + "?page=login";
+        // Use the same base URL as logout - baseScriptUrl is set from server
+        if (typeof baseScriptUrl !== 'undefined' && baseScriptUrl) {
+          var targetUrl = baseScriptUrl;
+          
+          // Try to detect dev mode from referrer
+          if (document.referrer && document.referrer.indexOf('/dev') !== -1) {
+            targetUrl = targetUrl.replace('/exec', '/dev');
+          }
+          
+          var loginUrl = targetUrl + "?page=login&t=" + new Date().getTime();
+          window.top.location.replace(loginUrl);
+        } else {
+          // Fallback: use deployment URL directly
+          var deploymentUrl = 'https://script.google.com/macros/s/AKfycby7LQUauSM2003uP85QkxX4vi8YoYJDcQj6CQa1_aha/dev';
+          window.top.location.replace(deploymentUrl + "?page=login&t=" + new Date().getTime());
         }
       },
       
