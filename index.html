@@ -217,7 +217,7 @@
 
   google.script.run
     .withSuccessHandler(dashRender)
-    .withFailureHandler(err => alert('Kesalahan: ' + err.message))
+    .withFailureHandler(err => SessionManager.handleError(err, 'Gagal memuat dashboard'))
     .dashGetDashboardData(userEmail);
 
     function dashFmt(v) {

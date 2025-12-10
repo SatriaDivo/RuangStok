@@ -440,6 +440,31 @@
         });
       },
       
+      // Handle errors from withFailureHandler - detect session expired
+      handleError: function(error, defaultMessage) {
+        const errorMsg = error && error.message ? error.message : (typeof error === 'string' ? error : 'Unknown error');
+        
+        // Check if it's a session expired error
+        if (errorMsg.toLowerCase().includes('session') || 
+            errorMsg.toLowerCase().includes('sesi') || 
+            errorMsg.toLowerCase().includes('expired') ||
+            errorMsg.toLowerCase().includes('identifier tidak ditemukan')) {
+          this.handleSessionExpired(errorMsg);
+          return true; // Indicates session error was handled
+        }
+        
+        // Show regular error with SweetAlert
+        const displayMsg = defaultMessage ? defaultMessage + ': ' + errorMsg : errorMsg;
+        Swal.fire({
+          icon: 'error',
+          title: 'Kesalahan',
+          text: displayMsg,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#e74c3c'
+        });
+        return false; // Regular error
+      },
+      
       validateSession: function() {
         const user = this.getUser();
         if (!user || !user.username) {

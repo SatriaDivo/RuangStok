@@ -581,9 +581,11 @@
             console.error('=== FAILURE HANDLER ===');
             console.error('Error object:', error);
             console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
             hideLoading();
-            showError('Error: ' + (error.message || error) + '\n\nMungkin:\n1. Sheet SalesDetails kosong atau belum ada\n2. Data belum tersimpan di Google Sheets\n3. Periksa Apps Script Logs untuk detail error');
+            // Use SessionManager.handleError to detect session expired
+            if (!SessionManager.handleError(error, 'Gagal memuat laporan penjualan')) {
+              // If not session error, show was already handled by handleError
+            }
           })
           .generateSalesReport(filter, userEmail);
       } catch (err) {
@@ -658,7 +660,7 @@
         })
         .withFailureHandler(function(error) {
           hideLoading();
-          showError('Error generating inventory report: ' + error.message);
+          SessionManager.handleError(error, 'Gagal memuat laporan inventory');
         })
         .generateInventoryReport(filter, userEmail);
     }
@@ -728,7 +730,7 @@
         })
         .withFailureHandler(function(error) {
           hideLoading();
-          showError('Error generating financial report: ' + error.message);
+          SessionManager.handleError(error, 'Gagal memuat laporan keuangan');
         })
         .generateFinancialReport(filter, userEmail);
     }
@@ -820,6 +822,16 @@
     }
 
     function showError(message) {
+      // Check if it's a session expired error - use SessionManager
+      const msgLower = message.toLowerCase();
+      if (msgLower.includes('session') || 
+          msgLower.includes('sesi') || 
+          msgLower.includes('expired') ||
+          msgLower.includes('identifier tidak ditemukan')) {
+        SessionManager.handleSessionExpired(message);
+        return;
+      }
+      
       const modal = document.createElement('div');
       modal.style.cssText = `
         position: fixed;
