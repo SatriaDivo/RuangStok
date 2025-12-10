@@ -422,6 +422,24 @@
         sessionStorage.removeItem('ruangstok_user');
       },
       
+      // Handle session expired with custom SweetAlert2 popup
+      handleSessionExpired: function(message) {
+        const msg = message || 'Sesi Anda telah berakhir. Silakan login kembali untuk melanjutkan.';
+        this.clearSession();
+        
+        Swal.fire({
+          icon: 'warning',
+          title: 'Sesi Berakhir',
+          text: msg,
+          confirmButtonText: 'Login Kembali',
+          confirmButtonColor: '#1abc9c',
+          allowOutsideClick: false,
+          allowEscapeKey: false
+        }).then((result) => {
+          this.redirectToLogin();
+        });
+      },
+      
       validateSession: function() {
         const user = this.getUser();
         if (!user || !user.username) {
@@ -434,9 +452,8 @@
         google.script.run
           .withSuccessHandler((result) => {
             if (!result || !result.active) {
-              console.log('Server session expired. Redirecting to login.');
-              this.clearSession();
-              this.redirectToLogin();
+              console.log('Server session expired. Showing popup.');
+              this.handleSessionExpired();
             } else {
               console.log('Session valid for:', user.username);
               

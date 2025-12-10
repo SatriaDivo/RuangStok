@@ -438,7 +438,7 @@
       // Check if user is logged in
       if (!user) {
         console.error('❌ User not logged in');
-        showNotification('Sesi tidak valid. Silakan login kembali.', 'error');
+        SessionManager.handleSessionExpired('Sesi tidak valid. Silakan login kembali.');
         updateInventoryStatus(true);
       } else {
         // Load inventory with proper error handling

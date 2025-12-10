@@ -505,8 +505,7 @@
             clearTimeout(timeout);  
             
             if (report && report.sessionExpired) {
-              SessionManager.clearSession();
-              SessionManager.redirectToLogin();
+              SessionManager.handleSessionExpired();
               return;
             }
 
@@ -652,8 +651,7 @@
         .withSuccessHandler(function(report) {
           hideLoading();
           if (report && report.sessionExpired) {
-            SessionManager.clearSession();
-            SessionManager.redirectToLogin();
+            SessionManager.handleSessionExpired();
             return;
           }
           displayInventoryReport(report);
@@ -723,8 +721,7 @@
         .withSuccessHandler(function(report) {
           hideLoading();
           if (report && report.sessionExpired) {
-            SessionManager.clearSession();
-            SessionManager.redirectToLogin();
+            SessionManager.handleSessionExpired();
             return;
           }
           displayFinancialReport(report);

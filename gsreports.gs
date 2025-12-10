@@ -98,7 +98,7 @@ function reportGetRangeDataAsObjects(rangeName) {
  */
 function generateSalesReport(filter, email) {
   // Session Check
-  const session = checkServerSession(email);
+  const session = checkServerSession(email, false);
   if (!session.active) {
     return { error: true, message: "Sesi berakhir", sessionExpired: true };
   }
@@ -417,7 +417,7 @@ function generateSalesReport(filter, email) {
  */
 function generateInventoryReport(filter, email) {
   // Session Check
-  const session = checkServerSession(email);
+  const session = checkServerSession(email, false);
   if (!session.active) {
     return { error: true, message: "Sesi berakhir", sessionExpired: true };
   }
@@ -570,7 +570,7 @@ function generateInventoryReport(filter, email) {
  */
 function generateFinancialReport(filter, email) {
   // Session Check
-  const session = checkServerSession(email);
+  const session = checkServerSession(email, false);
   if (!session.active) {
     return { error: true, message: "Sesi berakhir", sessionExpired: true };
   }
@@ -752,7 +752,7 @@ function generateFinancialReport(filter, email) {
  */
 function generateCustomerReport(email) {
   // Session Check
-  const session = checkServerSession(email);
+  const session = checkServerSession(email, false);
   if (!session.active) {
     return { error: true, message: "Sesi berakhir", sessionExpired: true };
   }
@@ -832,7 +832,7 @@ function generateCustomerReport(email) {
  */
 function exportReportToPDF(reportType, reportData, email) {
   // Session Check
-  const session = checkServerSession(email);
+  const session = checkServerSession(email, false);
   if (!session.active) {
     return { error: true, message: "Sesi berakhir", sessionExpired: true };
   }

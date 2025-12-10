@@ -593,8 +593,7 @@ function submitSupplierForm() {
   google.script.run
     .withSuccessHandler(function(result) {
       if (result && result.sessionExpired) {
-        SessionManager.clearSession();
-        SessionManager.redirectToLogin();
+        SessionManager.handleSessionExpired();
         return;
       }
       console.log('✅ Add supplier SUCCESS result:', result);
@@ -716,8 +715,7 @@ function submitEditSupplierForm() {
   google.script.run
     .withSuccessHandler(function(result) {
       if (result && result.sessionExpired) {
-        SessionManager.clearSession();
-        SessionManager.redirectToLogin();
+        SessionManager.handleSessionExpired();
         return;
       }
       clearTimeout(timeoutId); // Clear the timeout
@@ -971,8 +969,7 @@ function loadSupplierData() {
         // Check for session expiration
         if (response && response.sessionExpired) {
           console.warn('Session expired during data load');
-          SessionManager.clearSession();
-          SessionManager.redirectToLogin();
+          SessionManager.handleSessionExpired();
           return;
         }
 
@@ -1402,8 +1399,7 @@ function confirmDeleteSupplier() {
   google.script.run
     .withSuccessHandler(function(result) {
       if (result && result.sessionExpired) {
-        SessionManager.clearSession();
-        SessionManager.redirectToLogin();
+        SessionManager.handleSessionExpired();
         return;
       }
       console.log('✅ Delete result received:', result);

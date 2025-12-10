@@ -839,7 +839,7 @@ function syncWithGoogleSheets() {
   // Get user from localStorage or sessionStorage
   const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
   if (!userStr) {
-    showToast('Sesi tidak valid. Silakan login kembali.', 'error');
+    SessionManager.handleSessionExpired('Sesi tidak valid. Silakan login kembali.');
     return;
   }
   
@@ -960,7 +960,7 @@ function addOrUpdateItem() {
   // Get user from localStorage or sessionStorage
   const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
   if (!userStr) {
-    showToast('Sesi tidak valid. Silakan login kembali.', 'error');
+    SessionManager.handleSessionExpired('Sesi tidak valid. Silakan login kembali.');
     return;
   }
   const user = JSON.parse(userStr);
@@ -1149,7 +1149,7 @@ function confirmDeleteItem() {
   // Get user from localStorage or sessionStorage
   const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
   if (!userStr) {
-    showToast('Sesi tidak valid. Silakan login kembali.', 'error');
+    SessionManager.handleSessionExpired('Sesi tidak valid. Silakan login kembali.');
     closeDeleteModal();
     return;
   }
@@ -1353,7 +1353,7 @@ function confirmClearForm() {
       // Get user from localStorage or sessionStorage
       const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
       if (!userStr) {
-        showToast('Sesi tidak valid. Silakan login kembali.', 'error');
+        SessionManager.handleSessionExpired('Sesi tidak valid. Silakan login kembali.');
         confirmBtn.innerHTML = originalBtnText;
         confirmBtn.disabled = false;
         closeClearModal();

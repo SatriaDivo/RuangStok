@@ -227,8 +227,7 @@
     function dashRender(data) {
       // Check for session expiration
       if (data && data.sessionExpired) {
-        SessionManager.clearSession();
-        SessionManager.redirectToLogin();
+        SessionManager.handleSessionExpired();
         return;
       }
 
