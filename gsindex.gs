@@ -46,6 +46,7 @@ function doGet(e) {
     'sales': 'sales',
     'receipts': 'receipts',
     'payments': 'payments',
+    'mutations': 'mutations',
     'reports': 'reports',
     'users': 'users',
     'settings': 'settings',

@@ -350,6 +350,50 @@
           <i class="fas fa-file-alt"></i> Generate Laporan
         </button>
       </div>
+      
+      <div class="report-card mutations" style="border-left-color: #1abc9c;">
+        <h3><i class="fas fa-exchange-alt"></i> Rekap Mutasi Stok</h3>
+        <p>Lacak pergerakan stok barang masuk dan keluar, analisis riwayat transaksi inventory secara detail.</p>
+        
+        <div style="margin: 15px 0; text-align: left; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50;">Pilih Periode:</label>
+          <div style="margin-bottom: 10px;">
+            <label style="display: inline-block; margin-right: 15px; cursor: pointer;">
+              <input type="radio" name="mutationPeriod" value="all" style="margin-right: 5px;">
+              Semua Data
+            </label>
+            <label style="display: inline-block; margin-right: 15px; cursor: pointer;">
+              <input type="radio" name="mutationPeriod" value="week" style="margin-right: 5px;">
+              Minggu Ini
+            </label>
+            <label style="display: inline-block; margin-right: 15px; cursor: pointer;">
+              <input type="radio" name="mutationPeriod" value="month" checked style="margin-right: 5px;">
+              Bulan Ini
+            </label>
+            <label style="display: inline-block; cursor: pointer;">
+              <input type="radio" name="mutationPeriod" value="custom" style="margin-right: 5px;">
+              Custom
+            </label>
+          </div>
+          
+          <div id="customMutationDateRange" style="display: none; margin-top: 10px;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-size: 12px;">Dari Tanggal:</label>
+                <input type="date" id="mutationStartDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              </div>
+              <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-size: 12px;">Sampai Tanggal:</label>
+                <input type="date" id="mutationEndDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button class="report-btn" onclick="generateMutationReport()" style="background: #1abc9c;">
+          <i class="fas fa-file-alt"></i> Generate Laporan
+        </button>
+      </div>
     </div>
     
     <div class="coming-soon">
@@ -400,6 +444,19 @@
       financialRadios.forEach(radio => {
         radio.addEventListener('change', function() {
           const customDiv = document.getElementById('customFinancialDateRange');
+          if (this.value === 'custom') {
+            customDiv.style.display = 'block';
+          } else {
+            customDiv.style.display = 'none';
+          }
+        });
+      });
+      
+      // Mutation period
+      const mutationRadios = document.querySelectorAll('input[name="mutationPeriod"]');
+      mutationRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+          const customDiv = document.getElementById('customMutationDateRange');
           if (this.value === 'custom') {
             customDiv.style.display = 'block';
           } else {
@@ -733,6 +790,76 @@
           SessionManager.handleError(error, 'Gagal memuat laporan keuangan');
         })
         .generateFinancialReport(filter, userEmail);
+    }
+
+    function generateMutationReport() {
+      const user = SessionManager.getUser();
+      const userEmail = user ? user.username : null;
+      const period = document.querySelector('input[name="mutationPeriod"]:checked').value;
+      let filter = null;
+      
+      if (period === 'all') {
+        filter = {
+          startDate: null,
+          endDate: null,
+          period: 'all'
+        };
+      } else if (period === 'week') {
+        const monday = getMonday(new Date());
+        const sunday = getSunday(new Date());
+        filter = {
+          startDate: monday.toISOString(),
+          endDate: sunday.toISOString(),
+          period: 'week'
+        };
+      } else if (period === 'month') {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        filter = {
+          startDate: firstDay.toISOString(),
+          endDate: lastDay.toISOString(),
+          period: 'month'
+        };
+      } else if (period === 'custom') {
+        const startDateInput = document.getElementById('mutationStartDate').value;
+        const endDateInput = document.getElementById('mutationEndDate').value;
+        
+        if (!startDateInput || !endDateInput) {
+          showError('Harap isi tanggal mulai dan tanggal akhir untuk periode custom.');
+          return;
+        }
+        
+        const startDate = new Date(startDateInput);
+        const endDate = new Date(endDateInput);
+        
+        if (startDate > endDate) {
+          showError('Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+          return;
+        }
+        
+        filter = {
+          startDate: startDate.toISOString(),
+          endDate: endDate.toISOString(),
+          period: 'custom'
+        };
+      }
+      
+      showLoading('Generating Mutation Report...');
+      google.script.run
+        .withSuccessHandler(function(report) {
+          hideLoading();
+          if (report && report.sessionExpired) {
+            SessionManager.handleSessionExpired();
+            return;
+          }
+          displayMutationReport(report);
+        })
+        .withFailureHandler(function(error) {
+          hideLoading();
+          SessionManager.handleError(error, 'Gagal memuat laporan mutasi stok');
+        })
+        .generateMutationReport(userEmail, filter);
     }
 
     function showLoading(message) {
@@ -1365,6 +1492,9 @@
         case 'financial':
           csvContent = generateFinancialCSV(currentReportData, date);
           break;
+        case 'mutation':
+          csvContent = mutationToCSV(currentReportData);
+          break;
       }
 
       downloadCSV(csvContent, `${title}_${new Date().getTime()}.csv`);
@@ -1453,6 +1583,160 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+
+    function displayMutationReport(report) {
+      currentReportData = report;
+      currentReportType = 'mutation';
+      const modal = createReportModal('Rekap Mutasi Stok', createMutationReportHTML(report));
+      document.body.appendChild(modal);
+    }
+
+    function createMutationReportHTML(report) {
+      const formatCurrency = (amount) => 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '-';
+        return new Date(dateStr).toLocaleDateString('id-ID', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      };
+
+      // Format periode untuk header
+      let periodHeader = '';
+      if (report.summary.filterStartDate && report.summary.filterEndDate) {
+        periodHeader = `<div style="text-align: center; margin-bottom: 20px; color: #7f8c8d;">
+          <strong>Periode:</strong> ${new Date(report.summary.filterStartDate).toLocaleDateString('id-ID')} - ${new Date(report.summary.filterEndDate).toLocaleDateString('id-ID')}
+        </div>`;
+      }
+
+      return `
+        ${periodHeader}
+        <div style="margin-bottom: 30px;">
+          <h3 style="color: #2c3e50; border-bottom: 2px solid #1abc9c; padding-bottom: 10px;">Ringkasan Mutasi Stok</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px;">
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #c8e6c9;">
+              <h4 style="margin: 0 0 10px 0; color: #27ae60; font-size: 13px;">Total Barang Masuk</h4>
+              <p style="margin: 0; font-size: 16px; font-weight: bold; color: #27ae60;">${report.summary.totalIn || 0} unit</p>
+            </div>
+            <div style="background: #ffebee; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #ffcdd2;">
+              <h4 style="margin: 0 0 10px 0; color: #e74c3c; font-size: 13px;">Total Barang Keluar</h4>
+              <p style="margin: 0; font-size: 16px; font-weight: bold; color: #e74c3c;">${report.summary.totalOut || 0} unit</p>
+            </div>
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #bbdefb;">
+              <h4 style="margin: 0 0 10px 0; color: #3498db; font-size: 13px;">Selisih Bersih</h4>
+              <p style="margin: 0; font-size: 16px; font-weight: bold; color: ${(report.summary.totalIn - report.summary.totalOut) >= 0 ? '#27ae60' : '#e74c3c'};">
+                ${(report.summary.totalIn - report.summary.totalOut) >= 0 ? '+' : ''}${report.summary.totalIn - report.summary.totalOut} unit
+              </p>
+            </div>
+            <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #e1bee7;">
+              <h4 style="margin: 0 0 10px 0; color: #9b59b6; font-size: 13px;">Total Transaksi</h4>
+              <p style="margin: 0; font-size: 16px; font-weight: bold; color: #9b59b6;">${report.summary.totalTransactions || 0}</p>
+            </div>
+          </div>
+        </div>
+
+        ${report.topInItems && report.topInItems.length > 0 ? `
+        <div style="margin-bottom: 30px;">
+          <h4 style="color: #27ae60; margin-bottom: 15px;">🔼 Top 5 Barang Paling Banyak Masuk</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            ${report.topInItems.map((item, index) =>
+              `<div style="background: #e8f5e9; padding: 12px; border-radius: 8px; border-left: 4px solid #27ae60;">
+                <div style="font-weight: bold; color: #2c3e50;">${index + 1}. ${item.itemName || 'Unknown'}</div>
+                <div style="font-size: 14px; color: #27ae60; font-weight: bold;">${item.totalQty} unit</div>
+              </div>`
+            ).join('')}
+          </div>
+        </div>
+        ` : ''}
+
+        ${report.topOutItems && report.topOutItems.length > 0 ? `
+        <div style="margin-bottom: 30px;">
+          <h4 style="color: #e74c3c; margin-bottom: 15px;">🔽 Top 5 Barang Paling Banyak Keluar</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            ${report.topOutItems.map((item, index) =>
+              `<div style="background: #ffebee; padding: 12px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                <div style="font-weight: bold; color: #2c3e50;">${index + 1}. ${item.itemName || 'Unknown'}</div>
+                <div style="font-size: 14px; color: #e74c3c; font-weight: bold;">${item.totalQty} unit</div>
+              </div>`
+            ).join('')}
+          </div>
+        </div>
+        ` : ''}
+
+        ${report.mutations && report.mutations.length > 0 ? `
+        <div style="margin-top: 30px;">
+          <h4 style="color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #1abc9c; padding-bottom: 10px;">Detail Mutasi (${report.mutations.length} transaksi)</h4>
+          <div style="max-height: 400px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+              <thead style="background: #f8f9fa; position: sticky; top: 0;">
+                <tr>
+                  <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd;">Tanggal</th>
+                  <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd;">Nama Barang</th>
+                  <th style="padding: 12px 10px; text-align: center; border-bottom: 2px solid #ddd;">Tipe</th>
+                  <th style="padding: 12px 10px; text-align: center; border-bottom: 2px solid #ddd;">Qty</th>
+                  <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd;">Referensi</th>
+                  <th style="padding: 12px 10px; text-align: left; border-bottom: 2px solid #ddd;">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${report.mutations.map((m, index) =>
+                  `<tr style="background: ${index % 2 === 0 ? '#fff' : '#f9f9f9'};">
+                    <td style="padding: 10px; border-bottom: 1px solid #eee;">${formatDate(m.date)}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: 500;">${m.itemName || '-'}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
+                      <span style="
+                        padding: 4px 10px; 
+                        border-radius: 12px; 
+                        font-size: 11px; 
+                        font-weight: bold;
+                        ${m.type === 'IN' 
+                          ? 'background: #e8f5e9; color: #27ae60;' 
+                          : 'background: #ffebee; color: #e74c3c;'
+                        }
+                      ">
+                        ${m.type === 'IN' ? '⬆️ MASUK' : '⬇️ KELUAR'}
+                      </span>
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center; font-weight: bold; color: ${m.type === 'IN' ? '#27ae60' : '#e74c3c'};">
+                      ${m.type === 'IN' ? '+' : '-'}${m.qty}
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px; color: #7f8c8d;">${m.reference || '-'}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px; color: #7f8c8d;">${m.description || '-'}</td>
+                  </tr>`
+                ).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        ` : '<p style="text-align: center; color: #7f8c8d; padding: 20px;">Tidak ada data mutasi stok untuk periode ini.</p>'}
+      `;
+    }
+
+    function mutationToCSV(report) {
+      let csv = 'Rekap Mutasi Stok\n\n';
+      
+      // Summary
+      csv += 'RINGKASAN\n';
+      csv += `Total Barang Masuk,${report.summary.totalIn || 0}\n`;
+      csv += `Total Barang Keluar,${report.summary.totalOut || 0}\n`;
+      csv += `Selisih Bersih,${report.summary.totalIn - report.summary.totalOut}\n`;
+      csv += `Total Transaksi,${report.summary.totalTransactions || 0}\n\n`;
+      
+      // Detail
+      csv += 'DETAIL MUTASI\n';
+      csv += 'Tanggal,Nama Barang,Tipe,Qty,Referensi,Keterangan\n';
+      
+      if (report.mutations) {
+        report.mutations.forEach(m => {
+          csv += `${m.date || ''},${m.itemName || ''},${m.type},${m.qty},${m.reference || ''},${m.description || ''}\n`;
+        });
+      }
+      
+      return csv;
     }
 
     function printReport() {
