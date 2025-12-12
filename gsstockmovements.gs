@@ -86,17 +86,9 @@ function smGetAllMovements(email, filter) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName('StockMovements');
     
-    // If sheet doesn't exist or empty, auto-migrate first
+    // If sheet doesn't exist, return empty - NO AUTO MIGRATION to prevent timeout
     if (!sheet) {
-      Logger.log('StockMovements sheet not found, creating and migrating...');
-      const migrationResult = smMigrateExistingSalesData(email);
-      Logger.log('Auto-migration result: ' + JSON.stringify(migrationResult));
-      // Re-get sheet after migration
-      sheet = ss.getSheetByName('StockMovements');
-    }
-    
-    if (!sheet) {
-      // Still no sheet after migration, return empty
+      Logger.log('StockMovements sheet not found - returning empty result');
       return {
         success: true,
         data: [],
@@ -105,40 +97,37 @@ function smGetAllMovements(email, filter) {
           totalOut: 0,
           netChange: 0,
           totalTransactions: 0
-        }
+        },
+        message: 'Sheet StockMovements belum ada. Silakan buat sheet terlebih dahulu.'
       };
     }
     
     const data = sheet.getDataRange().getValues();
     if (data.length < 2) {
-      // Sheet exists but empty (only headers), try migration
-      Logger.log('StockMovements is empty, attempting migration...');
-      const migrationResult = smMigrateExistingSalesData(email);
-      Logger.log('Auto-migration result: ' + JSON.stringify(migrationResult));
-      
-      // Re-read data after migration
-      const newData = sheet.getDataRange().getValues();
-      if (newData.length < 2) {
-        return {
-          success: true,
-          data: [],
-          summary: {
-            totalIn: 0,
-            totalOut: 0,
-            netChange: 0,
-            totalTransactions: 0
-          }
-        };
-      }
+      // Sheet exists but empty (only headers) - return empty, NO AUTO MIGRATION
+      Logger.log('StockMovements is empty - returning empty result');
+      return {
+        success: true,
+        data: [],
+        summary: {
+          totalIn: 0,
+          totalOut: 0,
+          netChange: 0,
+          totalTransactions: 0
+        },
+        message: 'Belum ada data mutasi stok'
+      };
     }
     
-    // Re-read data (in case migration happened)
+    // Parse data
     const allData = sheet.getDataRange().getValues();
     const headers = allData[0];
     const movements = [];
     
-    // Parse data
-    for (let i = 1; i < allData.length; i++) {
+    // Parse data with limit to prevent timeout
+    const maxRows = Math.min(allData.length, 10000); // Limit to 10k rows
+    
+    for (let i = 1; i < maxRows; i++) {
       const row = allData[i];
       if (!row[1]) continue; // Skip if no Item ID
       

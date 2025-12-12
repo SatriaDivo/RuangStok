@@ -509,16 +509,37 @@
     
     console.log('Loading mutations with filter:', filter);
     
+    // Add timeout mechanism
+    let timeoutId = setTimeout(function() {
+      console.error('Request timeout - taking too long');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Gagal memuat data</h3>
+            <p>Request timeout - Silakan coba lagi atau gunakan filter tanggal yang lebih spesifik</p>
+          </td>
+        </tr>
+      `;
+    }, 30000); // 30 seconds timeout
+    
     google.script.run
-      .withSuccessHandler(handleMutationsResult)
+      .withSuccessHandler(function(result) {
+        clearTimeout(timeoutId);
+        handleMutationsResult(result);
+      })
       .withFailureHandler(function(error) {
+        clearTimeout(timeoutId);
         console.error('Error loading mutations:', error);
         tbody.innerHTML = `
           <tr>
             <td colspan="7" class="empty-state">
               <i class="fas fa-exclamation-triangle"></i>
               <h3>Gagal memuat data</h3>
-              <p>${error.message || 'Terjadi kesalahan'}</p>
+              <p>${error.message || 'Terjadi kesalahan saat memuat data'}</p>
+              <button onclick="loadMutations()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+                <i class="fas fa-redo"></i> Coba Lagi
+              </button>
             </td>
           </tr>
         `;
