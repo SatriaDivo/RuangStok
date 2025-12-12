@@ -268,3 +268,87 @@ function smAddStockManually(email, adjustment) {
     return { success: false, message: error.message };
   }
 }
+
+/**
+ * MIGRATION FUNCTION - Backfill existing sales data to StockMovements
+ * Run this ONCE to migrate historical data
+ * @param {string} email - User email (admin only)
+ */
+function smMigrateExistingSalesData(email) {
+  const session = checkServerSession(email, false);
+  if (!session.active) {
+    return { success: false, message: "Sesi berakhir", sessionExpired: true };
+  }
+
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    // Get existing SalesDetails
+    const salesSheet = ss.getSheetByName('SalesDetails');
+    if (!salesSheet) {
+      return { success: false, message: 'Sheet SalesDetails tidak ditemukan' };
+    }
+    
+    const salesData = salesSheet.getDataRange().getValues();
+    if (salesData.length < 2) {
+      return { success: false, message: 'Tidak ada data penjualan untuk dimigrate' };
+    }
+    
+    const headers = salesData[0];
+    let migratedCount = 0;
+    
+    // Process each sales record
+    for (let i = 1; i < salesData.length; i++) {
+      const row = salesData[i];
+      
+      // Skip empty rows
+      if (!row[0] && !row[1]) continue;
+      
+      // Extract data based on column headers
+      const getColValue = (colNames) => {
+        for (let name of colNames) {
+          const idx = headers.indexOf(name);
+          if (idx >= 0) return row[idx];
+        }
+        return '';
+      };
+      
+      const soDate = getColValue(['SO Date', 'Date', 'Tanggal']);
+      const itemId = getColValue(['Item ID', 'Kode Barang']);
+      const itemName = getColValue(['Item Name', 'Nama Barang']);
+      const qtySold = Number(getColValue(['QTY Sold', 'Qty', 'Jumlah Terjual'])) || 0;
+      const soId = getColValue(['SO ID']);
+      const customerName = getColValue(['Customer Name', 'Customer', 'Pelanggan']);
+      
+      if (!itemId || qtySold <= 0) continue;
+      
+      // Log this sale as stock movement
+      logStockMovement({
+        itemId: itemId,
+        itemName: itemName,
+        type: 'OUT',
+        qty: qtySold,
+        reference: soId || 'MIGRATED',
+        notes: `[MIGRATED] Penjualan kepada: ${customerName || 'Unknown'}`,
+        user: 'SYSTEM-MIGRATION'
+      });
+      
+      migratedCount++;
+    }
+    
+    Logger.log(`Migration completed: ${migratedCount} sales records migrated`);
+    
+    return {
+      success: true,
+      message: `Berhasil migrate ${migratedCount} transaksi penjualan`,
+      migratedCount: migratedCount
+    };
+    
+  } catch (error) {
+    Logger.log('Error in smMigrateExistingSalesData: ' + error.message);
+    return { 
+      success: false, 
+      message: 'Gagal migrate data: ' + error.message 
+    };
+  }
+}

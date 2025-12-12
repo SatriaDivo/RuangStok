@@ -413,6 +413,9 @@
         <button class="btn-filter secondary" onclick="resetFilters()">
           <i class="fas fa-undo"></i> Reset
         </button>
+        <button class="btn-filter" onclick="migrateExistingData()" style="background: #e67e22; color: white; margin-left: 10px;">
+          <i class="fas fa-database"></i> Migrate Data Lama
+        </button>
       </div>
     </div>
   </div>
@@ -584,4 +587,51 @@
     
     loadMutations();
   }
-</script>
+  
+  function migrateExistingData() {
+    if (!confirm('Apakah Anda yakin ingin migrate data penjualan yang sudah ada ke Stock Movements?\n\nProses ini akan membaca semua data dari SalesDetails dan mencatatnya ke StockMovements.\n\nJalankan sekali saja!')) {
+      return;
+    }
+    
+    // Show loading overlay
+    Swal.fire({
+      title: 'Migrating Data...',
+      html: 'Sedang memproses data penjualan lama...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    google.script.run
+      .withSuccessHandler(function(result) {
+        Swal.close();
+        
+        if (result && result.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Migration Berhasil!',
+            html: `<p>${result.message}</p><p>Total: <strong>${result.migratedCount}</strong> transaksi</p>`,
+            confirmButtonText: 'OK'
+          }).then(() => {
+            // Reload mutations
+            loadMutations();
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Migration Gagal',
+            text: result ? result.message : 'Terjadi kesalahan'
+          });
+        }
+      })
+      .withFailureHandler(function(error) {
+        Swal.close();
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Gagal migrate data: ' + error.message
+        });
+      })
+      .smMigrateExistingSalesData(mutUserEmail);
+  }
