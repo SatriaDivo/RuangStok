@@ -294,6 +294,21 @@ function soSaveNewSO(payload, email) {
     
     // Reduce stock in inventory
     soReduceInventoryStock(d['Item ID'], d['QTY Sold']);
+    
+    // Log stock movement for sales
+    try {
+      logStockMovement({
+        itemId: d['Item ID'] || '',
+        itemName: d['Item Name'] || '',
+        type: 'OUT',
+        qty: parseFloat(d['QTY Sold']) || 0,
+        reference: d['SO ID'] || '',
+        notes: 'Penjualan kepada: ' + (d['Customer Name'] || ''),
+        user: Session.getActiveUser().getEmail()
+      });
+    } catch (logError) {
+      Logger.log('Warning: Failed to log stock movement: ' + logError.message);
+    }
   });
 
   // Step 3: recalc all metrics

@@ -214,6 +214,23 @@ class InventoryService {
       const newRow = this.createRowFromItem(item, headers);
       sheet.appendRow(newRow);
       
+      // Log stock movement if quantity > 0
+      if (item.quantity && item.quantity > 0) {
+        try {
+          logStockMovement({
+            itemId: item.id,
+            itemName: item.name,
+            type: 'IN',
+            qty: item.quantity,
+            reference: 'STOCK-IN',
+            notes: 'Stok awal - penambahan barang baru',
+            user: Session.getActiveUser().getEmail()
+          });
+        } catch (logError) {
+          Logger.log('Warning: Failed to log stock movement: ' + logError.message);
+        }
+      }
+      
       Logger.log(`Successfully added inventory item: ${item.id} - ${item.name}`);
       return ApiResponse.success(
         { itemId: item.id }, 
@@ -249,10 +266,33 @@ class InventoryService {
         return ApiResponse.error(`Barang dengan kode '${item.id}' tidak ditemukan`);
       }
       
+      // Get old quantity to track changes
+      const qtyColIndex = headers.findIndex(h => h === 'Quantity' || h === 'Jumlah' || h === 'Qty');
+      const oldQty = qtyColIndex >= 0 ? Number(data[itemRowIndex][qtyColIndex]) || 0 : 0;
+      const newQty = Number(item.quantity) || 0;
+      const qtyDiff = newQty - oldQty;
+      
       const sheetRowNumber = itemRowIndex + 1; // Convert to 1-based indexing
       
       // Update specific fields
       this.updateRowFields(sheet, sheetRowNumber, item, headers);
+      
+      // Log stock movement if quantity changed
+      if (qtyDiff !== 0) {
+        try {
+          logStockMovement({
+            itemId: item.id,
+            itemName: item.name,
+            type: qtyDiff > 0 ? 'IN' : 'OUT',
+            qty: Math.abs(qtyDiff),
+            reference: 'ADJ',
+            notes: qtyDiff > 0 ? 'Penambahan stok manual' : 'Pengurangan stok manual (adjustment)',
+            user: Session.getActiveUser().getEmail()
+          });
+        } catch (logError) {
+          Logger.log('Warning: Failed to log stock movement: ' + logError.message);
+        }
+      }
       
       Logger.log(`Successfully updated inventory item: ${item.id}`);
       return ApiResponse.success(
