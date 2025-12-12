@@ -15,15 +15,6 @@ function mutGetAllMutations(email, filter) {
   // Delegate to the new Stock Movements system
   return smGetAllMovements(email, filter);
 }
-/**
- * Get all stock mutations from StockMovements sheet
- * @param {string} email - User email for session check
- * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
- */
-function mutGetAllMutations(email, filter) {
-  // Delegate to the new Stock Movements system
-  return smGetAllMovements(email, filter);
-}
 
 /**
  * Get mutations for a specific item

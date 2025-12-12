@@ -864,16 +864,8 @@
           
           console.log('Navigating to:', targetUrl);
           
-          // Use multiple fallback methods like login
-          try {
-            window.top.location.replace(targetUrl);
-          } catch(err) {
-            try {
-              window.top.location.href = targetUrl;
-            } catch(err2) {
-              window.location.href = targetUrl;
-            }
-          }
+          // Direct navigation to top frame
+          window.top.location.href = targetUrl;
         });
       });
     });
