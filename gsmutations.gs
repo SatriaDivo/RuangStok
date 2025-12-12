@@ -2,11 +2,11 @@
  * ============================================================================
  * MUTATIONS MODULE - Stock Movement / Mutasi Stok
  * ============================================================================
- * Handles stock movement tracking from Receipts (IN) and SalesDetails (OUT)
+ * Handles stock movement tracking from PurchaseDetails (IN) and SalesDetails (OUT)
  */
 
 /**
- * Get all stock mutations (combined from Receipts and SalesDetails)
+ * Get all stock mutations (combined from PurchaseDetails and SalesDetails)
  * @param {string} email - User email for session check
  * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
  */
@@ -20,49 +20,65 @@ function mutGetAllMutations(email, filter) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const mutations = [];
     
-    // Get Receipts data (Barang Masuk)
-    const receiptsSheet = ss.getSheetByName('Receipts');
-    if (receiptsSheet) {
-      const receiptsData = getSheetDataAsObjects('Receipts');
-      receiptsData.forEach(row => {
-        if (row['Item ID'] && row['Qty']) {
+    // Get PurchaseDetails data (Barang Masuk)
+    const purchaseSheet = ss.getSheetByName('PurchaseDetails');
+    if (purchaseSheet) {
+      const purchaseData = getSheetDataAsObjects('PurchaseDetails');
+      Logger.log('PurchaseDetails rows found: ' + purchaseData.length);
+      purchaseData.forEach(row => {
+        // Check for Item ID and QTY Purchased (correct column names)
+        const itemId = row['Item ID'] || row['Kode Barang'] || '';
+        const qty = Number(row['QTY Purchased']) || Number(row['Qty']) || 0;
+        
+        if (itemId && qty > 0) {
           mutations.push({
             date: row['Date'] || row['Tanggal'] || '',
-            itemId: row['Item ID'] || '',
+            itemId: itemId,
             itemName: row['Item Name'] || row['Nama Barang'] || '',
             type: 'IN',
             typeLabel: 'Masuk',
-            qty: Number(row['Qty']) || 0,
-            reference: row['PO ID'] || row['Trx ID'] || '',
+            qty: qty,
+            reference: row['PO ID'] || '',
             referenceType: 'PO',
-            supplier: row['Supplier'] || row['Pemasok'] || '',
-            notes: row['Notes'] || row['Keterangan'] || 'Penerimaan barang'
+            supplier: row['Supplier Name'] || row['Supplier'] || row['Pemasok'] || '',
+            notes: row['Notes'] || row['Keterangan'] || 'Penerimaan barang dari pembelian'
           });
         }
       });
+    } else {
+      Logger.log('PurchaseDetails sheet not found');
     }
     
     // Get SalesDetails data (Barang Keluar)
     const salesSheet = ss.getSheetByName('SalesDetails');
     if (salesSheet) {
       const salesData = getSheetDataAsObjects('SalesDetails');
+      Logger.log('SalesDetails rows found: ' + salesData.length);
       salesData.forEach(row => {
-        if (row['Item ID'] && row['Qty']) {
+        // Check for Item ID and QTY Sold (correct column names)
+        const itemId = row['Item ID'] || row['Kode Barang'] || '';
+        const qty = Number(row['QTY Sold']) || Number(row['Qty']) || 0;
+        
+        if (itemId && qty > 0) {
           mutations.push({
-            date: row['Date'] || row['Tanggal'] || '',
-            itemId: row['Item ID'] || '',
+            date: row['SO Date'] || row['Date'] || row['Tanggal'] || '',
+            itemId: itemId,
             itemName: row['Item Name'] || row['Nama Barang'] || '',
             type: 'OUT',
             typeLabel: 'Keluar',
-            qty: Number(row['Qty']) || 0,
+            qty: qty,
             reference: row['SO ID'] || '',
             referenceType: 'SO',
-            customer: row['Customer'] || row['Pelanggan'] || '',
+            customer: row['Customer Name'] || row['Customer'] || row['Pelanggan'] || '',
             notes: row['Notes'] || row['Keterangan'] || 'Penjualan barang'
           });
         }
       });
+    } else {
+      Logger.log('SalesDetails sheet not found');
     }
+    
+    Logger.log('Total mutations found: ' + mutations.length);
     
     // Apply filters if provided
     let filteredMutations = mutations;
