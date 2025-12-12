@@ -2,11 +2,11 @@
  * ============================================================================
  * MUTATIONS MODULE - Stock Movement / Mutasi Stok
  * ============================================================================
- * Handles stock movement tracking from Receipts (IN) and SalesDetails (OUT)
+ * Handles stock movement tracking from PurchaseDetails (IN) and SalesDetails (OUT)
  */
 
 /**
- * Get all stock mutations (combined from Receipts and SalesDetails)
+ * Get all stock mutations (combined from PurchaseDetails and SalesDetails)
  * @param {string} email - User email for session check
  * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
  */
@@ -20,44 +20,52 @@ function mutGetAllMutations(email, filter) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const mutations = [];
     
-    // Get Receipts data (Barang Masuk)
-    const receiptsSheet = ss.getSheetByName('Receipts');
-    if (receiptsSheet) {
-      const receiptsData = getSheetDataAsObjects('Receipts');
-      receiptsData.forEach(row => {
-        if (row['Item ID'] && row['Qty']) {
+    // Get PurchaseDetails data (Barang Masuk) - Stock IN comes from purchases
+    const purchaseSheet = ss.getSheetByName('PurchaseDetails');
+    if (purchaseSheet) {
+      const purchaseData = getSheetDataAsObjects('PurchaseDetails');
+      purchaseData.forEach(row => {
+        // Check for Item ID and Quantity with flexible column names
+        const itemId = row['Kode Barang'] || row['Item ID'] || '';
+        const qty = Number(row['Jumlah Barang'] || row['QTY Purchased'] || row['Qty'] || 0);
+        
+        if (itemId && qty > 0) {
           mutations.push({
             date: row['Date'] || row['Tanggal'] || '',
-            itemId: row['Item ID'] || '',
-            itemName: row['Item Name'] || row['Nama Barang'] || '',
+            itemId: itemId,
+            itemName: row['Nama Barang'] || row['Item Name'] || '',
             type: 'IN',
             typeLabel: 'Masuk',
-            qty: Number(row['Qty']) || 0,
-            reference: row['PO ID'] || row['Trx ID'] || '',
+            qty: qty,
+            reference: row['PO ID'] || '',
             referenceType: 'PO',
-            supplier: row['Supplier'] || row['Pemasok'] || '',
-            notes: row['Notes'] || row['Keterangan'] || 'Penerimaan barang'
+            supplier: row['Supplier Name'] || row['Supplier'] || row['Pemasok'] || '',
+            notes: row['Notes'] || row['Keterangan'] || 'Pembelian barang'
           });
         }
       });
     }
     
-    // Get SalesDetails data (Barang Keluar)
+    // Get SalesDetails data (Barang Keluar) - Stock OUT comes from sales
     const salesSheet = ss.getSheetByName('SalesDetails');
     if (salesSheet) {
       const salesData = getSheetDataAsObjects('SalesDetails');
       salesData.forEach(row => {
-        if (row['Item ID'] && row['Qty']) {
+        // Check for Item ID and Quantity with flexible column names
+        const itemId = row['Item ID'] || row['Kode Barang'] || '';
+        const qty = Number(row['QTY Sold'] || row['Jumlah Terjual'] || row['Qty'] || 0);
+        
+        if (itemId && qty > 0) {
           mutations.push({
-            date: row['Date'] || row['Tanggal'] || '',
-            itemId: row['Item ID'] || '',
+            date: row['SO Date'] || row['Date'] || row['Tanggal'] || '',
+            itemId: itemId,
             itemName: row['Item Name'] || row['Nama Barang'] || '',
             type: 'OUT',
             typeLabel: 'Keluar',
-            qty: Number(row['Qty']) || 0,
+            qty: qty,
             reference: row['SO ID'] || '',
             referenceType: 'SO',
-            customer: row['Customer'] || row['Pelanggan'] || '',
+            customer: row['Customer Name'] || row['Customer'] || row['Pelanggan'] || '',
             notes: row['Notes'] || row['Keterangan'] || 'Penjualan barang'
           });
         }
@@ -163,8 +171,8 @@ function mutGetInventoryItems(email) {
     
     const data = getSheetDataAsObjects('InventoryItems');
     const items = data.map(row => ({
-      id: row['Item ID'] || '',
-      name: row['Item Name'] || row['Nama Barang'] || ''
+      id: row['Kode Barang'] || row['Item ID'] || '',
+      name: row['Nama Barang'] || row['Item Name'] || ''
     })).filter(item => item.id);
     
     return { success: true, data: items };
