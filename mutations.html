@@ -446,9 +446,9 @@
 <script>
   let mutUserEmail = null;
   
-  // Load mutations on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('Mutations page loaded');
+  // Function to initialize mutations page
+  function initMutationsPage() {
+    console.log('Initializing Mutations page');
     
     // Get user from session
     try {
@@ -457,21 +457,37 @@
       console.log('User email:', mutUserEmail);
     } catch (e) {
       console.error('Error getting user:', e);
+      mutUserEmail = null;
     }
     
-    // Set default date range (last 180 days to capture more data)
+    // Set default date range (today's date)
     const today = new Date();
-    const startDate = new Date(today);
-    startDate.setDate(startDate.getDate() - 180);
+    const todayStr = today.toISOString().split('T')[0];
     
-    document.getElementById('filterEndDate').value = today.toISOString().split('T')[0];
-    document.getElementById('filterStartDate').value = startDate.toISOString().split('T')[0];
+    const startDateEl = document.getElementById('filterStartDate');
+    const endDateEl = document.getElementById('filterEndDate');
     
-    console.log('Date range set:', startDate.toISOString().split('T')[0], 'to', today.toISOString().split('T')[0]);
-    
-    // Load data
-    loadMutations();
-  });
+    if (startDateEl && endDateEl) {
+      // Set both dates to today
+      endDateEl.value = todayStr;
+      startDateEl.value = todayStr;
+      console.log('Date range set to today:', todayStr);
+      
+      // Load data
+      loadMutations();
+    } else {
+      console.error('Date filter elements not found');
+    }
+  }
+  
+  // Try multiple initialization methods to ensure it works
+  if (document.readyState === 'loading') {
+    // DOM still loading, wait for it
+    document.addEventListener('DOMContentLoaded', initMutationsPage);
+  } else {
+    // DOM already loaded, initialize immediately
+    setTimeout(initMutationsPage, 50);
+  }
   
   function loadMutations() {
     const tbody = document.getElementById('mutationsTableBody');
@@ -591,11 +607,10 @@
   
   function resetFilters() {
     const today = new Date();
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const todayStr = today.toISOString().split('T')[0];
     
-    document.getElementById('filterEndDate').value = today.toISOString().split('T')[0];
-    document.getElementById('filterStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+    document.getElementById('filterEndDate').value = todayStr;
+    document.getElementById('filterStartDate').value = todayStr;
     document.getElementById('filterItem').value = '';
     document.getElementById('filterType').value = 'ALL';
     
