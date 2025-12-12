@@ -446,7 +446,6 @@
 <script>
   const mutUser = SessionManager.getUser();
   const mutUserEmail = mutUser ? mutUser.username : null;
-  let migrationDone = false;
   
   // Load mutations on page load
   document.addEventListener('DOMContentLoaded', function() {
@@ -458,47 +457,9 @@
     document.getElementById('filterEndDate').value = today.toISOString().split('T')[0];
     document.getElementById('filterStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
     
-    // Check if migration needed and do it automatically
-    checkAndMigrateIfNeeded();
+    // Just load data directly - migration will be called from backend if needed
+    loadMutations();
   });
-  
-  function checkAndMigrateIfNeeded() {
-    // First, check if StockMovements has data
-    google.script.run
-      .withSuccessHandler(function(result) {
-        if (result && result.success && result.data && result.data.length === 0) {
-          // No data in StockMovements, do auto migration
-          console.log('No data found, starting auto-migration...');
-          autoMigrate();
-        } else {
-          // Data exists, just load normally
-          loadMutations();
-        }
-      })
-      .withFailureHandler(function(error) {
-        console.log('Error checking data, will try to load anyway:', error);
-        loadMutations();
-      })
-      .smGetAllMovements(mutUserEmail, { startDate: '2020-01-01', endDate: '2030-12-31' });
-  }
-  
-  function autoMigrate() {
-    console.log('Starting auto-migration...');
-    
-    google.script.run
-      .withSuccessHandler(function(result) {
-        console.log('Migration result:', result);
-        migrationDone = true;
-        // After migration, load the data
-        loadMutations();
-      })
-      .withFailureHandler(function(error) {
-        console.error('Migration failed:', error);
-        // Even if migration fails, try to load data
-        loadMutations();
-      })
-      .smMigrateExistingSalesData(mutUserEmail);
-  }
   
   function loadMutations() {
     const tbody = document.getElementById('mutationsTableBody');

@@ -86,8 +86,17 @@ function smGetAllMovements(email, filter) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName('StockMovements');
     
-    // If sheet doesn't exist, return empty data
+    // If sheet doesn't exist or empty, auto-migrate first
     if (!sheet) {
+      Logger.log('StockMovements sheet not found, creating and migrating...');
+      const migrationResult = smMigrateExistingSalesData(email);
+      Logger.log('Auto-migration result: ' + JSON.stringify(migrationResult));
+      // Re-get sheet after migration
+      sheet = ss.getSheetByName('StockMovements');
+    }
+    
+    if (!sheet) {
+      // Still no sheet after migration, return empty
       return {
         success: true,
         data: [],
@@ -102,24 +111,35 @@ function smGetAllMovements(email, filter) {
     
     const data = sheet.getDataRange().getValues();
     if (data.length < 2) {
-      return {
-        success: true,
-        data: [],
-        summary: {
-          totalIn: 0,
-          totalOut: 0,
-          netChange: 0,
-          totalTransactions: 0
-        }
-      };
+      // Sheet exists but empty (only headers), try migration
+      Logger.log('StockMovements is empty, attempting migration...');
+      const migrationResult = smMigrateExistingSalesData(email);
+      Logger.log('Auto-migration result: ' + JSON.stringify(migrationResult));
+      
+      // Re-read data after migration
+      const newData = sheet.getDataRange().getValues();
+      if (newData.length < 2) {
+        return {
+          success: true,
+          data: [],
+          summary: {
+            totalIn: 0,
+            totalOut: 0,
+            netChange: 0,
+            totalTransactions: 0
+          }
+        };
+      }
     }
     
-    const headers = data[0];
+    // Re-read data (in case migration happened)
+    const allData = sheet.getDataRange().getValues();
+    const headers = allData[0];
     const movements = [];
     
     // Parse data
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
+    for (let i = 1; i < allData.length; i++) {
+      const row = allData[i];
       if (!row[1]) continue; // Skip if no Item ID
       
       movements.push({
