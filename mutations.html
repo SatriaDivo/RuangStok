@@ -444,20 +444,32 @@
 </div>
 
 <script>
-  const mutUser = SessionManager.getUser();
-  const mutUserEmail = mutUser ? mutUser.username : null;
+  let mutUserEmail = null;
   
   // Load mutations on page load
   document.addEventListener('DOMContentLoaded', function() {
-    // Set default date range (last 30 days)
+    console.log('Mutations page loaded');
+    
+    // Get user from session
+    try {
+      const mutUser = SessionManager.getUser();
+      mutUserEmail = mutUser ? mutUser.username : null;
+      console.log('User email:', mutUserEmail);
+    } catch (e) {
+      console.error('Error getting user:', e);
+    }
+    
+    // Set default date range (last 180 days to capture more data)
     const today = new Date();
-    const thirtyDaysAgo = new Date(today);
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - 180);
     
     document.getElementById('filterEndDate').value = today.toISOString().split('T')[0];
-    document.getElementById('filterStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+    document.getElementById('filterStartDate').value = startDate.toISOString().split('T')[0];
     
-    // Just load data directly - migration will be called from backend if needed
+    console.log('Date range set:', startDate.toISOString().split('T')[0], 'to', today.toISOString().split('T')[0]);
+    
+    // Load data
     loadMutations();
   });
   
