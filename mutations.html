@@ -445,10 +445,13 @@
 
 <script>
   let mutUserEmail = null;
+  let initAttempts = 0;
+  const maxInitAttempts = 5;
   
   // Function to initialize mutations page
   function initMutationsPage() {
-    console.log('Initializing Mutations page');
+    initAttempts++;
+    console.log('Initializing Mutations page - Attempt:', initAttempts);
     
     // Get user from session
     try {
@@ -466,28 +469,50 @@
     
     const startDateEl = document.getElementById('filterStartDate');
     const endDateEl = document.getElementById('filterEndDate');
+    const tbody = document.getElementById('mutationsTableBody');
     
-    if (startDateEl && endDateEl) {
-      // Set both dates to today
-      endDateEl.value = todayStr;
-      startDateEl.value = todayStr;
-      console.log('Date range set to today:', todayStr);
+    // Check if elements exist
+    if (!startDateEl || !endDateEl || !tbody) {
+      console.warn('Elements not ready yet. Found:', { 
+        startDateEl: !!startDateEl, 
+        endDateEl: !!endDateEl, 
+        tbody: !!tbody 
+      });
       
-      // Load data
-      loadMutations();
-    } else {
-      console.error('Date filter elements not found');
+      // Retry if not exceeded max attempts
+      if (initAttempts < maxInitAttempts) {
+        setTimeout(initMutationsPage, 200);
+      } else {
+        console.error('Failed to initialize after', maxInitAttempts, 'attempts');
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Gagal menginisialisasi halaman</h3>
+                <p>Silakan refresh halaman</p>
+              </td>
+            </tr>
+          `;
+        }
+      }
+      return;
     }
+    
+    // Elements found, set values
+    endDateEl.value = todayStr;
+    startDateEl.value = todayStr;
+    console.log('Date range set to today:', todayStr);
+    console.log('Start date value:', startDateEl.value);
+    console.log('End date value:', endDateEl.value);
+    
+    // Load data
+    loadMutations();
   }
   
-  // Try multiple initialization methods to ensure it works
-  if (document.readyState === 'loading') {
-    // DOM still loading, wait for it
-    document.addEventListener('DOMContentLoaded', initMutationsPage);
-  } else {
-    // DOM already loaded, initialize immediately
-    setTimeout(initMutationsPage, 50);
-  }
+  // Initialize when script loads
+  setTimeout(initMutationsPage, 100);
+
   
   function loadMutations() {
     const tbody = document.getElementById('mutationsTableBody');
