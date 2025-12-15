@@ -16,6 +16,44 @@ function testMutations() {
 }
 
 /**
+ * Helper function to get data from named range as objects
+ */
+function mutGetRangeDataAsObjects(rangeName) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const range = ss.getRangeByName(rangeName);
+  
+  if (!range) {
+    return [];
+  }
+  
+  const sheet = range.getSheet();
+  const startRow = range.getRow();
+  const startCol = range.getColumn();
+  const numCols = range.getNumColumns();
+  const lastRow = sheet.getLastRow();
+  
+  if (lastRow < startRow + 1) {
+    return [];
+  }
+  
+  const expandedRange = sheet.getRange(startRow, startCol, lastRow - startRow + 1, numCols);
+  const values = expandedRange.getValues();
+  
+  if (values.length < 2) {
+    return [];
+  }
+  
+  const headers = values[0];
+  const rows = values.slice(1).filter(r => r.some(cell => cell !== '' && cell !== null));
+  
+  return rows.map(r => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = r[i]);
+    return obj;
+  });
+}
+
+/**
  * Get all stock mutations from StockMovements sheet
  * @param {string} email - User email for session check
  * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
@@ -34,20 +72,10 @@ function mutGetAllMutations(email, filter) {
   }
 
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName('StockMovements');
+    // Use named range RANGESM like other features
+    const rawData = mutGetRangeDataAsObjects('RANGESM');
     
-    if (!sheet) {
-      return {
-        success: true,
-        data: [],
-        summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 },
-        message: 'Sheet StockMovements belum ada'
-      };
-    }
-    
-    const lastRow = sheet.getLastRow();
-    if (lastRow < 2) {
+    if (!rawData || rawData.length === 0) {
       return {
         success: true,
         data: [],
@@ -56,27 +84,21 @@ function mutGetAllMutations(email, filter) {
       };
     }
     
-    // Read all data - SIMPLE like soGetRangeDataAsObjects
-    const dataRange = sheet.getRange(2, 1, lastRow - 1, 9); // Start from row 2, 9 columns
-    const values = dataRange.getValues();
-    
+    // Map to movements array
     var movements = [];
-    for (var i = 0; i < values.length; i++) {
-      var row = values[i];
-      
-      // Skip empty rows
-      if (!row[1]) continue;
+    for (var i = 0; i < rawData.length; i++) {
+      var row = rawData[i];
       
       var movement = {
-        date: row[0],
-        itemId: String(row[1]),
-        itemName: String(row[2]),
-        type: String(row[3]),
-        qty: Number(row[4]),
-        reference: String(row[5] || ''),
-        notes: String(row[6] || ''),
-        user: String(row[7] || ''),
-        keterangan: String(row[8] || '')
+        date: row['Date'],
+        itemId: String(row['Item ID'] || ''),
+        itemName: String(row['Item Name'] || ''),
+        type: String(row['Type'] || ''),
+        qty: Number(row['Qty']) || 0,
+        reference: String(row['Reference'] || ''),
+        notes: String(row['Notes'] || ''),
+        user: String(row['User'] || ''),
+        keterangan: String(row['Keterangan'] || '')
       };
       
       movements.push(movement);
