@@ -823,12 +823,6 @@
     console.log('=== SHOW ALL DATA - NO FILTER ===');
     console.log('User email:', mutUserEmail);
     
-    // Send empty object instead of object with null values
-    // This fixes the issue where Apps Script returns null
-    const filter = {};
-    
-    console.log('Filter:', filter);
-    
     google.script.run
       .withSuccessHandler(function(result) {
         console.log('Show all result:', result);
@@ -849,7 +843,7 @@
           </tr>
         `;
       })
-      .mutGetAllMutations(mutUserEmail, filter);
+      .mutGetAllMutationsNoFilter(mutUserEmail);
   }
   
   function createStockMovementsSheet() {

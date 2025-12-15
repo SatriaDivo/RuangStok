@@ -16,11 +16,63 @@ function testMutations() {
 }
 
 /**
+ * Direct test - no session check
+ */
+function testMutationsDirect() {
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('StockMovements');
+    
+    if (!sheet) {
+      return { error: 'Sheet StockMovements not found' };
+    }
+    
+    var lastRow = sheet.getLastRow();
+    var lastCol = sheet.getLastColumn();
+    
+    Logger.log('Last row: ' + lastRow + ', Last col: ' + lastCol);
+    
+    if (lastRow < 2) {
+      return { error: 'No data rows', lastRow: lastRow };
+    }
+    
+    var data = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+    var headers = data[0];
+    Logger.log('Headers: ' + JSON.stringify(headers));
+    
+    var rows = data.slice(1);
+    Logger.log('Row count: ' + rows.length);
+    Logger.log('First row: ' + JSON.stringify(rows[0]));
+    
+    return {
+      success: true,
+      headers: headers,
+      rowCount: rows.length,
+      firstRow: rows[0]
+    };
+  } catch (e) {
+    return { error: e.message, stack: e.stack };
+  }
+}
+
+/**
+ * Get ALL stock mutations - no filter (for "Tampilkan Semua" button)
+ * @param {string} email - User email for session check
+ */
+function mutGetAllMutationsNoFilter(email) {
+  Logger.log('mutGetAllMutationsNoFilter called with email: ' + email);
+  return mutGetAllMutations(email, null);
+}
+
+/**
  * Get all stock mutations from StockMovements sheet
  * @param {string} email - User email for session check
  * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
  */
 function mutGetAllMutations(email, filter) {
+  Logger.log('mutGetAllMutations called');
+  Logger.log('Email: ' + email);
+  Logger.log('Filter: ' + JSON.stringify(filter));
   // Session check
   const session = checkServerSession(email, false);
   if (!session || !session.active) {
