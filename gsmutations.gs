@@ -21,34 +21,23 @@ function testMutations() {
  * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
  */
 function mutGetAllMutations(email, filter) {
-  Logger.log('=== mutGetAllMutations START ===');
-  Logger.log('Email: ' + email);
-  Logger.log('Filter: ' + JSON.stringify(filter));
-  
+  // Session check - SIMPLE like other features
+  const session = checkServerSession(email, false);
+  if (!session || !session.active) {
+    return { 
+      success: false, 
+      message: "Sesi berakhir", 
+      sessionExpired: true,
+      data: [],
+      summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
+    };
+  }
+
   try {
-    // Check session
-    var session = checkServerSession(email, false);
-    Logger.log('Session check result: ' + JSON.stringify(session));
-    
-    if (!session || !session.active) {
-      Logger.log('Session not active, returning error');
-      return { 
-        success: false, 
-        message: "Sesi berakhir", 
-        sessionExpired: true,
-        data: [],
-        summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
-      };
-    }
-    
-    Logger.log('Session is active, proceeding...');
-    
-    // Get spreadsheet
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName('StockMovements');
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('StockMovements');
     
     if (!sheet) {
-      Logger.log('Sheet not found');
       return {
         success: true,
         data: [],
@@ -57,11 +46,8 @@ function mutGetAllMutations(email, filter) {
       };
     }
     
-    // Get all data
-    var allData = sheet.getDataRange().getValues();
-    Logger.log('Total rows: ' + allData.length);
-    
-    if (allData.length < 2) {
+    const lastRow = sheet.getLastRow();
+    if (lastRow < 2) {
       return {
         success: true,
         data: [],
@@ -70,108 +56,89 @@ function mutGetAllMutations(email, filter) {
       };
     }
     
-    // Parse data - simple array
+    // Read all data - SIMPLE like soGetRangeDataAsObjects
+    const dataRange = sheet.getRange(2, 1, lastRow - 1, 9); // Start from row 2, 9 columns
+    const values = dataRange.getValues();
+    
     var movements = [];
-    for (var i = 1; i < allData.length; i++) {
-      var row = allData[i];
+    for (var i = 0; i < values.length; i++) {
+      var row = values[i];
       
       // Skip empty rows
       if (!row[1]) continue;
       
-      try {
-        var movement = {
-          date: row[0],
-          itemId: String(row[1] || ''),
-          itemName: String(row[2] || ''),
-          type: String(row[3] || ''),
-          qty: Number(row[4]) || 0,
-          reference: String(row[5] || ''),
-          notes: String(row[6] || ''),
-          user: String(row[7] || ''),
-          keterangan: String(row[8] || '')
-        };
-        movements.push(movement);
-      } catch (e) {
-        Logger.log('Error parsing row ' + i + ': ' + e.message);
-      }
+      var movement = {
+        date: row[0],
+        itemId: String(row[1]),
+        itemName: String(row[2]),
+        type: String(row[3]),
+        qty: Number(row[4]),
+        reference: String(row[5] || ''),
+        notes: String(row[6] || ''),
+        user: String(row[7] || ''),
+        keterangan: String(row[8] || '')
+      };
+      
+      movements.push(movement);
     }
     
-    Logger.log('Parsed ' + movements.length + ' movements');
-    
-    // Apply filters if provided
+    // Apply filters - SIMPLE
     if (filter) {
-      // ItemId filter
       if (filter.itemId) {
-        var tempItemId = [];
-        for (var x = 0; x < movements.length; x++) {
-          if (movements[x].itemId === filter.itemId) {
-            tempItemId.push(movements[x]);
+        var temp1 = [];
+        for (var j = 0; j < movements.length; j++) {
+          if (movements[j].itemId === filter.itemId) {
+            temp1.push(movements[j]);
           }
         }
-        movements = tempItemId;
-        Logger.log('After itemId filter: ' + movements.length);
+        movements = temp1;
       }
       
-      // Type filter
       if (filter.type && filter.type !== 'ALL') {
-        var tempType = [];
-        for (var y = 0; y < movements.length; y++) {
-          if (movements[y].type === filter.type) {
-            tempType.push(movements[y]);
+        var temp2 = [];
+        for (var k = 0; k < movements.length; k++) {
+          if (movements[k].type === filter.type) {
+            temp2.push(movements[k]);
           }
         }
-        movements = tempType;
-        Logger.log('After type filter: ' + movements.length);
+        movements = temp2;
       }
       
-      // Date filters - only if provided
       if (filter.startDate) {
-        try {
-          var startDate = new Date(filter.startDate);
-          startDate.setHours(0, 0, 0, 0);
-          var tempStart = [];
-          for (var z = 0; z < movements.length; z++) {
-            var mDate = new Date(movements[z].date);
-            if (mDate >= startDate) {
-              tempStart.push(movements[z]);
-            }
+        var startDate = new Date(filter.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        var temp3 = [];
+        for (var l = 0; l < movements.length; l++) {
+          var mDate = new Date(movements[l].date);
+          if (mDate >= startDate) {
+            temp3.push(movements[l]);
           }
-          movements = tempStart;
-          Logger.log('After startDate filter: ' + movements.length);
-        } catch (e) {
-          Logger.log('Error in startDate filter: ' + e.message);
         }
+        movements = temp3;
       }
       
       if (filter.endDate) {
-        try {
-          var endDate = new Date(filter.endDate);
-          endDate.setHours(23, 59, 59, 999);
-          var tempEnd = [];
-          for (var w = 0; w < movements.length; w++) {
-            var mDate2 = new Date(movements[w].date);
-            if (mDate2 <= endDate) {
-              tempEnd.push(movements[w]);
-            }
+        var endDate = new Date(filter.endDate);
+        endDate.setHours(23, 59, 59, 999);
+        var temp4 = [];
+        for (var m = 0; m < movements.length; m++) {
+          var mDate2 = new Date(movements[m].date);
+          if (mDate2 <= endDate) {
+            temp4.push(movements[m]);
           }
-          movements = tempEnd;
-          Logger.log('After endDate filter: ' + movements.length);
-        } catch (e) {
-          Logger.log('Error in endDate filter: ' + e.message);
         }
+        movements = temp4;
       }
     }
-    
-    Logger.log('Final movements count: ' + movements.length);
     
     // Calculate summary
     var totalIn = 0;
     var totalOut = 0;
-    for (var m = 0; m < movements.length; m++) {
-      if (movements[m].type === 'IN') {
-        totalIn += movements[m].qty;
-      } else if (movements[m].type === 'OUT') {
-        totalOut += movements[m].qty;
+    for (var n = 0; n < movements.length; n++) {
+      if (movements[n].type === 'IN') {
+        totalIn += movements[n].qty;
+      } else if (movements[n].type === 'OUT') {
+        totalOut += movements[n].qty;
       }
     }
     
@@ -180,7 +147,8 @@ function mutGetAllMutations(email, filter) {
       return new Date(b.date) - new Date(a.date);
     });
     
-    var result = {
+    // Return - SIMPLE like other features
+    return {
       success: true,
       data: movements,
       summary: {
@@ -191,17 +159,8 @@ function mutGetAllMutations(email, filter) {
       }
     };
     
-    Logger.log('=== Returning result ===');
-    Logger.log('Result summary: ' + JSON.stringify(result.summary));
-    Logger.log('Result data count: ' + result.data.length);
-    
-    return result;
-    
   } catch (e) {
-    Logger.log('=== EXCEPTION CAUGHT ===');
-    Logger.log('ERROR: ' + e.message);
-    Logger.log('Stack: ' + e.stack);
-    
+    Logger.log('ERROR in mutGetAllMutations: ' + e.message);
     return {
       success: false,
       message: 'Error: ' + e.message,
