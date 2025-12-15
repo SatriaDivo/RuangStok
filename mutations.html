@@ -604,28 +604,33 @@
     console.log('Loading mutations with filter:', filter);
     console.log('User email:', mutUserEmail);
     
-    // Add timeout mechanism - reduced to 15 seconds for faster feedback
+    // Add timeout mechanism - 30 seconds
     let timeoutId = setTimeout(function() {
-      console.error('Request timeout after 15s - taking too long');
+      console.error('Request timeout after 30s');
       tbody.innerHTML = `
         <tr>
           <td colspan="8" class="empty-state">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Request Timeout</h3>
-            <p>Permintaan memakan waktu terlalu lama. Ini biasanya terjadi karena:</p>
-            <ul style="text-align:left; margin:10px auto; max-width:400px;">
-              <li>Sheet StockMovements tidak ada atau kosong</li>
-              <li>Data terlalu banyak</li>
-              <li>Koneksi lambat</li>
+            <p>Permintaan memakan waktu terlalu lama (>30 detik).</p>
+            <p style="font-size:0.9em; color:#7f8c8d;">Kemungkinan penyebab:</p>
+            <ul style="text-align:left; margin:10px auto; max-width:500px; font-size:0.9em;">
+              <li>Data terlalu banyak untuk di-filter</li>
+              <li>Ada error di server side (cek Apps Script logs)</li>
+              <li>Koneksi internet lambat</li>
             </ul>
-            <p>Coba gunakan filter tanggal yang lebih spesifik atau buat sheet StockMovements</p>
-            <button onclick="loadMutations()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
-              <i class="fas fa-redo"></i> Coba Lagi
-            </button>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
+              <button onclick="showAllData()" style="padding:8px 16px; background:#3498db; color:white; border:none; border-radius:6px; cursor:pointer;">
+                <i class="fas fa-list"></i> Tampilkan Semua
+              </button>
+              <button onclick="loadMutations()" style="padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+                <i class="fas fa-redo"></i> Coba Lagi
+              </button>
+            </div>
           </td>
         </tr>
       `;
-    }, 15000); // Reduced to 15 seconds timeout
+    }, 30000); // 30 seconds timeout
     
     google.script.run
       .withSuccessHandler(function(result) {

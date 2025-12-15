@@ -21,15 +21,12 @@ function testMutations() {
  * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
  */
 function mutGetAllMutations(email, filter) {
-  Logger.log('=== mutGetAllMutations START ===');
-  Logger.log('Email: ' + email);
-  Logger.log('Filter: ' + JSON.stringify(filter));
-  
   try {
+    Logger.log('=== mutGetAllMutations START ===');
+    
     // Check session
     var session = checkServerSession(email, false);
     if (!session || !session.active) {
-      Logger.log('Session not active');
       return { 
         success: false, 
         message: "Sesi berakhir", 
@@ -38,8 +35,6 @@ function mutGetAllMutations(email, filter) {
         summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
       };
     }
-    
-    Logger.log('Session active for user: ' + session.username);
     
     // Get spreadsheet
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -72,83 +67,75 @@ function mutGetAllMutations(email, filter) {
     var movements = [];
     for (var i = 1; i < allData.length; i++) {
       var row = allData[i];
+      
+      // Skip empty rows
       if (!row[1]) continue;
       
-      var movement = {
-        date: row[0],
-        itemId: row[1] ? String(row[1]) : '',
-        itemName: row[2] ? String(row[2]) : '',
-        type: row[3] ? String(row[3]) : '',
-        qty: row[4] ? Number(row[4]) : 0,
-        reference: row[5] ? String(row[5]) : '',
-        notes: row[6] ? String(row[6]) : '',
-        user: row[7] ? String(row[7]) : '',
-        keterangan: row[8] ? String(row[8]) : ''
-      };
-      movements.push(movement);
+      try {
+        var movement = {
+          date: row[0],
+          itemId: String(row[1] || ''),
+          itemName: String(row[2] || ''),
+          type: String(row[3] || ''),
+          qty: Number(row[4]) || 0,
+          reference: String(row[5] || ''),
+          notes: String(row[6] || ''),
+          user: String(row[7] || ''),
+          keterangan: String(row[8] || '')
+        };
+        movements.push(movement);
+      } catch (e) {
+        Logger.log('Error parsing row ' + i + ': ' + e.message);
+      }
     }
     
-    Logger.log('Parsed: ' + movements.length + ' movements');
-    if (movements.length > 0) {
-      Logger.log('First movement: ' + JSON.stringify(movements[0]));
-      Logger.log('First movement date type: ' + typeof movements[0].date);
-      Logger.log('First movement date value: ' + movements[0].date);
-    }
+    Logger.log('Parsed ' + movements.length + ' movements');
     
-    // Apply itemId filter if provided
-    if (filter && filter.itemId) {
-      var temp0 = [];
-      for (var n = 0; n < movements.length; n++) {
-        if (movements[n].itemId === filter.itemId) {
-          temp0.push(movements[n]);
+    // Apply filters if provided
+    if (filter) {
+      // ItemId filter
+      if (filter.itemId) {
+        movements = movements.filter(function(m) {
+          return m.itemId === filter.itemId;
+        });
+      }
+      
+      // Type filter
+      if (filter.type && filter.type !== 'ALL') {
+        movements = movements.filter(function(m) {
+          return m.type === filter.type;
+        });
+      }
+      
+      // Date filters - only if provided
+      if (filter.startDate) {
+        try {
+          var startDate = new Date(filter.startDate);
+          startDate.setHours(0, 0, 0, 0);
+          movements = movements.filter(function(m) {
+            var mDate = new Date(m.date);
+            return mDate >= startDate;
+          });
+        } catch (e) {
+          Logger.log('Error in startDate filter: ' + e.message);
         }
       }
-      movements = temp0;
-      Logger.log('After itemId filter: ' + movements.length);
-    }
-    
-    // Apply date filter if provided
-    if (filter && filter.startDate) {
-      var startDate = new Date(filter.startDate);
-      startDate.setHours(0, 0, 0, 0);
-      var temp = [];
-      for (var j = 0; j < movements.length; j++) {
-        var mDate = new Date(movements[j].date);
-        if (mDate >= startDate) {
-          temp.push(movements[j]);
+      
+      if (filter.endDate) {
+        try {
+          var endDate = new Date(filter.endDate);
+          endDate.setHours(23, 59, 59, 999);
+          movements = movements.filter(function(m) {
+            var mDate = new Date(m.date);
+            return mDate <= endDate;
+          });
+        } catch (e) {
+          Logger.log('Error in endDate filter: ' + e.message);
         }
       }
-      movements = temp;
-      Logger.log('After startDate filter: ' + movements.length);
     }
     
-    if (filter && filter.endDate) {
-      var endDate = new Date(filter.endDate);
-      endDate.setHours(23, 59, 59, 999);
-      var temp2 = [];
-      for (var k = 0; k < movements.length; k++) {
-        var mDate2 = new Date(movements[k].date);
-        if (mDate2 <= endDate) {
-          temp2.push(movements[k]);
-        }
-      }
-      movements = temp2;
-      Logger.log('After endDate filter: ' + movements.length);
-    }
-    
-    // Type filter
-    if (filter && filter.type && filter.type !== 'ALL') {
-      var temp3 = [];
-      for (var l = 0; l < movements.length; l++) {
-        if (movements[l].type === filter.type) {
-          temp3.push(movements[l]);
-        }
-      }
-      movements = temp3;
-      Logger.log('After type filter: ' + movements.length);
-    }
-    
-    Logger.log('After all filters: ' + movements.length);
+    Logger.log('After filters: ' + movements.length + ' movements');
     
     // Calculate summary
     var totalIn = 0;
