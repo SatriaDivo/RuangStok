@@ -597,12 +597,17 @@
       </tr>
     `;
     
-    const filter = {
-      startDate: document.getElementById('filterStartDate').value || null,
-      endDate: document.getElementById('filterEndDate').value || null,
-      itemId: document.getElementById('filterItem').value || null,
-      type: document.getElementById('filterType').value || 'ALL'
-    };
+    // Build filter object - only include non-empty values
+    const filter = {};
+    const startDate = document.getElementById('filterStartDate').value;
+    const endDate = document.getElementById('filterEndDate').value;
+    const itemId = document.getElementById('filterItem').value;
+    const type = document.getElementById('filterType').value;
+    
+    if (startDate) filter.startDate = startDate;
+    if (endDate) filter.endDate = endDate;
+    if (itemId) filter.itemId = itemId;
+    if (type && type !== 'ALL') filter.type = type;
     
     console.log('Loading mutations with filter:', filter);
     console.log('User email:', mutUserEmail);
@@ -818,13 +823,9 @@
     console.log('=== SHOW ALL DATA - NO FILTER ===');
     console.log('User email:', mutUserEmail);
     
-    // Load WITHOUT any date filter
-    const filter = {
-      startDate: null,
-      endDate: null,
-      itemId: null,
-      type: 'ALL'
-    };
+    // Send empty object instead of object with null values
+    // This fixes the issue where Apps Script returns null
+    const filter = {};
     
     console.log('Filter:', filter);
     
