@@ -677,54 +677,36 @@
   function handleMutationsResult(result) {
     console.log('=== handleMutationsResult START ===');
     console.log('Raw result:', result);
-    console.log('Result details:', {
-      exists: !!result,
-      success: result?.success,
-      message: result?.message,
-      dataLength: result?.data?.length,
-      summary: result?.summary
-    });
+    console.log('Result type:', typeof result);
+    console.log('Is array:', Array.isArray(result));
     
-    // Log first few items if data exists
-    if (result?.data && result.data.length > 0) {
-      console.log('First 3 items:', result.data.slice(0, 3));
-      console.log('Sample date:', result.data[0].date);
-      console.log('Sample date type:', typeof result.data[0].date);
-    }
+    const tbody = document.getElementById('mutationsTableBody');
     
+    // Check for session expired (object response)
     if (result && result.sessionExpired) {
       SessionManager.handleSessionExpired();
       return;
     }
     
-    // Check if result exists and has success property
-    if (!result) {
-      console.error('No result received from server');
-      document.getElementById('mutationsTableBody').innerHTML = `
-        <tr>
-          <td colspan="8" class="empty-state">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h3>Gagal memuat data</h3>
-            <p>Tidak ada respon dari server. Coba refresh halaman.</p>
-            <button onclick="location.reload()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
-              <i class="fas fa-redo"></i> Refresh
-            </button>
-          </td>
-        </tr>
-      `;
-      return;
-    }
+    // Handle ARRAY response (like inventory)
+    let mutations = [];
     
-    if (!result.success) {
-      const errorMsg = result.message || 'Terjadi kesalahan';
-      console.warn('Request not successful:', errorMsg);
-      document.getElementById('mutationsTableBody').innerHTML = `
+    if (Array.isArray(result)) {
+      // Direct array response
+      mutations = result;
+      console.log('Received array with', mutations.length, 'items');
+    } else if (result && result.data) {
+      // Object with data property
+      mutations = result.data;
+    } else if (!result) {
+      console.error('No result received from server');
+      tbody.innerHTML = `
         <tr>
           <td colspan="8" class="empty-state">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Gagal memuat data</h3>
-            <p>${errorMsg}</p>
-            <button onclick="loadMutations()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+            <p>Tidak ada respon dari server.</p>
+            <button onclick="loadAllMutations()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
               <i class="fas fa-redo"></i> Coba Lagi
             </button>
           </td>
@@ -733,32 +715,27 @@
       return;
     }
     
-    // Update summary
-    const summary = result.summary || {};
-    document.getElementById('totalIn').textContent = (summary.totalIn || 0).toLocaleString('id-ID');
-    document.getElementById('totalOut').textContent = (summary.totalOut || 0).toLocaleString('id-ID');
-    document.getElementById('netChange').textContent = (summary.netChange || 0).toLocaleString('id-ID');
-    document.getElementById('totalTransactions').textContent = (summary.totalTransactions || 0).toLocaleString('id-ID');
+    // Calculate summary from data
+    let totalIn = 0, totalOut = 0;
+    mutations.forEach(m => {
+      if (m.type === 'IN') totalIn += m.qty;
+      else if (m.type === 'OUT') totalOut += m.qty;
+    });
+    
+    // Update summary cards
+    document.getElementById('totalIn').textContent = totalIn.toLocaleString('id-ID');
+    document.getElementById('totalOut').textContent = totalOut.toLocaleString('id-ID');
+    document.getElementById('netChange').textContent = (totalIn - totalOut).toLocaleString('id-ID');
+    document.getElementById('totalTransactions').textContent = mutations.length.toLocaleString('id-ID');
     
     // Render table
-    const tbody = document.getElementById('mutationsTableBody');
-    const data = result.data || [];
-    
-    if (data.length === 0) {
-      const emptyMsg = result.message || 'Belum ada pergerakan stok dalam periode yang dipilih';
-      const isSheetMissing = result.message && result.message.includes('StockMovements belum ada');
-      
+    if (mutations.length === 0) {
       tbody.innerHTML = `
         <tr>
           <td colspan="8" class="empty-state">
             <i class="fas fa-inbox"></i>
             <h3>Tidak ada data mutasi</h3>
-            <p>${emptyMsg}</p>
-            ${isSheetMissing ? `
-              <button onclick="createStockMovementsSheet()" style="margin-top:10px; padding:8px 16px; background:#3498db; color:white; border:none; border-radius:6px; cursor:pointer;">
-                <i class="fas fa-plus"></i> Buat Sheet StockMovements
-              </button>
-            ` : ''}
+            <p>Belum ada pergerakan stok</p>
           </td>
         </tr>
       `;
@@ -766,7 +743,7 @@
     }
     
     let html = '';
-    data.forEach(m => {
+    mutations.forEach(m => {
       const date = m.date ? new Date(m.date).toLocaleDateString('id-ID', { 
         day: '2-digit', month: 'short', year: 'numeric' 
       }) : '-';
