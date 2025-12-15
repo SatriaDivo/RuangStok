@@ -413,9 +413,6 @@
         <button class="btn-filter secondary" onclick="resetFilters()">
           <i class="fas fa-undo"></i> Reset
         </button>
-        <button class="btn-filter" onclick="showAllData()" style="background:#3498db; color:white;">
-          <i class="fas fa-list"></i> Tampilkan Semua
-        </button>
         <button class="btn-filter" onclick="migrateExistingData()" style="background:#9b59b6; color:white;">
           <i class="fas fa-database"></i> Migrate Data Lama
         </button>
@@ -513,16 +510,10 @@
       return;
     }
     
-    // Elements found, set values - default to last 30 days
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
-    const startDateStr = startDate.toISOString().split('T')[0];
-    
-    endDateEl.value = todayStr;
-    startDateEl.value = startDateStr;
-    console.log('Date range set:', startDateStr, 'to', todayStr);
-    console.log('Start date value:', startDateEl.value);
-    console.log('End date value:', endDateEl.value);
+    // Elements found, clear default values (show all data by default)
+    endDateEl.value = '';
+    startDateEl.value = '';
+    console.log('Filter inputs cleared for showing all data');
     
     // Check if user email is available before loading
     if (!mutUserEmail) {
@@ -542,9 +533,9 @@
       return;
     }
     
-    // Load data
-    console.log('Calling loadMutations with email:', mutUserEmail);
-    loadMutations();
+    // Load ALL data by default (no filter)
+    console.log('Calling showAllData with email:', mutUserEmail);
+    showAllData();
   }
   
   // Initialize when script loads
@@ -628,10 +619,7 @@
               <li>Koneksi internet lambat</li>
             </ul>
             <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
-              <button onclick="showAllData()" style="padding:8px 16px; background:#3498db; color:white; border:none; border-radius:6px; cursor:pointer;">
-                <i class="fas fa-list"></i> Tampilkan Semua
-              </button>
-              <button onclick="loadMutations()" style="padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+              <button onclick="showAllData()" style="padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
                 <i class="fas fa-redo"></i> Coba Lagi
               </button>
             </div>
@@ -792,15 +780,14 @@
   }
   
   function resetFilters() {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    
-    document.getElementById('filterEndDate').value = todayStr;
-    document.getElementById('filterStartDate').value = todayStr;
+    // Clear all filter inputs
+    document.getElementById('filterEndDate').value = '';
+    document.getElementById('filterStartDate').value = '';
     document.getElementById('filterItem').value = '';
     document.getElementById('filterType').value = 'ALL';
     
-    loadMutations();
+    // Show all data (no filter)
+    showAllData();
   }
   
   function showAllData() {
