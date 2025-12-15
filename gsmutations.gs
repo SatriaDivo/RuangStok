@@ -21,12 +21,17 @@ function testMutations() {
  * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
  */
 function mutGetAllMutations(email, filter) {
+  Logger.log('=== mutGetAllMutations START ===');
+  Logger.log('Email: ' + email);
+  Logger.log('Filter: ' + JSON.stringify(filter));
+  
   try {
-    Logger.log('=== mutGetAllMutations START ===');
-    
     // Check session
     var session = checkServerSession(email, false);
+    Logger.log('Session check result: ' + JSON.stringify(session));
+    
     if (!session || !session.active) {
+      Logger.log('Session not active, returning error');
       return { 
         success: false, 
         message: "Sesi berakhir", 
@@ -35,6 +40,8 @@ function mutGetAllMutations(email, filter) {
         summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
       };
     }
+    
+    Logger.log('Session is active, proceeding...');
     
     // Get spreadsheet
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -95,16 +102,26 @@ function mutGetAllMutations(email, filter) {
     if (filter) {
       // ItemId filter
       if (filter.itemId) {
-        movements = movements.filter(function(m) {
-          return m.itemId === filter.itemId;
-        });
+        var tempItemId = [];
+        for (var x = 0; x < movements.length; x++) {
+          if (movements[x].itemId === filter.itemId) {
+            tempItemId.push(movements[x]);
+          }
+        }
+        movements = tempItemId;
+        Logger.log('After itemId filter: ' + movements.length);
       }
       
       // Type filter
       if (filter.type && filter.type !== 'ALL') {
-        movements = movements.filter(function(m) {
-          return m.type === filter.type;
-        });
+        var tempType = [];
+        for (var y = 0; y < movements.length; y++) {
+          if (movements[y].type === filter.type) {
+            tempType.push(movements[y]);
+          }
+        }
+        movements = tempType;
+        Logger.log('After type filter: ' + movements.length);
       }
       
       // Date filters - only if provided
@@ -112,10 +129,15 @@ function mutGetAllMutations(email, filter) {
         try {
           var startDate = new Date(filter.startDate);
           startDate.setHours(0, 0, 0, 0);
-          movements = movements.filter(function(m) {
-            var mDate = new Date(m.date);
-            return mDate >= startDate;
-          });
+          var tempStart = [];
+          for (var z = 0; z < movements.length; z++) {
+            var mDate = new Date(movements[z].date);
+            if (mDate >= startDate) {
+              tempStart.push(movements[z]);
+            }
+          }
+          movements = tempStart;
+          Logger.log('After startDate filter: ' + movements.length);
         } catch (e) {
           Logger.log('Error in startDate filter: ' + e.message);
         }
@@ -125,17 +147,22 @@ function mutGetAllMutations(email, filter) {
         try {
           var endDate = new Date(filter.endDate);
           endDate.setHours(23, 59, 59, 999);
-          movements = movements.filter(function(m) {
-            var mDate = new Date(m.date);
-            return mDate <= endDate;
-          });
+          var tempEnd = [];
+          for (var w = 0; w < movements.length; w++) {
+            var mDate2 = new Date(movements[w].date);
+            if (mDate2 <= endDate) {
+              tempEnd.push(movements[w]);
+            }
+          }
+          movements = tempEnd;
+          Logger.log('After endDate filter: ' + movements.length);
         } catch (e) {
           Logger.log('Error in endDate filter: ' + e.message);
         }
       }
     }
     
-    Logger.log('After filters: ' + movements.length + ' movements');
+    Logger.log('Final movements count: ' + movements.length);
     
     // Calculate summary
     var totalIn = 0;
@@ -164,11 +191,17 @@ function mutGetAllMutations(email, filter) {
       }
     };
     
-    Logger.log('=== END - success ===');
+    Logger.log('=== Returning result ===');
+    Logger.log('Result summary: ' + JSON.stringify(result.summary));
+    Logger.log('Result data count: ' + result.data.length);
+    
     return result;
     
   } catch (e) {
+    Logger.log('=== EXCEPTION CAUGHT ===');
     Logger.log('ERROR: ' + e.message);
+    Logger.log('Stack: ' + e.stack);
+    
     return {
       success: false,
       message: 'Error: ' + e.message,
