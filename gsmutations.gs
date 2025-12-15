@@ -2,204 +2,146 @@
  * ============================================================================
  * MUTATIONS MODULE - Stock Movement / Mutasi Stok
  * ============================================================================
- * Handles stock movement tracking from StockMovements log
- * Uses getSheetDataAsObjects from gsreports.gs for data access
+ * Handles stock movement tracking from StockMovements sheet
+ * Pattern: Same as gssuppliers.gs, gscustomers.gs, gsinventory.gs
  */
-
-/**
- * Simple test function to debug
- */
-function testMutations() {
-  var result = mutGetAllMutations('stockruang@gmail.com', {});
-  Logger.log('Result: ' + JSON.stringify(result));
-  return result;
-}
-
-/**
- * Direct test - no session check
- */
-function testMutationsDirect() {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName('StockMovements');
-    
-    if (!sheet) {
-      return { error: 'Sheet StockMovements not found' };
-    }
-    
-    var lastRow = sheet.getLastRow();
-    var lastCol = sheet.getLastColumn();
-    
-    Logger.log('Last row: ' + lastRow + ', Last col: ' + lastCol);
-    
-    if (lastRow < 2) {
-      return { error: 'No data rows', lastRow: lastRow };
-    }
-    
-    var data = sheet.getRange(1, 1, lastRow, lastCol).getValues();
-    var headers = data[0];
-    Logger.log('Headers: ' + JSON.stringify(headers));
-    
-    var rows = data.slice(1);
-    Logger.log('Row count: ' + rows.length);
-    Logger.log('First row: ' + JSON.stringify(rows[0]));
-    
-    return {
-      success: true,
-      headers: headers,
-      rowCount: rows.length,
-      firstRow: rows[0]
-    };
-  } catch (e) {
-    return { error: e.message, stack: e.stack };
-  }
-}
-
-/**
- * Get ALL stock mutations - no filter (for "Tampilkan Semua" button)
- * @param {string} email - User email for session check
- */
-function mutGetAllMutationsNoFilter(email) {
-  Logger.log('mutGetAllMutationsNoFilter called with email: ' + email);
-  return mutGetAllMutations(email, null);
-}
 
 /**
  * Get all stock mutations from StockMovements sheet
+ * Pattern same as supGetSuppliers, itemGetInventoryItems
  * @param {string} email - User email for session check
- * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
  */
-function mutGetAllMutations(email, filter) {
-  Logger.log('mutGetAllMutations called');
-  Logger.log('Email: ' + email);
-  Logger.log('Filter: ' + JSON.stringify(filter));
-  // Session check
-  const session = checkServerSession(email, false);
-  if (!session || !session.active) {
-    return { 
-      success: false, 
-      message: "Sesi berakhir", 
-      sessionExpired: true,
-      data: [],
-      summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
+function mutGetMutations(email) {
+  // 1. Server-side Session Check
+  const session = checkServerSession(email);
+  if (!session.active) {
+    return {
+      success: false,
+      message: "Sesi telah berakhir. Silakan login kembali.",
+      sessionExpired: true
     };
   }
 
   try {
-    // Use getSheetDataAsObjects from gsreports.gs (same as other features)
-    const rawData = getSheetDataAsObjects('StockMovements');
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName("StockMovements");
     
-    if (!rawData || rawData.length === 0) {
+    // Create sheet if doesn't exist
+    if (!sheet) {
+      Logger.log("Sheet 'StockMovements' tidak ada, membuat baru...");
+      sheet = ss.insertSheet("StockMovements");
+      const headers = ["Date", "Item ID", "Item Name", "Type", "Qty", "Reference", "Notes", "User", "Keterangan"];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      
       return {
         success: true,
+        message: "Sheet 'StockMovements' baru dibuat",
         data: [],
-        summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 },
-        message: 'Belum ada data mutasi'
+        summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
       };
     }
     
-    // Map to movements array
-    var movements = [];
-    for (var i = 0; i < rawData.length; i++) {
-      var row = rawData[i];
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+    
+    Logger.log("StockMovements sheet - lastRow: " + lastRow + ", lastCol: " + lastCol);
+    
+    // If empty or only header
+    if (lastRow <= 1) {
+      Logger.log("Sheet kosong atau hanya header");
+      // Ensure header exists
+      if (lastRow === 0) {
+        const headers = ["Date", "Item ID", "Item Name", "Type", "Qty", "Reference", "Notes", "User", "Keterangan"];
+        sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      }
       
-      var movement = {
-        date: row['Date'],
-        itemId: String(row['Item ID'] || ''),
-        itemName: String(row['Item Name'] || ''),
-        type: String(row['Type'] || ''),
-        qty: Number(row['Qty']) || 0,
-        reference: String(row['Reference'] || ''),
-        notes: String(row['Notes'] || ''),
-        user: String(row['User'] || ''),
-        keterangan: String(row['Keterangan'] || '')
+      return {
+        success: true,
+        message: "Belum ada data mutasi",
+        data: [],
+        summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
+      };
+    }
+    
+    // Read all data
+    const data = sheet.getRange(1, 1, lastRow, Math.max(lastCol, 9)).getValues();
+    const headers = data[0];
+    
+    Logger.log('Mutation headers: ' + JSON.stringify(headers));
+    Logger.log('Total rows: ' + data.length);
+    
+    // Get column indices
+    const dateIndex = headers.indexOf("Date");
+    const itemIdIndex = headers.indexOf("Item ID");
+    const itemNameIndex = headers.indexOf("Item Name");
+    const typeIndex = headers.indexOf("Type");
+    const qtyIndex = headers.indexOf("Qty");
+    const referenceIndex = headers.indexOf("Reference");
+    const notesIndex = headers.indexOf("Notes");
+    const userIndex = headers.indexOf("User");
+    const keteranganIndex = headers.indexOf("Keterangan");
+    
+    const mutations = [];
+    let totalIn = 0;
+    let totalOut = 0;
+    
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      
+      // Skip empty rows
+      if (!row[dateIndex] && !row[itemIdIndex]) {
+        continue;
+      }
+      
+      const type = String(row[typeIndex] || '');
+      const qty = Number(row[qtyIndex]) || 0;
+      
+      // Calculate totals
+      if (type === 'IN') {
+        totalIn += qty;
+      } else if (type === 'OUT') {
+        totalOut += qty;
+      }
+      
+      const mutation = {
+        date: row[dateIndex],
+        itemId: String(row[itemIdIndex] || ''),
+        itemName: String(row[itemNameIndex] || ''),
+        type: type,
+        qty: qty,
+        reference: String(row[referenceIndex] || ''),
+        notes: String(row[notesIndex] || ''),
+        user: String(row[userIndex] || ''),
+        keterangan: String(row[keteranganIndex] || '')
       };
       
-      movements.push(movement);
+      mutations.push(mutation);
     }
     
-    // Apply filters - SIMPLE
-    if (filter) {
-      if (filter.itemId) {
-        var temp1 = [];
-        for (var j = 0; j < movements.length; j++) {
-          if (movements[j].itemId === filter.itemId) {
-            temp1.push(movements[j]);
-          }
-        }
-        movements = temp1;
-      }
-      
-      if (filter.type && filter.type !== 'ALL') {
-        var temp2 = [];
-        for (var k = 0; k < movements.length; k++) {
-          if (movements[k].type === filter.type) {
-            temp2.push(movements[k]);
-          }
-        }
-        movements = temp2;
-      }
-      
-      if (filter.startDate) {
-        var startDate = new Date(filter.startDate);
-        startDate.setHours(0, 0, 0, 0);
-        var temp3 = [];
-        for (var l = 0; l < movements.length; l++) {
-          var mDate = new Date(movements[l].date);
-          if (mDate >= startDate) {
-            temp3.push(movements[l]);
-          }
-        }
-        movements = temp3;
-      }
-      
-      if (filter.endDate) {
-        var endDate = new Date(filter.endDate);
-        endDate.setHours(23, 59, 59, 999);
-        var temp4 = [];
-        for (var m = 0; m < movements.length; m++) {
-          var mDate2 = new Date(movements[m].date);
-          if (mDate2 <= endDate) {
-            temp4.push(movements[m]);
-          }
-        }
-        movements = temp4;
-      }
-    }
+    Logger.log('Total mutations found: ' + mutations.length);
     
-    // Calculate summary
-    var totalIn = 0;
-    var totalOut = 0;
-    for (var n = 0; n < movements.length; n++) {
-      if (movements[n].type === 'IN') {
-        totalIn += movements[n].qty;
-      } else if (movements[n].type === 'OUT') {
-        totalOut += movements[n].qty;
-      }
-    }
-    
-    // Sort by date desc
-    movements.sort(function(a, b) {
+    // Sort by date desc (newest first)
+    mutations.sort(function(a, b) {
       return new Date(b.date) - new Date(a.date);
     });
     
-    // Return - SIMPLE like other features
     return {
       success: true,
-      data: movements,
+      message: "Data berhasil dimuat",
+      data: mutations,
       summary: {
         totalIn: totalIn,
         totalOut: totalOut,
         netChange: totalIn - totalOut,
-        totalTransactions: movements.length
+        totalTransactions: mutations.length
       }
     };
     
-  } catch (e) {
-    Logger.log('ERROR in mutGetAllMutations: ' + e.message);
+  } catch (error) {
+    Logger.log('Error in mutGetMutations: ' + error.message);
     return {
       success: false,
-      message: 'Error: ' + e.message,
+      message: "Gagal memuat data: " + error.message,
       data: [],
       summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
     };
@@ -207,12 +149,70 @@ function mutGetAllMutations(email, filter) {
 }
 
 /**
- * Get mutations for a specific item
- * @param {string} email - User email for session check
- * @param {string} itemId - Item ID to filter
+ * Get filtered mutations
+ * @param {string} email - User email
+ * @param {Object} filter - {startDate, endDate, itemId, type}
  */
-function mutGetItemMutations(email, itemId) {
-  return mutGetAllMutations(email, { itemId: itemId });
+function mutGetFilteredMutations(email, filter) {
+  // Get all mutations first
+  const result = mutGetMutations(email);
+  
+  if (!result.success || !result.data || result.data.length === 0) {
+    return result;
+  }
+  
+  let mutations = result.data;
+  
+  // Apply filters
+  if (filter) {
+    // Filter by item ID
+    if (filter.itemId) {
+      mutations = mutations.filter(m => m.itemId === filter.itemId);
+    }
+    
+    // Filter by type
+    if (filter.type && filter.type !== 'ALL') {
+      mutations = mutations.filter(m => m.type === filter.type);
+    }
+    
+    // Filter by start date
+    if (filter.startDate) {
+      const startDate = new Date(filter.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      mutations = mutations.filter(m => new Date(m.date) >= startDate);
+    }
+    
+    // Filter by end date
+    if (filter.endDate) {
+      const endDate = new Date(filter.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      mutations = mutations.filter(m => new Date(m.date) <= endDate);
+    }
+  }
+  
+  // Recalculate summary for filtered data
+  let totalIn = 0;
+  let totalOut = 0;
+  
+  mutations.forEach(m => {
+    if (m.type === 'IN') {
+      totalIn += m.qty;
+    } else if (m.type === 'OUT') {
+      totalOut += m.qty;
+    }
+  });
+  
+  return {
+    success: true,
+    message: "Data berhasil dimuat",
+    data: mutations,
+    summary: {
+      totalIn: totalIn,
+      totalOut: totalOut,
+      netChange: totalIn - totalOut,
+      totalTransactions: mutations.length
+    }
+  };
 }
 
 /**
@@ -220,7 +220,7 @@ function mutGetItemMutations(email, itemId) {
  * @param {string} email - User email for session check
  */
 function mutGetInventoryItems(email) {
-  const session = checkServerSession(email, false);
+  const session = checkServerSession(email);
   if (!session.active) {
     return { success: false, message: "Sesi berakhir", sessionExpired: true };
   }
@@ -233,11 +233,27 @@ function mutGetInventoryItems(email) {
       return { success: true, data: [] };
     }
     
-    const data = getSheetDataAsObjects('InventoryItems');
-    const items = data.map(row => ({
-      id: row['Item ID'] || '',
-      name: row['Item Name'] || row['Nama Barang'] || ''
-    })).filter(item => item.id);
+    const lastRow = invSheet.getLastRow();
+    if (lastRow <= 1) {
+      return { success: true, data: [] };
+    }
+    
+    const data = invSheet.getRange(1, 1, lastRow, invSheet.getLastColumn()).getValues();
+    const headers = data[0];
+    
+    const idIndex = headers.indexOf('Item ID');
+    const nameIndex = headers.indexOf('Item Name') !== -1 ? headers.indexOf('Item Name') : headers.indexOf('Nama Barang');
+    
+    const items = [];
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (row[idIndex]) {
+        items.push({
+          id: String(row[idIndex]),
+          name: String(row[nameIndex] || '')
+        });
+      }
+    }
     
     return { success: true, data: items };
     
@@ -253,13 +269,13 @@ function mutGetInventoryItems(email) {
  * @param {Object} filter - Filter options
  */
 function generateMutationReport(email, filter) {
-  const session = checkServerSession(email, false);
+  const session = checkServerSession(email);
   if (!session.active) {
     return { error: true, message: "Sesi berakhir", sessionExpired: true };
   }
 
   try {
-    const result = mutGetAllMutations(email, filter);
+    const result = filter ? mutGetFilteredMutations(email, filter) : mutGetMutations(email);
     
     if (!result.success) {
       return { error: true, message: result.message };
@@ -302,22 +318,19 @@ function generateMutationReport(email, filter) {
       qty: m.qty,
       reference: m.reference || '',
       description: m.type === 'IN' 
-        ? (m.supplier ? 'Dari: ' + m.supplier : 'Penerimaan barang')
-        : (m.customer ? 'Ke: ' + m.customer : 'Penjualan barang')
+        ? 'Penerimaan barang'
+        : 'Penjualan barang'
     }));
-    
-    // Add filter dates to summary if provided
-    const summary = {
-      totalIn: result.summary.totalIn,
-      totalOut: result.summary.totalOut,
-      totalTransactions: result.summary.totalTransactions,
-      filterStartDate: filter && filter.startDate ? filter.startDate : null,
-      filterEndDate: filter && filter.endDate ? filter.endDate : null
-    };
     
     return {
       error: false,
-      summary: summary,
+      summary: {
+        totalIn: result.summary.totalIn,
+        totalOut: result.summary.totalOut,
+        totalTransactions: result.summary.totalTransactions,
+        filterStartDate: filter && filter.startDate ? filter.startDate : null,
+        filterEndDate: filter && filter.endDate ? filter.endDate : null
+      },
       topInItems: topInItems,
       topOutItems: topOutItems,
       mutations: mutations
@@ -325,9 +338,15 @@ function generateMutationReport(email, filter) {
     
   } catch (error) {
     Logger.log('Error in generateMutationReport: ' + error.message);
-    return {
-      error: true,
-      message: 'Gagal generate laporan mutasi: ' + error.message
-    };
+    return { error: true, message: error.message };
   }
+}
+
+/**
+ * Test function for debugging
+ */
+function testMutGetMutations() {
+  const result = mutGetMutations('stockruang@gmail.com');
+  Logger.log('Result: ' + JSON.stringify(result));
+  return result;
 }

@@ -534,8 +534,8 @@
     }
     
     // Load ALL data by default (no filter)
-    console.log('Calling showAllData with email:', mutUserEmail);
-    showAllData();
+    console.log('Loading all mutations with email:', mutUserEmail);
+    loadAllMutations();
   }
   
   // Initialize when script loads
@@ -547,8 +547,54 @@
   } else {
     setTimeout(initMutationsPage, 300);
   }
-
   
+  /**
+   * Load ALL mutations (no filter) - same pattern as inventory, suppliers
+   */
+  function loadAllMutations() {
+    const tbody = document.getElementById('mutationsTableBody');
+    
+    if (!mutUserEmail) {
+      console.warn('No user email');
+      return;
+    }
+    
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Memuat data mutasi...</p>
+        </td>
+      </tr>
+    `;
+    
+    console.log('Calling mutGetMutations with email:', mutUserEmail);
+    
+    google.script.run
+      .withSuccessHandler(function(result) {
+        console.log('mutGetMutations result:', result);
+        handleMutationsResult(result);
+      })
+      .withFailureHandler(function(error) {
+        console.error('Error:', error);
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h3>Gagal memuat data</h3>
+              <p>${error.message || error}</p>
+              <button onclick="loadAllMutations()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+                <i class="fas fa-redo"></i> Coba Lagi
+              </button>
+            </td>
+          </tr>
+        `;
+      })
+      .mutGetMutations(mutUserEmail);
+  }  
+  /**
+   * Load filtered mutations - called by Filter button
+   */
   function loadMutations() {
     const tbody = document.getElementById('mutationsTableBody');
     
@@ -569,9 +615,6 @@
               <i class="fas fa-exclamation-triangle"></i>
               <h3>Sesi tidak valid</h3>
               <p>Silakan login kembali</p>
-              <button onclick="location.reload()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
-                <i class="fas fa-redo"></i> Refresh
-              </button>
             </td>
           </tr>
         `;
@@ -579,16 +622,7 @@
       }
     }
     
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" class="loading-state">
-          <i class="fas fa-spinner fa-spin"></i>
-          <p>Memuat data mutasi...</p>
-        </td>
-      </tr>
-    `;
-    
-    // Build filter object - only include non-empty values
+    // Build filter object
     const filter = {};
     const startDate = document.getElementById('filterStartDate').value;
     const endDate = document.getElementById('filterEndDate').value;
@@ -600,49 +634,36 @@
     if (itemId) filter.itemId = itemId;
     if (type && type !== 'ALL') filter.type = type;
     
-    console.log('Loading mutations with filter:', filter);
-    console.log('User email:', mutUserEmail);
+    // If no filters, load all
+    if (Object.keys(filter).length === 0) {
+      loadAllMutations();
+      return;
+    }
     
-    // Add timeout mechanism - 30 seconds
-    let timeoutId = setTimeout(function() {
-      console.error('Request timeout after 30s');
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="8" class="empty-state">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h3>Request Timeout</h3>
-            <p>Permintaan memakan waktu terlalu lama (>30 detik).</p>
-            <p style="font-size:0.9em; color:#7f8c8d;">Kemungkinan penyebab:</p>
-            <ul style="text-align:left; margin:10px auto; max-width:500px; font-size:0.9em;">
-              <li>Data terlalu banyak untuk di-filter</li>
-              <li>Ada error di server side (cek Apps Script logs)</li>
-              <li>Koneksi internet lambat</li>
-            </ul>
-            <div style="display:flex; gap:10px; justify-content:center; margin-top:15px;">
-              <button onclick="showAllData()" style="padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
-                <i class="fas fa-redo"></i> Coba Lagi
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }, 30000); // 30 seconds timeout
+    console.log('Loading filtered mutations:', filter);
+    
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Memuat data mutasi...</p>
+        </td>
+      </tr>
+    `;
     
     google.script.run
       .withSuccessHandler(function(result) {
-        clearTimeout(timeoutId);
-        console.log('Received result from server:', result);
+        console.log('mutGetFilteredMutations result:', result);
         handleMutationsResult(result);
       })
       .withFailureHandler(function(error) {
-        clearTimeout(timeoutId);
-        console.error('Error loading mutations:', error);
+        console.error('Error:', error);
         tbody.innerHTML = `
           <tr>
             <td colspan="8" class="empty-state">
               <i class="fas fa-exclamation-triangle"></i>
               <h3>Gagal memuat data</h3>
-              <p>${error.message || 'Terjadi kesalahan saat memuat data'}</p>
+              <p>${error.message || error}</p>
               <button onclick="loadMutations()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
                 <i class="fas fa-redo"></i> Coba Lagi
               </button>
@@ -650,7 +671,7 @@
           </tr>
         `;
       })
-      .mutGetAllMutations(mutUserEmail, filter);
+      .mutGetFilteredMutations(mutUserEmail, filter);
   }
   
   function handleMutationsResult(result) {
@@ -786,51 +807,8 @@
     document.getElementById('filterItem').value = '';
     document.getElementById('filterType').value = 'ALL';
     
-    // Show all data (no filter)
-    showAllData();
-  }
-  
-  function showAllData() {
-    const tbody = document.getElementById('mutationsTableBody');
-    
-    if (!mutUserEmail) {
-      alert('Sesi tidak valid. Silakan login kembali.');
-      return;
-    }
-    
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="8" class="loading-state">
-          <i class="fas fa-spinner fa-spin"></i>
-          <p>Memuat semua data mutasi...</p>
-        </td>
-      </tr>
-    `;
-    
-    console.log('=== SHOW ALL DATA - NO FILTER ===');
-    console.log('User email:', mutUserEmail);
-    
-    google.script.run
-      .withSuccessHandler(function(result) {
-        console.log('Show all result:', result);
-        handleMutationsResult(result);
-      })
-      .withFailureHandler(function(error) {
-        console.error('Error loading all data:', error);
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="8" class="empty-state">
-              <i class="fas fa-exclamation-triangle"></i>
-              <h3>Gagal memuat data</h3>
-              <p>${error.message || 'Terjadi kesalahan saat memuat data'}</p>
-              <button onclick="showAllData()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
-                <i class="fas fa-redo"></i> Coba Lagi
-              </button>
-            </td>
-          </tr>
-        `;
-      })
-      .mutGetAllMutationsNoFilter(mutUserEmail);
+    // Load all data (no filter)
+    loadAllMutations();
   }
   
   function createStockMovementsSheet() {
