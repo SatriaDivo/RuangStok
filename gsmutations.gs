@@ -7,28 +7,35 @@
  */
 
 /**
- * Get all stock mutations from StockMovements sheet
- * Returns ARRAY directly like itemGetInventoryItems
+ * Get all stock mutations - NEW NAME to avoid caching issues
  * @param {string} email - User email for session check
  */
-function mutGetMutations(email) {
+function mutLoadAllData(email) {
+  Logger.log('mutLoadAllData called with email: ' + email);
+  
   const session = checkServerSession(email);
   if (!session.active) {
+    Logger.log('Session not active');
     return { success: false, message: "Sesi berakhir", sessionExpired: true };
   }
 
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
+    Logger.log('Got spreadsheet');
+    
     let sheet = ss.getSheetByName("StockMovements");
+    Logger.log('Sheet found: ' + (sheet ? 'YES' : 'NO'));
     
     if (!sheet) {
       sheet = ss.insertSheet("StockMovements");
-      const headers = ["Date", "Item ID", "Item Name", "Type", "Qty", "Reference", "Notes", "User", "Keterangan"];
+      const headers = ["Date", "Item ID", "Item Name", "Type", "Qty", "Reference", "Notes", "User"];
       sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      Logger.log('Created new sheet, returning empty array');
       return [];
     }
     
     const lastRow = sheet.getLastRow();
+    Logger.log('Last row: ' + lastRow);
     const lastCol = sheet.getLastColumn();
     
     if (lastRow <= 1) {
@@ -46,7 +53,6 @@ function mutGetMutations(email) {
     const referenceIndex = headers.indexOf("Reference");
     const notesIndex = headers.indexOf("Notes");
     const userIndex = headers.indexOf("User");
-    const keteranganIndex = headers.indexOf("Keterangan");
     
     const mutations = [];
     
@@ -57,16 +63,25 @@ function mutGetMutations(email) {
         continue;
       }
       
+      // Convert date to ISO string for proper serialization
+      let dateValue = row[dateIndex];
+      if (dateValue instanceof Date) {
+        dateValue = dateValue.toISOString();
+      } else if (dateValue) {
+        dateValue = String(dateValue);
+      } else {
+        dateValue = '';
+      }
+      
       mutations.push({
-        date: row[dateIndex],
+        date: dateValue,
         itemId: String(row[itemIdIndex] || ''),
         itemName: String(row[itemNameIndex] || ''),
         type: String(row[typeIndex] || ''),
         qty: Number(row[qtyIndex]) || 0,
         reference: String(row[referenceIndex] || ''),
         notes: String(row[notesIndex] || ''),
-        user: String(row[userIndex] || ''),
-        keterangan: String(row[keteranganIndex] || '')
+        user: String(row[userIndex] || '')
       });
     }
     
@@ -74,6 +89,7 @@ function mutGetMutations(email) {
       return new Date(b.date) - new Date(a.date);
     });
     
+    Logger.log('Returning ' + mutations.length + ' mutations');
     return mutations;
     
   } catch (error) {
@@ -87,8 +103,8 @@ function mutGetMutations(email) {
  * @param {string} email - User email
  * @param {Object} filter - {startDate, endDate, itemId, type}
  */
-function mutGetFilteredMutations(email, filter) {
-  let mutations = mutGetMutations(email);
+function mutLoadFilteredData(email, filter) {
+  let mutations = mutLoadAllData(email);
   
   if (mutations && mutations.sessionExpired) {
     return mutations;
@@ -125,4 +141,15 @@ function mutGetFilteredMutations(email, filter) {
   }
   
   return mutations;
+}
+
+/**
+ * Test function - run this from Apps Script Editor to test
+ */
+function testMutLoadAllData() {
+  const email = 'stockruang@gmail.com'; // Your email
+  const result = mutLoadAllData(email);
+  Logger.log('Test result:');
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
 }

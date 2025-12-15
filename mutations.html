@@ -432,12 +432,11 @@
           <th>Qty</th>
           <th>Referensi</th>
           <th>Catatan</th>
-          <th>Keterangan</th>
         </tr>
       </thead>
       <tbody id="mutationsTableBody">
         <tr>
-          <td colspan="8" class="loading-state">
+          <td colspan="7" class="loading-state">
             <i class="fas fa-spinner fa-spin"></i>
             <p>Memuat data mutasi...</p>
           </td>
@@ -457,15 +456,18 @@
     initAttempts++;
     console.log('Initializing Mutations page - Attempt:', initAttempts);
     
-    // Get user from session
+    // Get user from localStorage or sessionStorage (same pattern as inventory.html)
     try {
-      const mutUser = SessionManager.getUser();
-      mutUserEmail = mutUser ? mutUser.username : null;
-      console.log('User email:', mutUserEmail);
+      const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+      console.log('User string from storage:', userStr);
       
-      if (!mutUserEmail) {
-        console.warn('No user email found in session');
-        // Don't return yet, still try to initialize UI elements
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        mutUserEmail = user ? user.username : null;
+        console.log('User email:', mutUserEmail);
+      } else {
+        console.warn('No user found in storage');
+        mutUserEmail = null;
       }
     } catch (e) {
       console.error('Error getting user:', e);
@@ -496,7 +498,7 @@
         if (tbody) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="8" class="empty-state">
+              <td colspan="7" class="empty-state">
                 <i class="fas fa-exclamation-triangle"></i>
                 <h3>Gagal menginisialisasi halaman</h3>
                 <p>Silakan refresh halaman</p>
@@ -521,7 +523,7 @@
       console.warn('User email not available, showing message');
       tbody.innerHTML = `
         <tr>
-          <td colspan="8" class="empty-state">
+          <td colspan="7" class="empty-state">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Sesi tidak valid</h3>
             <p>Silakan login kembali atau refresh halaman</p>
@@ -562,25 +564,25 @@
     
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="loading-state">
+        <td colspan="7" class="loading-state">
           <i class="fas fa-spinner fa-spin"></i>
           <p>Memuat data mutasi...</p>
         </td>
       </tr>
     `;
     
-    console.log('Calling mutGetMutations with email:', mutUserEmail);
+    console.log('Calling mutLoadAllData with email:', mutUserEmail);
     
     google.script.run
       .withSuccessHandler(function(result) {
-        console.log('mutGetMutations result:', result);
+        console.log('mutLoadAllData result:', result);
         handleMutationsResult(result);
       })
       .withFailureHandler(function(error) {
         console.error('Error:', error);
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" class="empty-state">
+            <td colspan="7" class="empty-state">
               <i class="fas fa-exclamation-triangle"></i>
               <h3>Gagal memuat data</h3>
               <p>${error.message || error}</p>
@@ -591,7 +593,7 @@
           </tr>
         `;
       })
-      .mutGetMutations(mutUserEmail);
+      .mutLoadAllData(mutUserEmail);
   }  
   /**
    * Load filtered mutations - called by Filter button
@@ -601,18 +603,21 @@
     
     // Check if user email is available
     if (!mutUserEmail) {
-      console.warn('User email not available, trying to get from session');
+      console.warn('User email not available, trying to get from storage');
       try {
-        const user = SessionManager.getUser();
-        mutUserEmail = user ? user.username : null;
+        const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          mutUserEmail = user ? user.username : null;
+        }
       } catch (e) {
-        console.error('Failed to get user from session:', e);
+        console.error('Failed to get user from storage:', e);
       }
       
       if (!mutUserEmail) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" class="empty-state">
+            <td colspan="7" class="empty-state">
               <i class="fas fa-exclamation-triangle"></i>
               <h3>Sesi tidak valid</h3>
               <p>Silakan login kembali</p>
@@ -645,7 +650,7 @@
     
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="loading-state">
+        <td colspan="7" class="loading-state">
           <i class="fas fa-spinner fa-spin"></i>
           <p>Memuat data mutasi...</p>
         </td>
@@ -654,14 +659,14 @@
     
     google.script.run
       .withSuccessHandler(function(result) {
-        console.log('mutGetFilteredMutations result:', result);
+        console.log('mutLoadFilteredData result:', result);
         handleMutationsResult(result);
       })
       .withFailureHandler(function(error) {
         console.error('Error:', error);
         tbody.innerHTML = `
           <tr>
-            <td colspan="8" class="empty-state">
+            <td colspan="7" class="empty-state">
               <i class="fas fa-exclamation-triangle"></i>
               <h3>Gagal memuat data</h3>
               <p>${error.message || error}</p>
@@ -672,7 +677,7 @@
           </tr>
         `;
       })
-      .mutGetFilteredMutations(mutUserEmail, filter);
+      .mutLoadFilteredData(mutUserEmail, filter);
   }
   
   function handleMutationsResult(result) {
@@ -703,7 +708,7 @@
       console.error('No result received from server');
       tbody.innerHTML = `
         <tr>
-          <td colspan="8" class="empty-state">
+          <td colspan="7" class="empty-state">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Gagal memuat data</h3>
             <p>Tidak ada respon dari server.</p>
@@ -733,7 +738,7 @@
     if (mutations.length === 0) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="8" class="empty-state">
+          <td colspan="7" class="empty-state">
             <i class="fas fa-inbox"></i>
             <h3>Tidak ada data mutasi</h3>
             <p>Belum ada pergerakan stok</p>
@@ -762,7 +767,6 @@
           <td style="text-align: center; font-weight: 600;">${m.qty}</td>
           <td>${m.reference || '-'}</td>
           <td>${m.notes || '-'}</td>
-          <td>${m.keterangan || '-'}</td>
         </tr>
       `;
     });
@@ -790,7 +794,7 @@
     const tbody = document.getElementById('mutationsTableBody');
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="loading-state">
+        <td colspan="7" class="loading-state">
           <i class="fas fa-spinner fa-spin"></i>
           <p>Membuat sheet StockMovements...</p>
         </td>
