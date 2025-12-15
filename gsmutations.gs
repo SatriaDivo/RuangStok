@@ -22,6 +22,8 @@ function testMutations() {
  */
 function mutGetAllMutations(email, filter) {
   Logger.log('=== mutGetAllMutations START ===');
+  Logger.log('Email: ' + email);
+  Logger.log('Filter: ' + JSON.stringify(filter));
   
   try {
     // Check session
@@ -36,6 +38,8 @@ function mutGetAllMutations(email, filter) {
         summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
       };
     }
+    
+    Logger.log('Session active for user: ' + session.username);
     
     // Get spreadsheet
     var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -85,6 +89,23 @@ function mutGetAllMutations(email, filter) {
     }
     
     Logger.log('Parsed: ' + movements.length + ' movements');
+    if (movements.length > 0) {
+      Logger.log('First movement: ' + JSON.stringify(movements[0]));
+      Logger.log('First movement date type: ' + typeof movements[0].date);
+      Logger.log('First movement date value: ' + movements[0].date);
+    }
+    
+    // Apply itemId filter if provided
+    if (filter && filter.itemId) {
+      var temp0 = [];
+      for (var n = 0; n < movements.length; n++) {
+        if (movements[n].itemId === filter.itemId) {
+          temp0.push(movements[n]);
+        }
+      }
+      movements = temp0;
+      Logger.log('After itemId filter: ' + movements.length);
+    }
     
     // Apply date filter if provided
     if (filter && filter.startDate) {
@@ -98,6 +119,7 @@ function mutGetAllMutations(email, filter) {
         }
       }
       movements = temp;
+      Logger.log('After startDate filter: ' + movements.length);
     }
     
     if (filter && filter.endDate) {
@@ -111,6 +133,7 @@ function mutGetAllMutations(email, filter) {
         }
       }
       movements = temp2;
+      Logger.log('After endDate filter: ' + movements.length);
     }
     
     // Type filter
@@ -122,9 +145,10 @@ function mutGetAllMutations(email, filter) {
         }
       }
       movements = temp3;
+      Logger.log('After type filter: ' + movements.length);
     }
     
-    Logger.log('After filter: ' + movements.length);
+    Logger.log('After all filters: ' + movements.length);
     
     // Calculate summary
     var totalIn = 0;

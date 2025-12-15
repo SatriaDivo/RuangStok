@@ -653,7 +653,8 @@
   }
   
   function handleMutationsResult(result) {
-    console.log('Mutations result:', result);
+    console.log('=== handleMutationsResult START ===');
+    console.log('Raw result:', result);
     console.log('Result details:', {
       exists: !!result,
       success: result?.success,
@@ -661,6 +662,13 @@
       dataLength: result?.data?.length,
       summary: result?.summary
     });
+    
+    // Log first few items if data exists
+    if (result?.data && result.data.length > 0) {
+      console.log('First 3 items:', result.data.slice(0, 3));
+      console.log('Sample date:', result.data[0].date);
+      console.log('Sample date type:', typeof result.data[0].date);
+    }
     
     if (result && result.sessionExpired) {
       SessionManager.handleSessionExpired();
