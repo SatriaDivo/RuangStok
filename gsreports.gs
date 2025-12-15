@@ -34,7 +34,8 @@ function getSheetDataAsObjects(sheetNameOrRangeName) {
     'RANGEPO': 'PurchaseOrders',
     'RANGEPAYMENTS': 'Payments',
     'RANGERECEIPTS': 'Receipts',
-    'RANGECUSTOMERS': 'Customers'
+    'RANGECUSTOMERS': 'Customers',
+    'RANGESM': 'StockMovements'
   };
   
   const sheetName = sheetsByName[sheetNameOrRangeName] || sheetNameOrRangeName;

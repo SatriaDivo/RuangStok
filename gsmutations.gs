@@ -3,7 +3,7 @@
  * MUTATIONS MODULE - Stock Movement / Mutasi Stok
  * ============================================================================
  * Handles stock movement tracking from StockMovements log
- * This is a wrapper that calls the new Stock Movements system
+ * Uses getSheetDataAsObjects from gsreports.gs for data access
  */
 
 /**
@@ -16,50 +16,12 @@ function testMutations() {
 }
 
 /**
- * Helper function to get data from named range as objects
- */
-function mutGetRangeDataAsObjects(rangeName) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const range = ss.getRangeByName(rangeName);
-  
-  if (!range) {
-    return [];
-  }
-  
-  const sheet = range.getSheet();
-  const startRow = range.getRow();
-  const startCol = range.getColumn();
-  const numCols = range.getNumColumns();
-  const lastRow = sheet.getLastRow();
-  
-  if (lastRow < startRow + 1) {
-    return [];
-  }
-  
-  const expandedRange = sheet.getRange(startRow, startCol, lastRow - startRow + 1, numCols);
-  const values = expandedRange.getValues();
-  
-  if (values.length < 2) {
-    return [];
-  }
-  
-  const headers = values[0];
-  const rows = values.slice(1).filter(r => r.some(cell => cell !== '' && cell !== null));
-  
-  return rows.map(r => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = r[i]);
-    return obj;
-  });
-}
-
-/**
  * Get all stock mutations from StockMovements sheet
  * @param {string} email - User email for session check
  * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
  */
 function mutGetAllMutations(email, filter) {
-  // Session check - SIMPLE like other features
+  // Session check
   const session = checkServerSession(email, false);
   if (!session || !session.active) {
     return { 
@@ -72,8 +34,8 @@ function mutGetAllMutations(email, filter) {
   }
 
   try {
-    // Use named range RANGESM like other features
-    const rawData = mutGetRangeDataAsObjects('RANGESM');
+    // Use getSheetDataAsObjects from gsreports.gs (same as other features)
+    const rawData = getSheetDataAsObjects('StockMovements');
     
     if (!rawData || rawData.length === 0) {
       return {
