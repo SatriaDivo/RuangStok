@@ -413,6 +413,9 @@
         <button class="btn-filter secondary" onclick="resetFilters()">
           <i class="fas fa-undo"></i> Reset
         </button>
+        <button class="btn-filter" onclick="migrateExistingData()" style="background:#9b59b6; color:white;">
+          <i class="fas fa-database"></i> Migrate Data Lama
+        </button>
       </div>
     </div>
   </div>
@@ -433,7 +436,7 @@
       </thead>
       <tbody id="mutationsTableBody">
         <tr>
-          <td colspan="7" class="loading-state">
+          <td colspan="8" class="loading-state">
             <i class="fas fa-spinner fa-spin"></i>
             <p>Memuat data mutasi...</p>
           </td>
@@ -458,6 +461,11 @@
       const mutUser = SessionManager.getUser();
       mutUserEmail = mutUser ? mutUser.username : null;
       console.log('User email:', mutUserEmail);
+      
+      if (!mutUserEmail) {
+        console.warn('No user email found in session');
+        // Don't return yet, still try to initialize UI elements
+      }
     } catch (e) {
       console.error('Error getting user:', e);
       mutUserEmail = null;
@@ -487,10 +495,13 @@
         if (tbody) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="7" class="empty-state">
+              <td colspan="8" class="empty-state">
                 <i class="fas fa-exclamation-triangle"></i>
                 <h3>Gagal menginisialisasi halaman</h3>
                 <p>Silakan refresh halaman</p>
+                <button onclick="location.reload()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+                  <i class="fas fa-redo"></i> Refresh
+                </button>
               </td>
             </tr>
           `;
@@ -499,26 +510,84 @@
       return;
     }
     
-    // Elements found, set values
+    // Elements found, set values - default to last 30 days
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    const startDateStr = startDate.toISOString().split('T')[0];
+    
     endDateEl.value = todayStr;
-    startDateEl.value = todayStr;
-    console.log('Date range set to today:', todayStr);
+    startDateEl.value = startDateStr;
+    console.log('Date range set:', startDateStr, 'to', todayStr);
     console.log('Start date value:', startDateEl.value);
     console.log('End date value:', endDateEl.value);
     
+    // Check if user email is available before loading
+    if (!mutUserEmail) {
+      console.warn('User email not available, showing message');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="8" class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Sesi tidak valid</h3>
+            <p>Silakan login kembali atau refresh halaman</p>
+            <button onclick="location.reload()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+              <i class="fas fa-redo"></i> Refresh
+            </button>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+    
     // Load data
+    console.log('Calling loadMutations with email:', mutUserEmail);
     loadMutations();
   }
   
   // Initialize when script loads
-  setTimeout(initMutationsPage, 100);
+  // Wait for DOM and SessionManager to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(initMutationsPage, 300);
+    });
+  } else {
+    setTimeout(initMutationsPage, 300);
+  }
 
   
   function loadMutations() {
     const tbody = document.getElementById('mutationsTableBody');
+    
+    // Check if user email is available
+    if (!mutUserEmail) {
+      console.warn('User email not available, trying to get from session');
+      try {
+        const user = SessionManager.getUser();
+        mutUserEmail = user ? user.username : null;
+      } catch (e) {
+        console.error('Failed to get user from session:', e);
+      }
+      
+      if (!mutUserEmail) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              <i class="fas fa-exclamation-triangle"></i>
+              <h3>Sesi tidak valid</h3>
+              <p>Silakan login kembali</p>
+              <button onclick="location.reload()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+                <i class="fas fa-redo"></i> Refresh
+              </button>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+    }
+    
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="loading-state">
+        <td colspan="8" class="loading-state">
           <i class="fas fa-spinner fa-spin"></i>
           <p>Memuat data mutasi...</p>
         </td>
@@ -533,24 +602,35 @@
     };
     
     console.log('Loading mutations with filter:', filter);
+    console.log('User email:', mutUserEmail);
     
-    // Add timeout mechanism
+    // Add timeout mechanism - reduced to 15 seconds for faster feedback
     let timeoutId = setTimeout(function() {
-      console.error('Request timeout - taking too long');
+      console.error('Request timeout after 15s - taking too long');
       tbody.innerHTML = `
         <tr>
-          <td colspan="7" class="empty-state">
+          <td colspan="8" class="empty-state">
             <i class="fas fa-exclamation-triangle"></i>
-            <h3>Gagal memuat data</h3>
-            <p>Request timeout - Silakan coba lagi atau gunakan filter tanggal yang lebih spesifik</p>
+            <h3>Request Timeout</h3>
+            <p>Permintaan memakan waktu terlalu lama. Ini biasanya terjadi karena:</p>
+            <ul style="text-align:left; margin:10px auto; max-width:400px;">
+              <li>Sheet StockMovements tidak ada atau kosong</li>
+              <li>Data terlalu banyak</li>
+              <li>Koneksi lambat</li>
+            </ul>
+            <p>Coba gunakan filter tanggal yang lebih spesifik atau buat sheet StockMovements</p>
+            <button onclick="loadMutations()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+              <i class="fas fa-redo"></i> Coba Lagi
+            </button>
           </td>
         </tr>
       `;
-    }, 30000); // 30 seconds timeout
+    }, 15000); // Reduced to 15 seconds timeout
     
     google.script.run
       .withSuccessHandler(function(result) {
         clearTimeout(timeoutId);
+        console.log('Received result from server:', result);
         handleMutationsResult(result);
       })
       .withFailureHandler(function(error) {
@@ -558,7 +638,7 @@
         console.error('Error loading mutations:', error);
         tbody.innerHTML = `
           <tr>
-            <td colspan="7" class="empty-state">
+            <td colspan="8" class="empty-state">
               <i class="fas fa-exclamation-triangle"></i>
               <h3>Gagal memuat data</h3>
               <p>${error.message || 'Terjadi kesalahan saat memuat data'}</p>
@@ -574,19 +654,49 @@
   
   function handleMutationsResult(result) {
     console.log('Mutations result:', result);
+    console.log('Result details:', {
+      exists: !!result,
+      success: result?.success,
+      message: result?.message,
+      dataLength: result?.data?.length,
+      summary: result?.summary
+    });
     
     if (result && result.sessionExpired) {
       SessionManager.handleSessionExpired();
       return;
     }
     
-    if (!result || !result.success) {
+    // Check if result exists and has success property
+    if (!result) {
+      console.error('No result received from server');
       document.getElementById('mutationsTableBody').innerHTML = `
         <tr>
-          <td colspan="7" class="empty-state">
+          <td colspan="8" class="empty-state">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Gagal memuat data</h3>
-            <p>${result ? result.message : 'Terjadi kesalahan'}</p>
+            <p>Tidak ada respon dari server. Coba refresh halaman.</p>
+            <button onclick="location.reload()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+              <i class="fas fa-redo"></i> Refresh
+            </button>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+    
+    if (!result.success) {
+      const errorMsg = result.message || 'Terjadi kesalahan';
+      console.warn('Request not successful:', errorMsg);
+      document.getElementById('mutationsTableBody').innerHTML = `
+        <tr>
+          <td colspan="8" class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Gagal memuat data</h3>
+            <p>${errorMsg}</p>
+            <button onclick="loadMutations()" style="margin-top:10px; padding:8px 16px; background:#1abc9c; color:white; border:none; border-radius:6px; cursor:pointer;">
+              <i class="fas fa-redo"></i> Coba Lagi
+            </button>
           </td>
         </tr>
       `;
@@ -605,12 +715,20 @@
     const data = result.data || [];
     
     if (data.length === 0) {
+      const emptyMsg = result.message || 'Belum ada pergerakan stok dalam periode yang dipilih';
+      const isSheetMissing = result.message && result.message.includes('StockMovements belum ada');
+      
       tbody.innerHTML = `
         <tr>
-          <td colspan="7" class="empty-state">
+          <td colspan="8" class="empty-state">
             <i class="fas fa-inbox"></i>
             <h3>Tidak ada data mutasi</h3>
-            <p>Belum ada pergerakan stok dalam periode yang dipilih</p>
+            <p>${emptyMsg}</p>
+            ${isSheetMissing ? `
+              <button onclick="createStockMovementsSheet()" style="margin-top:10px; padding:8px 16px; background:#3498db; color:white; border:none; border-radius:6px; cursor:pointer;">
+                <i class="fas fa-plus"></i> Buat Sheet StockMovements
+              </button>
+            ` : ''}
           </td>
         </tr>
       `;
@@ -644,6 +762,7 @@
           <td style="text-align: center; font-weight: 600;">${m.qty}</td>
           <td>${refDisplay}</td>
           <td>${notes || '-'}</td>
+          <td>${m.keterangan || '-'}</td>
         </tr>
       `;
     });
@@ -661,6 +780,41 @@
     document.getElementById('filterType').value = 'ALL';
     
     loadMutations();
+  }
+  
+  function createStockMovementsSheet() {
+    if (!mutUserEmail) {
+      alert('Sesi tidak valid. Silakan login kembali.');
+      return;
+    }
+    
+    const tbody = document.getElementById('mutationsTableBody');
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="loading-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Membuat sheet StockMovements...</p>
+        </td>
+      </tr>
+    `;
+    
+    google.script.run
+      .withSuccessHandler(function(result) {
+        console.log('Create sheet result:', result);
+        if (result && result.success) {
+          alert('Sheet StockMovements berhasil dibuat!');
+          loadMutations();
+        } else {
+          alert('Gagal membuat sheet: ' + (result?.message || 'Unknown error'));
+          loadMutations();
+        }
+      })
+      .withFailureHandler(function(error) {
+        console.error('Error creating sheet:', error);
+        alert('Error: ' + error.message);
+        loadMutations();
+      })
+      .smInitializeStockMovements(mutUserEmail);
   }
   
   function migrateExistingData() {
@@ -710,3 +864,4 @@
       })
       .smMigrateExistingSalesData(mutUserEmail);
   }
+</script>

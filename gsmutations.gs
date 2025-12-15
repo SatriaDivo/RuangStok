@@ -7,13 +7,164 @@
  */
 
 /**
+ * Simple test function to debug
+ */
+function testMutations() {
+  var result = mutGetAllMutations('stockruang@gmail.com', {});
+  Logger.log('Result: ' + JSON.stringify(result));
+  return result;
+}
+
+/**
  * Get all stock mutations from StockMovements sheet
  * @param {string} email - User email for session check
  * @param {Object} filter - Optional filter {startDate, endDate, itemId, type}
  */
 function mutGetAllMutations(email, filter) {
-  // Delegate to the new Stock Movements system
-  return smGetAllMovements(email, filter);
+  Logger.log('=== mutGetAllMutations START ===');
+  
+  try {
+    // Check session
+    var session = checkServerSession(email, false);
+    if (!session || !session.active) {
+      Logger.log('Session not active');
+      return { 
+        success: false, 
+        message: "Sesi berakhir", 
+        sessionExpired: true,
+        data: [],
+        summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
+      };
+    }
+    
+    // Get spreadsheet
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName('StockMovements');
+    
+    if (!sheet) {
+      Logger.log('Sheet not found');
+      return {
+        success: true,
+        data: [],
+        summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 },
+        message: 'Sheet StockMovements belum ada'
+      };
+    }
+    
+    // Get all data
+    var allData = sheet.getDataRange().getValues();
+    Logger.log('Total rows: ' + allData.length);
+    
+    if (allData.length < 2) {
+      return {
+        success: true,
+        data: [],
+        summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 },
+        message: 'Belum ada data mutasi'
+      };
+    }
+    
+    // Parse data - simple array
+    var movements = [];
+    for (var i = 1; i < allData.length; i++) {
+      var row = allData[i];
+      if (!row[1]) continue;
+      
+      var movement = {
+        date: row[0],
+        itemId: row[1] ? String(row[1]) : '',
+        itemName: row[2] ? String(row[2]) : '',
+        type: row[3] ? String(row[3]) : '',
+        qty: row[4] ? Number(row[4]) : 0,
+        reference: row[5] ? String(row[5]) : '',
+        notes: row[6] ? String(row[6]) : '',
+        user: row[7] ? String(row[7]) : '',
+        keterangan: row[8] ? String(row[8]) : ''
+      };
+      movements.push(movement);
+    }
+    
+    Logger.log('Parsed: ' + movements.length + ' movements');
+    
+    // Apply date filter if provided
+    if (filter && filter.startDate) {
+      var startDate = new Date(filter.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      var temp = [];
+      for (var j = 0; j < movements.length; j++) {
+        var mDate = new Date(movements[j].date);
+        if (mDate >= startDate) {
+          temp.push(movements[j]);
+        }
+      }
+      movements = temp;
+    }
+    
+    if (filter && filter.endDate) {
+      var endDate = new Date(filter.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      var temp2 = [];
+      for (var k = 0; k < movements.length; k++) {
+        var mDate2 = new Date(movements[k].date);
+        if (mDate2 <= endDate) {
+          temp2.push(movements[k]);
+        }
+      }
+      movements = temp2;
+    }
+    
+    // Type filter
+    if (filter && filter.type && filter.type !== 'ALL') {
+      var temp3 = [];
+      for (var l = 0; l < movements.length; l++) {
+        if (movements[l].type === filter.type) {
+          temp3.push(movements[l]);
+        }
+      }
+      movements = temp3;
+    }
+    
+    Logger.log('After filter: ' + movements.length);
+    
+    // Calculate summary
+    var totalIn = 0;
+    var totalOut = 0;
+    for (var m = 0; m < movements.length; m++) {
+      if (movements[m].type === 'IN') {
+        totalIn += movements[m].qty;
+      } else if (movements[m].type === 'OUT') {
+        totalOut += movements[m].qty;
+      }
+    }
+    
+    // Sort by date desc
+    movements.sort(function(a, b) {
+      return new Date(b.date) - new Date(a.date);
+    });
+    
+    var result = {
+      success: true,
+      data: movements,
+      summary: {
+        totalIn: totalIn,
+        totalOut: totalOut,
+        netChange: totalIn - totalOut,
+        totalTransactions: movements.length
+      }
+    };
+    
+    Logger.log('=== END - success ===');
+    return result;
+    
+  } catch (e) {
+    Logger.log('ERROR: ' + e.message);
+    return {
+      success: false,
+      message: 'Error: ' + e.message,
+      data: [],
+      summary: { totalIn: 0, totalOut: 0, netChange: 0, totalTransactions: 0 }
+    };
+  }
 }
 
 /**
