@@ -431,6 +431,7 @@
           <th>Jenis</th>
           <th>Qty</th>
           <th>Referensi</th>
+          <th>Catatan</th>
           <th>Keterangan</th>
         </tr>
       </thead>
@@ -752,14 +753,6 @@
         ? '<span class="badge-in"><i class="fas fa-arrow-down"></i> Masuk</span>'
         : '<span class="badge-out"><i class="fas fa-arrow-up"></i> Keluar</span>';
       
-      const refDisplay = m.reference 
-        ? `<span class="reference-link">${m.reference}</span>` 
-        : '-';
-      
-      const notes = m.type === 'IN' 
-        ? (m.supplier ? `Dari: ${m.supplier}` : m.notes)
-        : (m.customer ? `Ke: ${m.customer}` : m.notes);
-      
       html += `
         <tr>
           <td>${date}</td>
@@ -767,8 +760,8 @@
           <td>${m.itemName || '-'}</td>
           <td>${typeBadge}</td>
           <td style="text-align: center; font-weight: 600;">${m.qty}</td>
-          <td>${refDisplay}</td>
-          <td>${notes || '-'}</td>
+          <td>${m.reference || '-'}</td>
+          <td>${m.notes || '-'}</td>
           <td>${m.keterangan || '-'}</td>
         </tr>
       `;
