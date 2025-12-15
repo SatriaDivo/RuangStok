@@ -209,35 +209,92 @@
       </table>
     </div>
   </div>
-  
-
 </div>
 
 <!-- Add Product Modal -->
 <div id="addProductModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
   <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h3 style="margin: 0; color: #2c3e50;">Tambah Barang</h3>
+      <h3 id="modalTitle" style="margin: 0; color: #2c3e50;">Tambah Barang</h3>
       <button id="closeModal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #999;">×</button>
     </div>
     
-    <form id="addProductForm">
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-        <div>
-          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kode Barang *</label>
-          <input type="text" id="productCode" name="productCode" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;" placeholder="Masukkan kode barang">
-          <div class="error-message" id="codeError">Kode barang diperlukan</div>
-        </div>
-        <div>
-          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nama Barang *</label>
-          <input type="text" id="productName" name="productName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-          <div class="error-message" id="nameError">Nama barang diperlukan</div>
+    <!-- Mode Selection - Only visible when adding new -->
+    <div id="modeSelection" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+      <label style="display: block; margin-bottom: 10px; color: #2c3e50; font-weight: 600;">
+        <i class="fas fa-cog" style="margin-right: 8px;"></i>Pilih Mode:
+      </label>
+      <div style="display: flex; gap: 10px;">
+        <label style="flex: 1; display: flex; align-items: center; padding: 12px; background: white; border: 2px solid #1abc9c; border-radius: 8px; cursor: pointer;">
+          <input type="radio" name="addMode" value="new" checked onchange="toggleAddMode()" style="margin-right: 10px;">
+          <div>
+            <strong style="color: #1abc9c;"><i class="fas fa-plus-circle"></i> Barang Baru</strong>
+            <small style="display: block; color: #666;">Tambahkan item baru ke inventaris</small>
+          </div>
+        </label>
+        <label style="flex: 1; display: flex; align-items: center; padding: 12px; background: white; border: 2px solid #3498db; border-radius: 8px; cursor: pointer;">
+          <input type="radio" name="addMode" value="existing" onchange="toggleAddMode()" style="margin-right: 10px;">
+          <div>
+            <strong style="color: #3498db;"><i class="fas fa-box-open"></i> Tambah Stok</strong>
+            <small style="display: block; color: #666;">Tambah stok ke barang yang ada</small>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Form for existing item (Add Stock) -->
+    <div id="existingItemForm" style="display: none;">
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Pilih Barang *</label>
+        <select id="existingItemSelect" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;" onchange="onExistingItemSelect()">
+          <option value="">-- Pilih barang yang sudah ada --</option>
+        </select>
+      </div>
+      <div id="existingItemInfo" style="display: none; margin-bottom: 15px; padding: 15px; background: #e8f6f3; border-radius: 8px; border-left: 4px solid #1abc9c;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div><strong>Kode:</strong> <span id="existingItemCode">-</span></div>
+          <div><strong>Nama:</strong> <span id="existingItemName">-</span></div>
+          <div><strong>Stok Saat Ini:</strong> <span id="existingItemQty" style="color: #e74c3c; font-weight: 600;">-</span></div>
+          <div><strong>Kategori:</strong> <span id="existingItemCategory">-</span></div>
         </div>
       </div>
-      
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kategori Barang *</label>
-        <input type="text" id="category" name="category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Jumlah yang Ditambahkan *</label>
+          <input type="number" id="addStockQty" min="1" value="1" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        </div>
+        <div>
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Catatan</label>
+          <input type="text" id="addStockNotes" placeholder="Alasan penambahan stok" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px;">
+        <button type="button" id="cancelAddStockBtn" onclick="closeForm()" style="background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Batal</button>
+        <button type="button" onclick="addStockToExisting()" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+          <i class="fas fa-plus"></i> Tambah Stok
+        </button>
+      </div>
+    </div>
+
+    <!-- Form for new item -->
+    <form id="addProductForm">
+      <div id="newItemForm">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+          <div>
+            <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kode Barang *</label>
+            <input type="text" id="productCode" name="productCode" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;" placeholder="Masukkan kode barang">
+            <div class="error-message" id="codeError">Kode barang diperlukan</div>
+          </div>
+          <div>
+            <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Nama Barang *</label>
+            <input type="text" id="productName" name="productName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+            <div class="error-message" id="nameError">Nama barang diperlukan</div>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; color: #2c3e50; font-weight: 500;">Kategori Barang *</label>
+          <input type="text" id="category" name="category" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
         <div class="error-message" id="categoryError">Kategori barang diperlukan</div>
       </div>
       
@@ -269,6 +326,7 @@
         <button type="button" id="cancelBtn" style="background: #95a5a6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Close</button>
         <button type="submit" style="background: #1abc9c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Simpan</button>
       </div>
+      </div><!-- End newItemForm -->
     </form>
   </div>
 </div>
@@ -1049,6 +1107,12 @@ function editItem(index) {
   
   editingIndex = index;
   
+  // Hide mode selection when editing
+  document.getElementById('modeSelection').style.display = 'none';
+  document.getElementById('existingItemForm').style.display = 'none';
+  document.getElementById('newItemForm').style.display = 'block';
+  document.getElementById('addProductForm').style.display = 'block';
+  
   // Populate form
   document.getElementById('productCode').value = item.id;
   document.getElementById('productName').value = item.name;
@@ -1441,9 +1505,135 @@ function closeForm() {
   document.querySelector('#addProductModal h3').textContent = 'Tambah Barang';
   document.querySelector('#addProductModal button[type="submit"]').textContent = 'Simpan';
   
+  // Reset mode selection
+  const modeNew = document.querySelector('input[name="addMode"][value="new"]');
+  if (modeNew) {
+    modeNew.checked = true;
+    toggleAddMode();
+  }
+  
   // Clear errors
   document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
   document.querySelectorAll('.form-error').forEach(el => el.classList.remove('form-error'));
+  
+  // Reset existing item form
+  document.getElementById('existingItemSelect').value = '';
+  document.getElementById('existingItemInfo').style.display = 'none';
+  document.getElementById('addStockQty').value = 1;
+  document.getElementById('addStockNotes').value = '';
+}
+
+/**
+ * Toggle between "New Item" and "Add Stock" modes
+ */
+function toggleAddMode() {
+  const mode = document.querySelector('input[name="addMode"]:checked').value;
+  const newItemForm = document.getElementById('newItemForm');
+  const existingItemForm = document.getElementById('existingItemForm');
+  const addProductForm = document.getElementById('addProductForm');
+  const modalTitle = document.getElementById('modalTitle');
+  
+  if (mode === 'existing') {
+    // Show add stock form
+    newItemForm.style.display = 'none';
+    existingItemForm.style.display = 'block';
+    addProductForm.style.display = 'none';
+    modalTitle.textContent = 'Tambah Stok ke Barang yang Ada';
+    
+    // Populate existing items dropdown
+    populateExistingItemsDropdown();
+  } else {
+    // Show new item form
+    newItemForm.style.display = 'block';
+    existingItemForm.style.display = 'none';
+    addProductForm.style.display = 'block';
+    modalTitle.textContent = 'Tambah Barang Baru';
+  }
+}
+
+/**
+ * Populate dropdown with existing inventory items
+ */
+function populateExistingItemsDropdown() {
+  const select = document.getElementById('existingItemSelect');
+  select.innerHTML = '<option value="">-- Pilih barang yang sudah ada --</option>';
+  
+  if (inventoryData && inventoryData.length > 0) {
+    inventoryData.forEach(item => {
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = `${item.id} - ${item.name} (Stok: ${item.quantity || item.totalStock || 0})`;
+      select.appendChild(option);
+    });
+  }
+}
+
+/**
+ * Handle selection of existing item
+ */
+function onExistingItemSelect() {
+  const select = document.getElementById('existingItemSelect');
+  const itemId = select.value;
+  const infoDiv = document.getElementById('existingItemInfo');
+  
+  if (!itemId) {
+    infoDiv.style.display = 'none';
+    return;
+  }
+  
+  const item = inventoryData.find(i => i.id === itemId);
+  if (item) {
+    document.getElementById('existingItemCode').textContent = item.id;
+    document.getElementById('existingItemName').textContent = item.name;
+    document.getElementById('existingItemQty').textContent = item.quantity || item.totalStock || 0;
+    document.getElementById('existingItemCategory').textContent = item.category || '-';
+    infoDiv.style.display = 'block';
+  }
+}
+
+/**
+ * Add stock to existing item
+ */
+function addStockToExisting() {
+  const itemId = document.getElementById('existingItemSelect').value;
+  const qtyToAdd = parseInt(document.getElementById('addStockQty').value) || 0;
+  const notes = document.getElementById('addStockNotes').value.trim();
+  
+  if (!itemId) {
+    showToast('Silakan pilih barang terlebih dahulu', 'error');
+    return;
+  }
+  
+  if (qtyToAdd <= 0) {
+    showToast('Jumlah harus lebih dari 0', 'error');
+    return;
+  }
+  
+  // Get user from storage
+  const userStr = localStorage.getItem('ruangstok_user') || sessionStorage.getItem('ruangstok_user');
+  if (!userStr) {
+    SessionManager.handleSessionExpired('Sesi tidak valid. Silakan login kembali.');
+    return;
+  }
+  const user = JSON.parse(userStr);
+  
+  // Show loading
+  showToast('Menambahkan stok...', 'info');
+  
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result && result.success) {
+        showToast(result.message, 'success');
+        closeForm();
+        syncWithGoogleSheets(); // Refresh data
+      } else {
+        showToast('Gagal menambah stok: ' + (result.message || 'Unknown error'), 'error');
+      }
+    })
+    .withFailureHandler(function(error) {
+      showToast('Gagal menambah stok: ' + error.message, 'error');
+    })
+    .itemAddStockToExisting(itemId, qtyToAdd, notes, user.username);
 }
 
 // Render inventory table
@@ -1558,9 +1748,22 @@ function renderInventoryTable() {
 
   // Open modal
   addProductBtn.addEventListener('click', function() {
+    editingIndex = -1; // Reset editing mode
+    
+    // Show mode selection for new items
+    document.getElementById('modeSelection').style.display = 'block';
+    document.getElementById('newItemForm').style.display = 'block';
+    document.getElementById('existingItemForm').style.display = 'none';
+    document.getElementById('addProductForm').style.display = 'block';
+    
+    // Reset mode to "new"
+    const modeNew = document.querySelector('input[name="addMode"][value="new"]');
+    if (modeNew) modeNew.checked = true;
+    
     document.getElementById('productCode').value = '';
     document.getElementById('quantity').value = '';  // Empty, user will input manually
     document.getElementById('totalPrice').value = formatRupiah(0);
+    document.querySelector('#addProductModal h3').textContent = 'Tambah Barang';
     modal.style.display = 'block';
   });
 

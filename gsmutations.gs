@@ -153,3 +153,161 @@ function testMutLoadAllData() {
   Logger.log(JSON.stringify(result, null, 2));
   return result;
 }
+
+/**
+ * ============================================================================
+ * MIGRATION FUNCTIONS - Run from Apps Script Editor
+ * ============================================================================
+ */
+
+/**
+ * Migrate existing sales data to StockMovements
+ * Run this function from Apps Script Editor (Run > migrateSalesDataToStockMovements)
+ */
+function migrateSalesDataToStockMovements() {
+  Logger.log('=== Starting Sales Data Migration ===');
+  
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    // Get SalesDetails sheet
+    const salesDetailsSheet = ss.getSheetByName('SalesDetails');
+    if (!salesDetailsSheet) {
+      Logger.log('ERROR: Sheet SalesDetails tidak ditemukan');
+      return { success: false, message: 'Sheet SalesDetails tidak ditemukan' };
+    }
+    
+    // Get or create StockMovements sheet
+    let stockSheet = ss.getSheetByName('StockMovements');
+    if (!stockSheet) {
+      stockSheet = ss.insertSheet('StockMovements');
+      const headers = ['Date', 'Item ID', 'Item Name', 'Type', 'Qty', 'Reference', 'Notes', 'User'];
+      stockSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      Logger.log('Created StockMovements sheet');
+    }
+    
+    // Get sales data
+    const salesData = salesDetailsSheet.getDataRange().getValues();
+    const salesHeaders = salesData[0];
+    Logger.log('Sales headers: ' + JSON.stringify(salesHeaders));
+    
+    // Find column indexes
+    const dateIndex = salesHeaders.findIndex(h => h.toString().toLowerCase().includes('date') || h.toString().toLowerCase().includes('tanggal'));
+    const itemIdIndex = salesHeaders.findIndex(h => h.toString().toLowerCase().includes('item id') || h.toString().toLowerCase().includes('kode'));
+    const itemNameIndex = salesHeaders.findIndex(h => h.toString().toLowerCase().includes('name') || h.toString().toLowerCase().includes('nama'));
+    const qtyIndex = salesHeaders.findIndex(h => h.toString().toLowerCase().includes('qty') || h.toString().toLowerCase().includes('jumlah') || h.toString().toLowerCase().includes('quantity'));
+    const orderIdIndex = salesHeaders.findIndex(h => h.toString().toLowerCase().includes('order') || h.toString().toLowerCase().includes('so'));
+    
+    Logger.log('Indexes - Date: ' + dateIndex + ', ItemID: ' + itemIdIndex + ', Name: ' + itemNameIndex + ', Qty: ' + qtyIndex + ', OrderID: ' + orderIdIndex);
+    
+    // Get existing stock movements to avoid duplicates
+    const existingData = stockSheet.getDataRange().getValues();
+    const existingRefs = new Set();
+    for (let i = 1; i < existingData.length; i++) {
+      const ref = existingData[i][5]; // Reference column
+      if (ref) existingRefs.add(ref.toString());
+    }
+    Logger.log('Existing references count: ' + existingRefs.size);
+    
+    // Migrate data
+    let migratedCount = 0;
+    let skippedCount = 0;
+    const newRows = [];
+    
+    for (let i = 1; i < salesData.length; i++) {
+      const row = salesData[i];
+      
+      // Skip empty rows
+      if (!row[itemIdIndex]) continue;
+      
+      const orderId = orderIdIndex >= 0 ? row[orderIdIndex] : 'SO' + i;
+      
+      // Skip if already migrated
+      if (existingRefs.has(orderId.toString())) {
+        skippedCount++;
+        continue;
+      }
+      
+      const date = dateIndex >= 0 ? row[dateIndex] : new Date();
+      const itemId = row[itemIdIndex];
+      const itemName = itemNameIndex >= 0 ? row[itemNameIndex] : itemId;
+      const qty = qtyIndex >= 0 ? Number(row[qtyIndex]) || 0 : 0;
+      
+      if (qty <= 0) continue;
+      
+      newRows.push([
+        date,                           // Date
+        itemId,                         // Item ID
+        itemName,                       // Item Name
+        'OUT',                          // Type (sales = stock out)
+        qty,                            // Qty
+        orderId,                        // Reference
+        '[MIGRATED] Penjualan',         // Notes
+        'SYSTEM-MIGRATION'              // User
+      ]);
+      
+      migratedCount++;
+    }
+    
+    // Write new rows
+    if (newRows.length > 0) {
+      const lastRow = stockSheet.getLastRow();
+      stockSheet.getRange(lastRow + 1, 1, newRows.length, 8).setValues(newRows);
+    }
+    
+    Logger.log('=== Migration Complete ===');
+    Logger.log('Migrated: ' + migratedCount + ' records');
+    Logger.log('Skipped (already exists): ' + skippedCount + ' records');
+    
+    return { 
+      success: true, 
+      message: 'Migration berhasil', 
+      migratedCount: migratedCount,
+      skippedCount: skippedCount
+    };
+    
+  } catch (error) {
+    Logger.log('ERROR: ' + error.message);
+    return { success: false, message: error.toString() };
+  }
+}
+
+/**
+ * Clear all stock movements data (use with caution!)
+ * Run this function from Apps Script Editor
+ */
+function clearAllStockMovements() {
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.alert(
+    'Konfirmasi Hapus',
+    'Apakah Anda yakin ingin menghapus SEMUA data di StockMovements?\n\nTindakan ini tidak dapat dibatalkan!',
+    ui.ButtonSet.YES_NO
+  );
+  
+  if (response !== ui.Button.YES) {
+    Logger.log('Operation cancelled by user');
+    return { success: false, message: 'Dibatalkan oleh user' };
+  }
+  
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const stockSheet = ss.getSheetByName('StockMovements');
+    
+    if (!stockSheet) {
+      Logger.log('Sheet StockMovements tidak ditemukan');
+      return { success: false, message: 'Sheet tidak ditemukan' };
+    }
+    
+    const lastRow = stockSheet.getLastRow();
+    if (lastRow > 1) {
+      stockSheet.deleteRows(2, lastRow - 1);
+      Logger.log('Deleted ' + (lastRow - 1) + ' rows');
+    }
+    
+    return { success: true, message: 'Berhasil menghapus ' + (lastRow - 1) + ' baris data' };
+    
+  } catch (error) {
+    Logger.log('ERROR: ' + error.message);
+    return { success: false, message: error.toString() };
+  }
+}

@@ -60,6 +60,113 @@ function itemDeleteInventoryItem(itemId, email) {
 }
 
 /**
+ * Add stock to existing inventory item and record mutation
+ * @param {string} itemId - Item ID to add stock to
+ * @param {number} qtyToAdd - Quantity to add
+ * @param {string} notes - Notes for the mutation
+ * @param {string} email - User email
+ */
+function itemAddStockToExisting(itemId, qtyToAdd, notes, email) {
+  // Session Check
+  const session = checkServerSession(email);
+  if (!session.active) {
+    return { success: false, message: "Sesi berakhir", sessionExpired: true };
+  }
+
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const inventorySheet = ss.getSheetByName("InventoryItems");
+    
+    if (!inventorySheet) {
+      return { success: false, message: "Sheet InventoryItems tidak ditemukan" };
+    }
+    
+    // Find the item by ID
+    const data = inventorySheet.getDataRange().getValues();
+    const headers = data[0];
+    
+    Logger.log('Headers: ' + JSON.stringify(headers));
+    
+    // Find column indexes - support multiple header names
+    const idIndex = headers.findIndex(h => 
+      h === 'Item ID' || h === 'Kode Barang' || h === 'ID'
+    );
+    const nameIndex = headers.findIndex(h => 
+      h === 'Name' || h === 'Nama Barang' || h === 'Nama'
+    );
+    const qtyIndex = headers.findIndex(h => 
+      h === 'Quantity' || h === 'Jumlah' || h === 'Stok' || h === 'Stock' || h === 'Total Stock' || h === 'Jumlah Barang'
+    );
+    
+    Logger.log('Indexes - ID: ' + idIndex + ', Name: ' + nameIndex + ', Qty: ' + qtyIndex);
+    
+    if (idIndex === -1) {
+      return { success: false, message: "Kolom Item ID tidak ditemukan. Headers: " + headers.join(', ') };
+    }
+    
+    if (qtyIndex === -1) {
+      return { success: false, message: "Kolom Quantity tidak ditemukan. Headers: " + headers.join(', ') };
+    }
+    
+    let itemRowIndex = -1;
+    let itemName = '';
+    let currentQty = 0;
+    
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][idIndex] === itemId) {
+        itemRowIndex = i + 1; // 1-based row number
+        itemName = nameIndex >= 0 ? (data[i][nameIndex] || itemId) : itemId;
+        currentQty = Number(data[i][qtyIndex]) || 0;
+        break;
+      }
+    }
+    
+    if (itemRowIndex === -1) {
+      return { success: false, message: "Barang dengan ID " + itemId + " tidak ditemukan" };
+    }
+    
+    // Update quantity in InventoryItems (column is 1-based)
+    const newQty = currentQty + Number(qtyToAdd);
+    const colNumber = qtyIndex + 1;
+    Logger.log('Updating row ' + itemRowIndex + ', column ' + colNumber + ' to value ' + newQty);
+    inventorySheet.getRange(itemRowIndex, colNumber).setValue(newQty);
+    
+    // Record mutation in StockMovements
+    let stockSheet = ss.getSheetByName("StockMovements");
+    if (!stockSheet) {
+      stockSheet = ss.insertSheet("StockMovements");
+      const smHeaders = ["Date", "Item ID", "Item Name", "Type", "Qty", "Reference", "Notes", "User"];
+      stockSheet.getRange(1, 1, 1, smHeaders.length).setValues([smHeaders]);
+    }
+    
+    const mutationRow = [
+      new Date(),           // Date
+      itemId,               // Item ID
+      itemName,             // Item Name
+      "IN",                 // Type (stock in)
+      Number(qtyToAdd),     // Qty
+      "STOCK-ADD",          // Reference
+      notes || "Penambahan stok manual", // Notes
+      email                 // User
+    ];
+    
+    stockSheet.appendRow(mutationRow);
+    
+    Logger.log('Stock added: ' + itemId + ' +' + qtyToAdd + ' (total: ' + newQty + ')');
+    
+    return { 
+      success: true, 
+      message: "Berhasil menambah stok " + qtyToAdd + " ke " + itemName + " (total: " + newQty + ")",
+      newQuantity: newQty
+    };
+    
+  } catch (error) {
+    Logger.log('Error adding stock: ' + error.message);
+    return { success: false, message: error.toString() };
+  }
+}
+
+/**
  * Inventory data access and business logic
  */
 class InventoryService {
