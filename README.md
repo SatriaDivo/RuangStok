@@ -20,9 +20,10 @@
 8. [Menu Penjualan](#7-menu-penjualan)
 9. [Menu Penerimaan](#8-menu-penerimaan)
 10. [Menu Pembayaran](#9-menu-pembayaran)
-11. [Menu Laporan](#10-menu-laporan)
-12. [Menu Pengguna](#11-menu-pengguna)
-13. [Menu Pengaturan](#12-menu-pengaturan)
+11. [Menu Mutasi Stok](#10-menu-mutasi-stok)
+12. [Menu Laporan](#11-menu-laporan)
+13. [Menu Pengguna](#12-menu-pengguna)
+14. [Menu Pengaturan](#13-menu-pengaturan)
 
 ---
 
@@ -631,7 +632,90 @@ Menu Pembayaran digunakan untuk mencatat pembayaran hutang (ke pemasok) dan pene
 
 ---
 
-## 10. MENU LAPORAN
+## 10. MENU MUTASI STOK
+
+### Screenshot Tampilan
+[TEMPATKAN SS DI SINI]
+
+### Penjelasan
+
+#### Fungsi Halaman
+Menu Mutasi Stok digunakan untuk melacak dan mencatat semua pergerakan stok barang, baik masuk (IN) maupun keluar (OUT). Fitur ini penting untuk audit trail dan analisis pergerakan inventory.
+
+#### Kartu Ringkasan
+
+| Kartu | Deskripsi |
+|-------|-----------|
+| **Total Masuk (IN)** | Jumlah total stok yang masuk |
+| **Total Keluar (OUT)** | Jumlah total stok yang keluar |
+| **Selisih Bersih** | Selisih antara stok masuk dan keluar |
+| **Total Transaksi** | Jumlah total catatan mutasi |
+
+#### Tombol dan Menu
+
+| Tombol | Fungsi |
+|--------|--------|
+| **+ Tambah Mutasi** | Mencatat mutasi stok baru secara manual |
+| **Cari** | Mencari mutasi berdasarkan ID/nama item |
+| **Filter Tipe** | Memfilter berdasarkan tipe (ALL/IN/OUT) |
+| **Filter Tanggal** | Memfilter berdasarkan periode |
+| **Export** | Mengunduh data mutasi |
+
+#### Kolom Tabel Mutasi
+
+| Kolom | Deskripsi |
+|-------|-----------|
+| **Tanggal** | Tanggal terjadinya mutasi |
+| **Kode Barang** | ID item yang dimutasi |
+| **Nama Barang** | Nama item |
+| **Tipe** | IN (masuk) atau OUT (keluar) |
+| **Qty** | Jumlah unit yang dimutasi |
+| **Referensi** | Nomor referensi (SO/PO ID) |
+| **Catatan** | Keterangan tambahan |
+| **User** | Pengguna yang mencatat |
+
+#### Tipe Mutasi
+
+| Tipe | Badge | Deskripsi |
+|------|-------|-----------|
+| **IN** | 🟢 Hijau | Stok masuk (pembelian, retur, adjustment +) |
+| **OUT** | 🔴 Merah | Stok keluar (penjualan, rusak, adjustment -) |
+
+#### Alur Mencatat Mutasi Manual
+
+1. Klik tombol **"+ Tambah Mutasi"**
+2. Pilih tanggal mutasi
+3. Pilih item dari dropdown
+4. Pilih tipe mutasi (IN/OUT)
+5. Masukkan jumlah (Qty)
+6. Isi referensi (opsional, misal: nomor dokumen)
+7. Isi catatan (opsional)
+8. Klik **"Simpan"**
+
+#### Mutasi Otomatis
+
+Sistem secara otomatis mencatat mutasi stok saat:
+- **Penjualan dibuat** → Mutasi OUT tercatat
+- **Pembelian diterima** → Mutasi IN tercatat
+- **Adjustment stok** → Mutasi sesuai tipe tercatat
+
+#### Filter Data
+
+| Filter | Opsi |
+|--------|------|
+| **Tipe** | Semua (ALL), Masuk (IN), Keluar (OUT) |
+| **Periode** | Tanggal awal - Tanggal akhir |
+| **Pencarian** | Berdasarkan ID atau nama item |
+
+#### Catatan Penting
+- Data mutasi bersifat read-only untuk transaksi otomatis (dari penjualan/pembelian)
+- Mutasi manual dapat diedit/dihapus
+- Gunakan filter untuk analisis pergerakan stok periode tertentu
+- Export data untuk keperluan audit
+
+---
+
+## 11. MENU LAPORAN
 
 ### Screenshot Tampilan
 [TEMPATKAN SS DI SINI]
@@ -728,7 +812,7 @@ Menu Laporan menyediakan berbagai laporan untuk analisis bisnis dan pengambilan 
 
 ---
 
-## 11. MENU PENGGUNA
+## 12. MENU PENGGUNA
 
 ### Screenshot Tampilan
 [TEMPATKAN SS DI SINI]
@@ -812,7 +896,7 @@ Menu Pengguna digunakan untuk mengelola akun pengguna sistem. **Hanya dapat diak
 
 ---
 
-## 12. MENU PENGATURAN
+## 13. MENU PENGATURAN
 
 ### Screenshot Tampilan
 [TEMPATKAN SS DI SINI]
