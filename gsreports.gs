@@ -872,6 +872,218 @@ function testGetRawSalesData() {
   }
 }
 
+// ============================================================================
+// MUTATION REPORT - TOP LEVEL FUNCTION
+// ============================================================================
+
+/**
+ * Generate Mutation Report (Stock Movements)
+ * @param {string} email - User email for session check
+ * @param {Object} filter - {startDate: string, endDate: string, period: string}
+ * @returns {Object} Mutation report data
+ */
+function generateMutationReport(email, filter) {
+  Logger.log('=== generateMutationReport called ===');
+  Logger.log('Email: ' + email);
+  Logger.log('Filter: ' + JSON.stringify(filter));
+  
+  // Session check
+  const session = checkServerSession(email, false);
+  if (!session || !session.active) {
+    return { sessionExpired: true };
+  }
+  
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('StockMovements');
+    
+    if (!sheet) {
+      Logger.log('StockMovements sheet not found');
+      return {
+        error: true,
+        message: 'Sheet StockMovements tidak ditemukan',
+        summary: {
+          totalIn: 0,
+          totalOut: 0,
+          netChange: 0,
+          totalTransactions: 0
+        },
+        movements: [],
+        topItems: []
+      };
+    }
+    
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+    
+    if (lastRow < 2) {
+      Logger.log('No data in StockMovements');
+      return {
+        error: false,
+        message: 'Tidak ada data mutasi',
+        summary: {
+          totalIn: 0,
+          totalOut: 0,
+          netChange: 0,
+          totalTransactions: 0
+        },
+        movements: [],
+        topItems: []
+      };
+    }
+    
+    // Read all data
+    const data = sheet.getRange(1, 1, lastRow, lastCol).getValues();
+    const headers = data[0];
+    Logger.log('Headers: ' + JSON.stringify(headers));
+    
+    // Find column indexes
+    const dateIdx = headers.indexOf('Date');
+    const itemIdIdx = headers.indexOf('Item ID');
+    const itemNameIdx = headers.indexOf('Item Name');
+    const typeIdx = headers.indexOf('Type');
+    const qtyIdx = headers.indexOf('Qty');
+    const referenceIdx = headers.indexOf('Reference');
+    const notesIdx = headers.indexOf('Notes');
+    const userIdx = headers.indexOf('User');
+    
+    // Parse filter dates
+    let startDate = null;
+    let endDate = null;
+    
+    if (filter && filter.period !== 'all') {
+      if (filter.startDate) {
+        startDate = new Date(filter.startDate);
+        startDate.setHours(0, 0, 0, 0);
+      }
+      if (filter.endDate) {
+        endDate = new Date(filter.endDate);
+        endDate.setHours(23, 59, 59, 999);
+      }
+    }
+    
+    Logger.log('Date range: ' + (startDate ? startDate.toISOString() : 'null') + ' to ' + (endDate ? endDate.toISOString() : 'null'));
+    
+    // Process rows
+    const movements = [];
+    let totalIn = 0;
+    let totalOut = 0;
+    const itemStats = {}; // Track stats per item
+    
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      
+      // Skip empty rows
+      if (!row[dateIdx] && !row[itemIdIdx]) continue;
+      
+      // Parse date
+      let rowDate = row[dateIdx];
+      if (rowDate instanceof Date) {
+        // Already a date
+      } else if (rowDate) {
+        rowDate = new Date(rowDate);
+      } else {
+        continue; // Skip if no date
+      }
+      
+      // Apply date filter
+      if (startDate && rowDate < startDate) continue;
+      if (endDate && rowDate > endDate) continue;
+      
+      const type = String(row[typeIdx] || '').toUpperCase();
+      const qty = Number(row[qtyIdx]) || 0;
+      const itemId = String(row[itemIdIdx] || '');
+      const itemName = String(row[itemNameIdx] || '');
+      
+      // Update totals
+      if (type === 'IN') {
+        totalIn += qty;
+      } else if (type === 'OUT') {
+        totalOut += qty;
+      }
+      
+      // Track item stats
+      if (itemId) {
+        if (!itemStats[itemId]) {
+          itemStats[itemId] = {
+            itemId: itemId,
+            itemName: itemName,
+            totalIn: 0,
+            totalOut: 0,
+            transactions: 0
+          };
+        }
+        if (type === 'IN') {
+          itemStats[itemId].totalIn += qty;
+        } else if (type === 'OUT') {
+          itemStats[itemId].totalOut += qty;
+        }
+        itemStats[itemId].transactions++;
+      }
+      
+      // Add to movements array
+      movements.push({
+        date: Utilities.formatDate(rowDate, ss.getSpreadsheetTimeZone(), 'dd/MM/yyyy'),
+        dateRaw: rowDate.toISOString(),
+        itemId: itemId,
+        itemName: itemName,
+        type: type,
+        qty: qty,
+        reference: String(row[referenceIdx] || ''),
+        notes: String(row[notesIdx] || ''),
+        user: String(row[userIdx] || '')
+      });
+    }
+    
+    // Sort movements by date (newest first)
+    movements.sort((a, b) => new Date(b.dateRaw) - new Date(a.dateRaw));
+    
+    // Get top items by total movement
+    const topItems = Object.values(itemStats)
+      .map(item => ({
+        ...item,
+        totalMovement: item.totalIn + item.totalOut,
+        netChange: item.totalIn - item.totalOut
+      }))
+      .sort((a, b) => b.totalMovement - a.totalMovement)
+      .slice(0, 10);
+    
+    const report = {
+      error: false,
+      message: 'Success',
+      generatedAt: new Date().toISOString(),
+      filter: filter,
+      summary: {
+        totalIn: totalIn,
+        totalOut: totalOut,
+        netChange: totalIn - totalOut,
+        totalTransactions: movements.length
+      },
+      movements: movements,
+      topItems: topItems
+    };
+    
+    Logger.log('Report generated successfully. Transactions: ' + movements.length);
+    return report;
+    
+  } catch (error) {
+    Logger.log('Error generating mutation report: ' + error.message);
+    Logger.log('Stack: ' + error.stack);
+    return {
+      error: true,
+      message: 'Error: ' + error.message,
+      summary: {
+        totalIn: 0,
+        totalOut: 0,
+        netChange: 0,
+        totalTransactions: 0
+      },
+      movements: [],
+      topItems: []
+    };
+  }
+}
+
 /**
  * Test with NO filter (should use current month by default)
  */
