@@ -509,9 +509,8 @@
               }));
             }
             
-            // Redirect to dashboard - force full page reload
-            var deploymentUrl = 'https://script.google.com/macros/s/AKfycby7LQUauSM2003uP85QkxX4vi8YoYJDcQj6CQa1_aha/dev';
-            var finalUrl = deploymentUrl + '?page=dashboard&t=' + new Date().getTime();
+            // Redirect to dashboard - use dynamic URL from server
+            var finalUrl = baseScriptUrl + '?page=dashboard&t=' + new Date().getTime();
             
             console.log('Redirecting to dashboard:', finalUrl);
             

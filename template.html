@@ -410,6 +410,10 @@
     }
   </style>
   <script>
+    // Get the deployment URL dynamically from server
+    var baseScriptUrl = '<?!= ScriptApp.getService().getUrl() ?>';
+    console.log('Base Script URL:', baseScriptUrl);
+    
     // Global Session Management
     const SessionManager = {
       getUser: function() {
@@ -519,9 +523,9 @@
           var loginUrl = targetUrl + "?page=login&t=" + new Date().getTime();
           window.top.location.replace(loginUrl);
         } else {
-          // Fallback: use deployment URL directly
-          var deploymentUrl = 'https://script.google.com/macros/s/AKfycby7LQUauSM2003uP85QkxX4vi8YoYJDcQj6CQa1_aha/dev';
-          window.top.location.replace(deploymentUrl + "?page=login&t=" + new Date().getTime());
+          // Fallback: use current location
+          var currentUrl = window.location.href.split('?')[0];
+          window.top.location.replace(currentUrl + "?page=login&t=" + new Date().getTime());
         }
       },
       
@@ -850,8 +854,7 @@
         overlay.style.display = 'none';
       }
       
-      // Handle all navigation links
-      const deploymentUrl = 'https://script.google.com/macros/s/AKfycby7LQUauSM2003uP85QkxX4vi8YoYJDcQj6CQa1_aha/dev';
+      // Handle all navigation links - use dynamic URL from server
       const navLinks = document.querySelectorAll('.nav-item[href^="?page="], a[href^="?page="]');
       
       navLinks.forEach(function(link) {
@@ -860,7 +863,13 @@
           
           const href = this.getAttribute('href');
           const page = href.replace('?page=', '');
-          const targetUrl = deploymentUrl + '?page=' + page + '&t=' + new Date().getTime();
+          
+          // Use baseScriptUrl from server, or fallback to current location
+          var targetBaseUrl = (typeof baseScriptUrl !== 'undefined' && baseScriptUrl) 
+            ? baseScriptUrl 
+            : window.location.href.split('?')[0];
+          
+          const targetUrl = targetBaseUrl + '?page=' + page + '&t=' + new Date().getTime();
           
           console.log('Navigating to:', targetUrl);
           
