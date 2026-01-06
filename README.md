@@ -191,7 +191,9 @@ Menu Inventaris digunakan untuk mengelola semua data barang/produk termasuk stok
 
 | Tombol | Fungsi |
 |--------|--------|
-| **+ Tambah Item Baru** | Membuka form untuk menambah barang baru |
+| **+ Tambah Item Baru** | Membuka form untuk menambah barang baru ke inventory |
+| **+ Stock Baru** | Menambahkan stok untuk barang yang sudah ada (tanpa menambah item baru) |
+| **+ Tambah Barang** | Menambahkan item barang baru sekaligus stok awal |
 | **Cari** | Mencari barang berdasarkan nama/ID |
 | **Filter Kategori** | Memfilter barang berdasarkan kategori |
 | **Edit (ikon pensil)** | Mengubah data barang |
@@ -224,11 +226,28 @@ Menu Inventaris digunakan untuk mengelola semua data barang/produk termasuk stok
 
 #### Alur Menambah Barang Baru
 
-1. Klik tombol **"+ Tambah Item Baru"**
+1. Klik tombol **"+ Tambah Item Baru"** atau **"+ Tambah Barang"**
 2. Isi semua field yang diperlukan
 3. Klik tombol **"Simpan"**
 4. Barang akan muncul di tabel
 5. Notifikasi sukses akan ditampilkan
+
+#### Alur Menambah Stok untuk Barang yang Sudah Ada
+
+1. Klik tombol **"+ Stock Baru"**
+2. Pilih barang dari dropdown yang akan ditambah stoknya
+3. Masukkan jumlah stok yang akan ditambahkan
+4. Isi keterangan/alasan penambahan stok (opsional)
+5. Klik tombol **"Simpan"**
+6. Stok barang akan otomatis bertambah
+7. Mutasi stok akan tercatat otomatis dengan tipe IN
+
+#### Perbedaan Fitur
+
+| Fitur | Fungsi | Kapan Digunakan |
+|-------|--------|-----------------|
+| **+ Tambah Item Baru / + Tambah Barang** | Menambahkan item barang baru lengkap dengan data master (nama, kategori, harga, stok awal) | Saat ada produk baru yang belum pernah ada di sistem |
+| **+ Stock Baru** | Menambahkan stok untuk barang yang sudah terdaftar | Saat menerima stok tambahan untuk barang yang sudah ada (restock, stock opname, dll) |
 
 #### Alur Mengubah Data Barang
 
@@ -250,6 +269,9 @@ Menu Inventaris digunakan untuk mengelola semua data barang/produk termasuk stok
 - Item dengan stok rendah (< 10) akan ditandai dengan warna kuning
 - Item dengan stok habis (0) akan ditandai dengan warna merah
 - ID Item dibuat otomatis dengan format: ITM001, ITM002, dst
+- Gunakan fitur **"+ Stock Baru"** untuk menambah stok barang yang sudah ada tanpa perlu membuat item baru
+- Setiap penambahan stok melalui **"+ Stock Baru"** akan tercatat otomatis di Menu Mutasi Stok
+- Fitur **"+ Tambah Barang"** dan **"+ Tambah Item Baru"** memiliki fungsi yang sama untuk menambah produk baru
 
 ---
 
